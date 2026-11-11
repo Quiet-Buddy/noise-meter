@@ -4,7 +4,7 @@
 
 ## Nor garen
 
-Quiet Buddy Android aplikazio bat egiten duen proiektu txiki eta independentea da. Gehiago jakiteko, bisitatu [quiet-buddy.github.io](https://quiet-buddy.github.io).
+Quiet Buddy Android aplikazio bat egiten duen kode irekiko proiektu txiki bat da. Gehiago jakiteko, bisitatu [quiet-buddy.github.io](https://quiet-buddy.github.io).
 
 Politika honi buruzko galderarik? Idatzi mezu bat helbide honetara: CONTACT_EMAIL_PLACEHOLDER
 
