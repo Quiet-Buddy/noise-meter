@@ -1,5 +1,7 @@
 package com.quietbuddy.ui.settings
 
+import androidx.compose.ui.res.stringResource
+import com.quietbuddy.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -58,29 +60,29 @@ fun CalibrationScreen(onBack: () -> Unit) {
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
             IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back", tint = QB.Ink)
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cal_back), tint = QB.Ink)
             }
-            Text("Calibrate microphone", style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.cal_title), style = MaterialTheme.typography.headlineSmall)
         }
 
         Column(
             modifier = Modifier.fillMaxWidth().background(QB.Card, RoundedCornerShape(20.dp)).padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("Buddy hears right now", style = MaterialTheme.typography.labelSmall)
+            Text(stringResource(R.string.cal_hears_now), style = MaterialTheme.typography.labelSmall)
             Text(
                 current?.let { String.format(Locale.US, "%.0f dB", it) } ?: "-- dB",
                 style = MaterialTheme.typography.displayLarge,
                 fontWeight = FontWeight.ExtraBold,
             )
             Text(
-                "Hold a sound meter next to the phone in a steady sound and type what it shows.",
+                stringResource(R.string.cal_instructions),
                 style = MaterialTheme.typography.bodyMedium,
             )
             OutlinedTextField(
                 value = referenceText,
                 onValueChange = { referenceText = it },
-                label = { Text("Sound meter reading (dB)") },
+                label = { Text(stringResource(R.string.cal_reading_label)) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
@@ -90,18 +92,18 @@ fun CalibrationScreen(onBack: () -> Unit) {
                 enabled = reference != null && current != null,
                 modifier = Modifier.fillMaxWidth().height(52.dp),
             ) {
-                Text("Save")
+                Text(stringResource(R.string.common_save))
             }
             TextButton(
                 onClick = { viewModel.resetToDefault() },
                 modifier = Modifier.defaultMinSize(minHeight = 48.dp),
             ) {
-                Text("Reset to default")
+                Text(stringResource(R.string.cal_reset))
             }
         }
 
         Text(
-            "In a silent room Buddy should read below 45 dB.",
+            stringResource(R.string.cal_silent_hint),
             style = MaterialTheme.typography.labelSmall,
             color = QB.InkSoft,
         )

@@ -1,5 +1,7 @@
 package com.quietbuddy.ui.onboarding
 
+import androidx.compose.ui.res.stringResource
+import com.quietbuddy.R
 import android.Manifest
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -76,22 +78,22 @@ fun OnboardingScreen(onDone: () -> Unit) {
             Buddy(mood = Mood.HAPPY, modifier = Modifier.size(220.dp))
             Spacer(Modifier.height(16.dp))
             Text(
-                "Hi! I'm Buddy.",
+                stringResource(R.string.onb_hi),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(8.dp))
             Text(
-                "I keep an eye on how loud things get at home, so we can all stay calm together.",
+                stringResource(R.string.onb_intro),
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
             )
             Spacer(Modifier.height(20.dp))
-            InfoRow(Icons.Rounded.Headphones, "I only measure how loud it is", "Just a number, many times a second")
+            InfoRow(Icons.Rounded.Headphones, stringResource(R.string.onb_measure), stringResource(R.string.onb_measure_sub))
             Spacer(Modifier.height(12.dp))
-            InfoRow(Icons.Rounded.MicOff, "I never record anything", "No audio is saved, ever")
+            InfoRow(Icons.Rounded.MicOff, stringResource(R.string.onb_never_record), stringResource(R.string.onb_never_record_sub))
             Spacer(Modifier.height(12.dp))
-            InfoRow(Icons.Rounded.PhoneAndroid, "I stay on this phone", "No internet, no account, no cloud")
+            InfoRow(Icons.Rounded.PhoneAndroid, stringResource(R.string.onb_stay), stringResource(R.string.onb_stay_sub))
             Spacer(Modifier.height(16.dp))
         }
 
@@ -103,13 +105,13 @@ fun OnboardingScreen(onDone: () -> Unit) {
         ) {
             Icon(Icons.Rounded.Mic, contentDescription = null, tint = Color.White)
             Spacer(Modifier.width(8.dp))
-            Text("Let Buddy listen", style = MaterialTheme.typography.titleMedium, color = Color.White)
+            Text(stringResource(R.string.onb_listen), style = MaterialTheme.typography.titleMedium, color = Color.White)
         }
         TextButton(
             onClick = { viewModel.finish(onDone) },
             modifier = Modifier.heightIn(min = 48.dp),
         ) {
-            Text("Maybe later", style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
+            Text(stringResource(R.string.onb_later), style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
         }
     }
 }

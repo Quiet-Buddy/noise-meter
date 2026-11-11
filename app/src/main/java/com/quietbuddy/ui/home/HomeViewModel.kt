@@ -1,5 +1,6 @@
 package com.quietbuddy.ui.home
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quietbuddy.core.HistoryRepository
@@ -38,7 +39,7 @@ data class HomeUiState(
     /** Null whenever Buddy is asleep (not LISTENING). */
     val mood: Mood? = null,
     val db: Int? = null,
-    val speechLine: String = SpeechLines.SLEEPING,
+    @StringRes val speechLine: Int = SpeechLines.SLEEPING,
     val calmMinutes: Int = 0,
     val loudestDb: Float? = null,
     val loudestAtMs: Long? = null,

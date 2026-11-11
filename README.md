@@ -1,4 +1,5 @@
 # Quiet Buddy
+[![CI](https://github.com/Quiet-Buddy/noise-meter/actions/workflows/ci.yml/badge.svg)](https://github.com/Quiet-Buddy/noise-meter/actions/workflows/ci.yml)
 
 **A little companion that listens to how loud your space is, and lets you know with a friendly face.**
 
@@ -6,7 +7,11 @@ Quiet Buddy is an Android app that turns your phone into a gentle noise monitor.
 
 It's meant for places where noise matters: a classroom, a home with young children, a shared flat, a quiet study corner, or a home office.
 
-> **Status:** Quiet Buddy is still being built. There is no public download yet.
+## Download
+
+Test builds are published on the [Releases page](https://github.com/Quiet-Buddy/noise-meter/releases/latest). Quiet Buddy requires Android 10 or newer.
+
+More about the project at [quiet-buddy.github.io](https://quiet-buddy.github.io).
 
 ---
 
@@ -33,7 +38,7 @@ Buddy doesn't flip moods at every little sound. It waits a moment to be sure the
 - **Look back at history** to see how noisy the day was and when the loudest moments happened.
 - **Take on challenges** to try to keep things quiet.
 - **Keep it running in the background.** A small notification shows Buddy's current mood, and you can pause listening from it at any time.
-- **Use it in English or Spanish.**
+- **Use it in English, Spanish or Basque (euskara).** It follows your phone's language.
 
 ## Your privacy
 
@@ -62,3 +67,11 @@ If you're a developer and want to build the app yourself, it's a standard Androi
 ## Licence
 
 A licence has not been chosen yet.
+
+## Building
+
+- Requires JDK 17.
+- Debug build: `./gradlew assembleDebug`
+- Unit tests: `./gradlew testDebugUnitTest`
+
+Release signing reads these environment variables: `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. In CI they come from repository secrets: `ANDROID_KEYSTORE_BASE64` (base64 of the `.jks` file), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`.

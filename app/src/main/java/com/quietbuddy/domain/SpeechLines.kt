@@ -1,44 +1,29 @@
 package com.quietbuddy.domain
 
+import androidx.annotation.StringRes
+import com.quietbuddy.R
 import com.quietbuddy.core.Mood
 
-/** Buddy's kid-friendly speech bubbles, one list per mood. */
+/** Buddy's kid-friendly speech bubbles, one list per mood (as string resources, so they can be translated). */
 object SpeechLines {
 
-    const val SLEEPING = "Zzz… tap the microphone to wake me up."
+    @StringRes
+    val SLEEPING: Int = R.string.speech_sleeping
 
-    private val lines: Map<Mood, List<String>> = mapOf(
-        Mood.HAPPY to listOf(
-            "Ahh, I can hear the birds outside.",
-            "Everything is calm and cozy.",
-            "Shh, it's nice and peaceful today.",
-        ),
-        Mood.FINE to listOf(
-            "Nice. Everyone's chatting.",
-            "Just the right amount of noise.",
-            "Good talking, good listening.",
-        ),
-        Mood.WORRIED to listOf(
-            "Hmm, it's getting a bit loud in here.",
-            "Let's bring the volume down a little.",
-            "Could we play a little more quietly?",
-        ),
-        Mood.SAD to listOf(
-            "Ouch. Can we use our indoor voices?",
-            "That's a lot of noise. My tummy feels fuzzy.",
-            "Please help me find some quiet.",
-        ),
-        Mood.EARS_COVERED to listOf(
-            "Too loud! My ears!",
-            "Whoa! I'm covering my ears!",
-            "Big noise! Let's take a quiet break!",
-        ),
+    private val lines: Map<Mood, List<Int>> = mapOf(
+        Mood.HAPPY to listOf(R.string.speech_happy_1, R.string.speech_happy_2, R.string.speech_happy_3),
+        Mood.FINE to listOf(R.string.speech_fine_1, R.string.speech_fine_2, R.string.speech_fine_3),
+        Mood.WORRIED to listOf(R.string.speech_worried_1, R.string.speech_worried_2, R.string.speech_worried_3),
+        Mood.SAD to listOf(R.string.speech_sad_1, R.string.speech_sad_2, R.string.speech_sad_3),
+        Mood.EARS_COVERED to listOf(R.string.speech_ears_1, R.string.speech_ears_2, R.string.speech_ears_3),
     )
 
-    fun linesFor(mood: Mood): List<String> = lines.getValue(mood)
+    @StringRes
+    fun linesFor(mood: Mood): List<Int> = lines.getValue(mood)
 
     /** Deterministic rotation: index picks line (index mod size). */
-    fun line(mood: Mood, index: Int): String {
+    @StringRes
+    fun line(mood: Mood, index: Int): Int {
         val all = linesFor(mood)
         val i = ((index % all.size) + all.size) % all.size
         return all[i]

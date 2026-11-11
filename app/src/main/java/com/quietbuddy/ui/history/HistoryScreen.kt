@@ -1,5 +1,8 @@
 package com.quietbuddy.ui.history
 
+import androidx.compose.ui.res.stringResource
+import com.quietbuddy.R
+import com.quietbuddy.ui.buddy.moodLabelRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -79,7 +82,7 @@ fun HistoryScreen() {
     ) {
         Column {
             Text(settings.roomName, style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
-            Text("This week", style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.history_this_week), style = MaterialTheme.typography.headlineSmall)
         }
 
         // Seven day buttons
@@ -90,6 +93,13 @@ fun HistoryScreen() {
                 val weekday = LocalDate.ofEpochDay(day.dateEpochDay)
                     .dayOfWeek.getDisplayName(JTextStyle.SHORT, Locale.getDefault())
                 val shape = RoundedCornerShape(16.dp)
+                val moodText = day.dominantMood?.let { stringResource(moodLabelRes(it)) }
+                    ?: stringResource(R.string.history_no_data)
+                val dayDescription = stringResource(
+                    if (isSelected) R.string.history_day_desc_selected else R.string.history_day_desc,
+                    weekday,
+                    moodText,
+                )
                 Column(
                     modifier = Modifier
                         .weight(1f)
@@ -99,8 +109,7 @@ fun HistoryScreen() {
                         .border(2.dp, if (isSelected) QB.Accent else QB.Line, shape)
                         .clickable { viewModel.selectDay(day.dateEpochDay) }
                         .semantics {
-                            contentDescription = "$weekday, ${day.dominantMood?.name?.lowercase() ?: "no data"}" +
-                                if (isSelected) ", selected" else ""
+                            contentDescription = dayDescription
                         },
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
@@ -108,7 +117,7 @@ fun HistoryScreen() {
                     Buddy(day.dominantMood, Modifier.size(30.dp))
                     Spacer(Modifier.height(4.dp))
                     Text(
-                        text = if (isToday) "Today" else weekday,
+                        text = if (isToday) stringResource(R.string.history_today) else weekday,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
                         color = if (isSelected) QB.Accent else QB.InkSoft,
@@ -126,32 +135,32 @@ fun HistoryScreen() {
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                Text("$selectedName, hour by hour", style = MaterialTheme.typography.titleMedium)
-                Text("average dB", style = MaterialTheme.typography.labelSmall)
+                Text(stringResource(R.string.history_hour_by_hour, selectedName), style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.history_average_db), style = MaterialTheme.typography.labelSmall)
             }
             if (hours.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
-                    Text("No readings for this day yet.", style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
+                    Text(stringResource(R.string.history_no_readings), style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
                 }
             } else {
                 HourlyChart(hours, settings.baseThresholds)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
-                LegendItem("Calm", QB.Calm)
-                LegendItem("Getting loud", QB.Loud)
-                LegendItem("Too loud", QB.TooLoud)
+                LegendItem(stringResource(R.string.legend_calm), QB.Calm)
+                LegendItem(stringResource(R.string.legend_loud), QB.Loud)
+                LegendItem(stringResource(R.string.legend_too_loud), QB.TooLoud)
             }
         }
 
         // Stat cards
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             StatCard(
-                title = "Calm time",
+                title = stringResource(R.string.history_calm_time),
                 value = formatCalm(selectedSummary?.calmMinutes ?: 0),
                 modifier = Modifier.weight(1f),
             )
             StatCard(
-                title = "Loudest moment",
+                title = stringResource(R.string.home_loudest_moment),
                 value = selectedSummary?.loudestDb?.let { "${it.roundToInt()} dB" } ?: "-",
                 subtitle = selectedSummary?.loudestAtMs?.let { formatTime(it) },
                 modifier = Modifier.weight(1f),
@@ -168,7 +177,7 @@ fun HistoryScreen() {
         ) {
             Column {
                 Text(
-                    "$challengesThisWeek Quiet Challenges won this week",
+                    stringResource(R.string.history_challenges_won, challengesThisWeek),
                     style = MaterialTheme.typography.titleMedium,
                 )
             }

@@ -1,5 +1,7 @@
 package com.quietbuddy.ui.buddy
 
+import androidx.compose.ui.res.stringResource
+import com.quietbuddy.R
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.LinearEasing
@@ -62,12 +64,12 @@ fun Buddy(mood: Mood?, modifier: Modifier = Modifier, bodyColor: Color = QB.Budd
     val dx = if (mood == Mood.EARS_COVERED) shake else 0f
     val scale = bounce.value * (if (mood == null) breath else 1f)
     val description = when (mood) {
-        null -> "Buddy is asleep"
-        Mood.HAPPY -> "Buddy is happy"
-        Mood.FINE -> "Buddy is fine"
-        Mood.WORRIED -> "Buddy is worried"
-        Mood.SAD -> "Buddy is sad"
-        Mood.EARS_COVERED -> "Buddy is covering its ears"
+        null -> stringResource(R.string.buddy_asleep)
+        Mood.HAPPY -> stringResource(R.string.buddy_happy)
+        Mood.FINE -> stringResource(R.string.buddy_fine)
+        Mood.WORRIED -> stringResource(R.string.buddy_worried)
+        Mood.SAD -> stringResource(R.string.buddy_sad)
+        Mood.EARS_COVERED -> stringResource(R.string.buddy_ears)
     }
 
     Canvas(modifier = modifier.semantics { contentDescription = description }) {
@@ -292,4 +294,14 @@ private fun BuddyMoodsPreview() {
         listOf<Mood?>(Mood.HAPPY, Mood.FINE, Mood.WORRIED, Mood.SAD, Mood.EARS_COVERED, null)
             .forEach { Buddy(it, Modifier.size(56.dp)) }
     }
+}
+
+/** Short, translated name of a mood (e.g. for accessibility descriptions). */
+@androidx.annotation.StringRes
+fun moodLabelRes(mood: Mood): Int = when (mood) {
+    Mood.HAPPY -> R.string.svc_mood_happy
+    Mood.FINE -> R.string.svc_mood_fine
+    Mood.WORRIED -> R.string.svc_mood_worried
+    Mood.SAD -> R.string.svc_mood_sad
+    Mood.EARS_COVERED -> R.string.svc_mood_ears
 }

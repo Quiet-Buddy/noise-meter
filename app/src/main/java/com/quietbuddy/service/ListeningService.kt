@@ -1,5 +1,6 @@
 package com.quietbuddy.service
 
+import android.os.Build
 import android.Manifest
 import android.app.Notification
 import android.app.PendingIntent
@@ -136,8 +137,13 @@ class ListeningService : LifecycleService() {
         if (mood != lastNotifMood || ts - lastNotifMs >= 10_000) {
             lastNotifMood = mood
             lastNotifMs = ts
-            runCatching {
-                NotificationManagerCompat.from(this).notify(NOTIF_ID, buildNotification(mood, r.sample.laeq2sDb))
+            val canNotify = Build.VERSION.SDK_INT < 33 ||
+                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                PackageManager.PERMISSION_GRANTED
+            if (canNotify) {
+                runCatching {
+                    NotificationManagerCompat.from(this).notify(NOTIF_ID, buildNotification(mood, r.sample.laeq2sDb))
+                }
             }
         }
     }

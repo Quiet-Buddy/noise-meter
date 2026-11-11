@@ -1,5 +1,7 @@
 package com.quietbuddy.ui.home
 
+import androidx.compose.ui.res.stringResource
+import com.quietbuddy.R
 import android.Manifest
 import android.app.Activity
 import android.content.Context
@@ -123,13 +125,13 @@ fun HomeScreen() {
             Spacer(Modifier.height(8.dp))
             BandPill(mood = state.mood, listening = state.listening)
             Spacer(Modifier.height(16.dp))
-            SpeechBubble(text = state.speechLine)
+            SpeechBubble(text = stringResource(state.speechLine))
             Spacer(Modifier.height(16.dp))
 
             if (!listening) {
                 NotListeningMessage(state.listening)
                 Spacer(Modifier.height(12.dp))
-                DarkButton(text = "Wake Buddy up", onClick = ::wake)
+                DarkButton(text = stringResource(R.string.home_wake_buddy), onClick = ::wake)
                 Spacer(Modifier.height(16.dp))
             }
 
@@ -137,12 +139,12 @@ fun HomeScreen() {
             Spacer(Modifier.height(16.dp))
             Row(horizontalArrangement = spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                 StatCard(
-                    label = "Calm time today",
+                    label = stringResource(R.string.home_calm_time_today),
                     value = formatMinutes(state.calmMinutes),
                     modifier = Modifier.weight(1f),
                 )
                 StatCard(
-                    label = "Loudest moment",
+                    label = stringResource(R.string.home_loudest_moment),
                     value = state.loudestDb?.let { "${it.roundToInt()} dB" } ?: "–",
                     sub = state.loudestAtMs?.let { formatTime(it) },
                     modifier = Modifier.weight(1f),
@@ -163,9 +165,9 @@ fun HomeScreen() {
 private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val greeting = when (hour) {
-        in 5..11 -> "Good morning"
-        in 12..16 -> "Good afternoon"
-        else -> "Good evening"
+        in 5..11 -> stringResource(R.string.greeting_morning)
+        in 12..16 -> stringResource(R.string.greeting_afternoon)
+        else -> stringResource(R.string.greeting_evening)
     }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
@@ -178,7 +180,7 @@ private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
         ) {
             Icon(
                 imageVector = if (listening) Icons.Rounded.Mic else Icons.Rounded.MicOff,
-                contentDescription = if (listening) "Pause listening" else "Resume listening",
+                contentDescription = stringResource(if (listening) R.string.home_pause_listening else R.string.home_resume_listening),
                 tint = QB.Ink,
             )
         }
@@ -237,11 +239,11 @@ private fun DbReadout(db: Int?) {
 @Composable
 private fun BandPill(mood: Mood?, listening: ListeningState) {
     val label = when (mood) {
-        Mood.HAPPY, Mood.FINE -> "Nice and calm"
-        Mood.WORRIED -> "Getting loud"
-        Mood.SAD -> "Too loud!"
-        Mood.EARS_COVERED -> "Way too loud!"
-        null -> if (listening == ListeningState.PAUSED) "Paused" else "Sleeping"
+        Mood.HAPPY, Mood.FINE -> stringResource(R.string.band_nice_calm)
+        Mood.WORRIED -> stringResource(R.string.band_getting_loud)
+        Mood.SAD -> stringResource(R.string.band_too_loud)
+        Mood.EARS_COVERED -> stringResource(R.string.band_way_too_loud)
+        null -> stringResource(if (listening == ListeningState.PAUSED) R.string.band_paused else R.string.band_sleeping)
     }
     val soft = mood?.let { QB.bandSoft(it) } ?: QB.AccentSoft
     val text = mood?.let { QB.bandText(it) } ?: QB.InkSoft
@@ -275,8 +277,8 @@ private fun SpeechBubble(text: String) {
 @Composable
 private fun NotListeningMessage(listening: ListeningState) {
     val message = when (listening) {
-        ListeningState.NO_PERMISSION -> "Buddy needs the microphone to hear the room."
-        ListeningState.MIC_BUSY -> "Someone else is using the microphone."
+        ListeningState.NO_PERMISSION -> stringResource(R.string.home_needs_mic)
+        ListeningState.MIC_BUSY -> stringResource(R.string.home_mic_busy)
         else -> null
     } ?: return
     Text(
@@ -297,9 +299,9 @@ private fun BandBar(mood: Mood?) {
         Mood.SAD, Mood.EARS_COVERED -> 2
     }
     val segments = listOf(
-        Triple("Calm", QB.Calm, 0),
-        Triple("Getting loud", QB.Loud, 1),
-        Triple("Too loud", QB.TooLoud, 2),
+        Triple(stringResource(R.string.legend_calm), QB.Calm, 0),
+        Triple(stringResource(R.string.legend_loud), QB.Loud, 1),
+        Triple(stringResource(R.string.legend_too_loud), QB.TooLoud, 2),
     )
     Row(Modifier.fillMaxWidth(), horizontalArrangement = spacedBy(6.dp)) {
         segments.forEach { (_, color, index) ->
@@ -352,7 +354,7 @@ private fun ChallengeSection(challenge: ChallengeState, canStart: Boolean, onSta
             colors = CardDefaults.cardColors(containerColor = QB.Card),
         ) {
             Text(
-                "Shh… ${challenge.secondsLeft} s",
+                stringResource(R.string.challenge_running, challenge.secondsLeft),
                 style = MaterialTheme.typography.headlineSmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth().padding(20.dp),
@@ -364,7 +366,7 @@ private fun ChallengeSection(challenge: ChallengeState, canStart: Boolean, onSta
             colors = CardDefaults.cardColors(containerColor = if (challenge.won) QB.CalmSoft else QB.TooLoudSoft),
         ) {
             Text(
-                if (challenge.won) "Buddy is dancing! You did it." else "So close! Try again?",
+                stringResource(if (challenge.won) R.string.challenge_won else R.string.challenge_lost),
                 style = MaterialTheme.typography.titleMedium,
                 color = if (challenge.won) QB.CalmText else QB.TooLoudText,
                 textAlign = TextAlign.Center,
@@ -372,7 +374,7 @@ private fun ChallengeSection(challenge: ChallengeState, canStart: Boolean, onSta
             )
         }
         ChallengeState.Idle -> if (canStart) {
-            DarkButton(text = "Start a 30-second Quiet Challenge", onClick = onStart)
+            DarkButton(text = stringResource(R.string.challenge_start), onClick = onStart)
         }
     }
 }

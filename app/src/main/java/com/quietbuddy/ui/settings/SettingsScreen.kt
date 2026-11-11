@@ -1,5 +1,7 @@
 package com.quietbuddy.ui.settings
 
+import androidx.compose.ui.res.stringResource
+import com.quietbuddy.R
 import android.Manifest
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -77,7 +79,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
     ) {
         Column {
             Text(settings.roomName, style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
-            Text("Settings", style = MaterialTheme.typography.headlineSmall)
+            Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
         }
 
         // Sensitivity card
@@ -85,12 +87,12 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
             modifier = Modifier.fillMaxWidth().background(QB.Card, CardShape).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text("How sensitive is Buddy?", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.settings_sensitivity), style = MaterialTheme.typography.titleMedium)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 listOf(
-                    Preset.QUIET_TIME to "Quiet time",
-                    Preset.EVERYDAY to "Everyday",
-                    Preset.PLAYTIME to "Playtime",
+                    Preset.QUIET_TIME to stringResource(R.string.preset_quiet_time),
+                    Preset.EVERYDAY to stringResource(R.string.preset_everyday),
+                    Preset.PLAYTIME to stringResource(R.string.preset_playtime),
                 ).forEach { (preset, label) ->
                     val selected = settings.preset == preset
                     val shape = RoundedCornerShape(14.dp)
@@ -135,8 +137,11 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 Text("100 dB", style = MaterialTheme.typography.labelSmall)
             }
             Text(
-                "Buddy gets worried at ${displayed.start.roundToInt()} dB and sad at " +
-                    "${displayed.endInclusive.roundToInt()} dB. Normal talking is about 60 dB.",
+                stringResource(
+                    R.string.settings_thresholds_explain,
+                    displayed.start.roundToInt(),
+                    displayed.endInclusive.roundToInt(),
+                ),
                 style = MaterialTheme.typography.bodyMedium,
                 color = QB.InkSoft,
             )
@@ -147,22 +152,25 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
             modifier = Modifier.fillMaxWidth().background(QB.Card, CardShape).padding(vertical = 4.dp),
         ) {
             SwitchRow(
-                title = "Quiet hours",
-                subtitle = "${formatMinutes(settings.quietStartMinutes)} to " +
-                    "${formatMinutes(settings.quietEndMinutes)}, Buddy is " +
-                    "${AppSettings.QUIET_HOURS_SHIFT_DB.roundToInt()} dB stricter",
+                title = stringResource(R.string.settings_quiet_hours),
+                subtitle = stringResource(
+                    R.string.settings_quiet_hours_sub,
+                    formatMinutes(settings.quietStartMinutes),
+                    formatMinutes(settings.quietEndMinutes),
+                    AppSettings.QUIET_HOURS_SHIFT_DB.roundToInt(),
+                ),
                 checked = settings.quietHoursEnabled,
                 onCheckedChange = viewModel::setQuietHours,
             )
             SwitchRow(
-                title = "Soft chime when Buddy gets sad",
-                subtitle = "Once, then quiet for 2 minutes",
+                title = stringResource(R.string.settings_chime),
+                subtitle = stringResource(R.string.settings_chime_sub),
                 checked = settings.chimeOnSad,
                 onCheckedChange = viewModel::setChimeOnSad,
             )
             SwitchRow(
-                title = "Keep listening with screen off",
-                subtitle = "Shows Buddy in the notification shade",
+                title = stringResource(R.string.settings_keep_listening),
+                subtitle = stringResource(R.string.settings_keep_listening_sub),
                 checked = settings.keepListening,
                 onCheckedChange = { on ->
                     viewModel.setKeepListening(on)
@@ -176,13 +184,13 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
         // Navigation rows
         val offset = (settings.calibrationOffsetDb - AppSettings.DEFAULT_CALIBRATION_OFFSET_DB).roundToInt()
         val calibratedText = settings.calibratedAtMs?.let {
-            ", last done ${SimpleDateFormat("d MMM", Locale.getDefault()).format(it)}"
+            stringResource(R.string.settings_last_done, SimpleDateFormat("d MMM", Locale.getDefault()).format(it))
         } ?: ""
         Column(
             modifier = Modifier.fillMaxWidth().background(QB.Card, CardShape).padding(vertical = 4.dp),
         ) {
             NavRow(
-                title = "Room name",
+                title = stringResource(R.string.settings_room_name),
                 subtitle = settings.roomName,
                 onClick = {
                     roomDraft = settings.roomName
@@ -190,8 +198,12 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 },
             )
             NavRow(
-                title = "Calibrate microphone",
-                subtitle = "Offset ${String.format(Locale.US, "%+d", offset)} dB$calibratedText",
+                title = stringResource(R.string.cal_title),
+                subtitle = stringResource(
+                    R.string.settings_offset,
+                    String.format(Locale.US, "%+d", offset),
+                    calibratedText,
+                ),
                 onClick = onOpenCalibration,
             )
         }
@@ -203,7 +215,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(
-                "Buddy never records or sends audio. Everything stays on this phone.",
+                stringResource(R.string.settings_privacy),
                 style = MaterialTheme.typography.bodyMedium,
                 color = QB.CalmText,
             )
@@ -213,23 +225,23 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
     if (showRoomDialog) {
         AlertDialog(
             onDismissRequest = { showRoomDialog = false },
-            title = { Text("Room name", style = MaterialTheme.typography.titleMedium) },
+            title = { Text(stringResource(R.string.settings_room_name), style = MaterialTheme.typography.titleMedium) },
             text = {
                 OutlinedTextField(
                     value = roomDraft,
                     onValueChange = { roomDraft = it },
                     singleLine = true,
-                    label = { Text("Room") },
+                    label = { Text(stringResource(R.string.settings_room)) },
                 )
             },
             confirmButton = {
                 TextButton(onClick = {
                     viewModel.setRoomName(roomDraft)
                     showRoomDialog = false
-                }) { Text("Save") }
+                }) { Text(stringResource(R.string.common_save)) }
             },
             dismissButton = {
-                TextButton(onClick = { showRoomDialog = false }) { Text("Cancel") }
+                TextButton(onClick = { showRoomDialog = false }) { Text(stringResource(R.string.common_cancel)) }
             },
         )
     }
