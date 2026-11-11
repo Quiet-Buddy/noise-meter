@@ -4,8 +4,18 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.navigation.NavHostController
+import com.quietbuddy.ui.useNavigationRail
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.Home
@@ -102,20 +112,27 @@ private fun Root(vm: MainViewModel = hiltViewModel()) {
     val backEntry by nav.currentBackStackEntryAsState()
     val route = backEntry?.destination?.route
 
+    val showTabs = tabs.any { it.route == route }
+    // Tablets and phones on their side get a rail at the start edge; a bottom bar would eat the short height.
+    val rail = useNavigationRail()
+    fun select(tab: Tab) {
+        nav.navigate(tab.route) {
+            popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+            launchSingleTop = true
+            restoreState = true
+        }
+    }
+
     Scaffold(
+        // Include the display cutout so content clears the camera notch in landscape.
+        contentWindowInsets = WindowInsets.systemBars.union(WindowInsets.displayCutout),
         bottomBar = {
-            if (tabs.any { it.route == route }) {
+            if (showTabs && !rail) {
                 NavigationBar {
                     tabs.forEach { tab ->
                         NavigationBarItem(
                             selected = route == tab.route,
-                            onClick = {
-                                nav.navigate(tab.route) {
-                                    popUpTo(nav.graph.findStartDestination().id) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
+                            onClick = { select(tab) },
                             icon = { Icon(tab.icon, contentDescription = null) },
                             label = { Text(stringResource(tab.labelRes)) },
                         )
@@ -124,22 +141,44 @@ private fun Root(vm: MainViewModel = hiltViewModel()) {
             }
         },
     ) { padding ->
-        // consumeWindowInsets stops screens that also apply statusBarsPadding() from adding the inset twice.
-        NavHost(nav, startDestination = start, modifier = Modifier.padding(padding).consumeWindowInsets(padding)) {
-            composable(Routes.ONBOARDING) {
-                OnboardingScreen(onDone = {
-                    nav.navigate(Routes.HOME) {
-                        popUpTo(Routes.ONBOARDING) { inclusive = true }
-                        launchSingleTop = true
+        Row(Modifier.padding(padding).consumeWindowInsets(padding)) {
+            if (showTabs && rail) {
+                // Insets are already applied by the Scaffold padding above.
+                NavigationRail(windowInsets = WindowInsets(0)) {
+                    Spacer(Modifier.weight(1f))
+                    tabs.forEach { tab ->
+                        NavigationRailItem(
+                            selected = route == tab.route,
+                            onClick = { select(tab) },
+                            icon = { Icon(tab.icon, contentDescription = null) },
+                            label = { Text(stringResource(tab.labelRes)) },
+                        )
                     }
-                })
+                    Spacer(Modifier.weight(1f))
+                }
             }
-            composable(Routes.HOME) { HomeScreen() }
-            composable(Routes.HISTORY) { HistoryScreen() }
-            composable(Routes.SETTINGS) {
-                SettingsScreen(onOpenCalibration = { nav.navigate(Routes.CALIBRATION) })
-            }
-            composable(Routes.CALIBRATION) { CalibrationScreen(onBack = { nav.popBackStack() }) }
+            AppNavHost(nav, start, Modifier.weight(1f))
         }
+    }
+}
+
+@Composable
+private fun AppNavHost(nav: NavHostController, start: String, modifier: Modifier) {
+    // consumeWindowInsets in the caller stops screens that also apply statusBarsPadding() from adding the inset twice.
+    NavHost(nav, startDestination = start, modifier = modifier) {
+        composable(Routes.ONBOARDING) {
+            OnboardingScreen(onDone = {
+                nav.navigate(Routes.HOME) {
+                    popUpTo(Routes.ONBOARDING) { inclusive = true }
+                    launchSingleTop = true
+                }
+            })
+        }
+        composable(Routes.HOME) { HomeScreen() }
+        composable(Routes.HISTORY) { HistoryScreen() }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(onOpenCalibration = { nav.navigate(Routes.CALIBRATION) })
+        }
+        composable(Routes.CALIBRATION) { CalibrationScreen(onBack = { nav.popBackStack() }) }
     }
 }

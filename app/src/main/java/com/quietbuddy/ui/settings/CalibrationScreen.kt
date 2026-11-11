@@ -4,6 +4,9 @@ import androidx.compose.ui.res.stringResource
 import com.quietbuddy.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.widthIn
+import com.quietbuddy.ui.SingleColumnMaxWidth
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Row
@@ -49,63 +52,71 @@ fun CalibrationScreen(onBack: () -> Unit) {
     val reference = referenceText.toFloatOrNull()
     val current = latest?.laeq2sDb
 
-    Column(
-        modifier = Modifier
+    Box(
+        Modifier
             .fillMaxSize()
             .background(QB.Background)
-            .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+            .statusBarsPadding(),
+        contentAlignment = Alignment.TopCenter,
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-            IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cal_back), tint = QB.Ink)
-            }
-            Text(stringResource(R.string.cal_title), style = MaterialTheme.typography.headlineSmall)
-        }
-
+        // A form, so it stays one column; on wide screens it is capped in width and centred.
         Column(
-            modifier = Modifier.fillMaxWidth().background(QB.Card, RoundedCornerShape(20.dp)).padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier
+                .widthIn(max = SingleColumnMaxWidth)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-            Text(stringResource(R.string.cal_hears_now), style = MaterialTheme.typography.labelSmall)
-            Text(
-                current?.let { String.format(Locale.US, "%.0f dB", it) } ?: "-- dB",
-                style = MaterialTheme.typography.displayLarge,
-                fontWeight = FontWeight.ExtraBold,
-            )
-            Text(
-                stringResource(R.string.cal_instructions),
-                style = MaterialTheme.typography.bodyMedium,
-            )
-            OutlinedTextField(
-                value = referenceText,
-                onValueChange = { referenceText = it },
-                label = { Text(stringResource(R.string.cal_reading_label)) },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                modifier = Modifier.fillMaxWidth(),
-            )
-            Button(
-                onClick = { reference?.let { viewModel.save(it, onBack) } },
-                enabled = reference != null && current != null,
-                modifier = Modifier.fillMaxWidth().height(52.dp),
-            ) {
-                Text(stringResource(R.string.common_save))
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cal_back), tint = QB.Ink)
+                }
+                Text(stringResource(R.string.cal_title), style = MaterialTheme.typography.headlineSmall)
             }
-            TextButton(
-                onClick = { viewModel.resetToDefault() },
-                modifier = Modifier.defaultMinSize(minHeight = 48.dp),
-            ) {
-                Text(stringResource(R.string.cal_reset))
-            }
-        }
 
-        Text(
-            stringResource(R.string.cal_silent_hint),
-            style = MaterialTheme.typography.labelSmall,
-            color = QB.InkSoft,
-        )
+            Column(
+                modifier = Modifier.fillMaxWidth().background(QB.Card, RoundedCornerShape(20.dp)).padding(20.dp),
+                verticalArrangement = Arrangement.spacedBy(12.dp),
+            ) {
+                Text(stringResource(R.string.cal_hears_now), style = MaterialTheme.typography.labelSmall)
+                Text(
+                    current?.let { String.format(Locale.US, "%.0f dB", it) } ?: "-- dB",
+                    style = MaterialTheme.typography.displayLarge,
+                    fontWeight = FontWeight.ExtraBold,
+                )
+                Text(
+                    stringResource(R.string.cal_instructions),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                OutlinedTextField(
+                    value = referenceText,
+                    onValueChange = { referenceText = it },
+                    label = { Text(stringResource(R.string.cal_reading_label)) },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+                Button(
+                    onClick = { reference?.let { viewModel.save(it, onBack) } },
+                    enabled = reference != null && current != null,
+                    modifier = Modifier.fillMaxWidth().height(52.dp),
+                ) {
+                    Text(stringResource(R.string.common_save))
+                }
+                TextButton(
+                    onClick = { viewModel.resetToDefault() },
+                    modifier = Modifier.defaultMinSize(minHeight = 48.dp),
+                ) {
+                    Text(stringResource(R.string.cal_reset))
+                }
+            }
+
+            Text(
+                stringResource(R.string.cal_silent_hint),
+                style = MaterialTheme.typography.labelSmall,
+                color = QB.InkSoft,
+            )
+        }
     }
 }
