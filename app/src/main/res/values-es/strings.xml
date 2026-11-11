@@ -70,8 +70,8 @@
     <string name="settings_thresholds_explain">Buddy se preocupa a los %1$d dB y se pone triste a los %2$d dB. Una conversación normal ronda los 60 dB.</string>
     <string name="settings_quiet_hours">Horas de silencio</string>
     <string name="settings_quiet_hours_sub">De %1$s a %2$s, Buddy es %3$d dB más estricto</string>
-    <string name="settings_chime">Aviso suave cuando Buddy se pone triste</string>
-    <string name="settings_chime_sub">Una vez, y luego silencio durante 2 minutos</string>
+    <string name="settings_chime">Avisos sonoros cuando hay mucho ruido</string>
+    <string name="settings_chime_sub">Un tono suave cuando Buddy se preocupa, más fuerte cuando está triste o se tapa los oídos. Se repite mientras siga el ruido. Usa el volumen multimedia.</string>
     <string name="settings_keep_listening">Seguir escuchando con la pantalla apagada</string>
     <string name="settings_keep_listening_sub">Muestra a Buddy en la barra de notificaciones</string>
     <string name="settings_last_done">, última vez el %1$s</string>

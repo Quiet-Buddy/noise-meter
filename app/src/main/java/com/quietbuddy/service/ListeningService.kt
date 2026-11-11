@@ -8,8 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.content.pm.ServiceInfo
-import android.media.AudioManager
-import android.media.ToneGenerator
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.ServiceCompat
@@ -27,6 +25,7 @@ import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.MinuteAggregate
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.SettingsRepository
+import com.quietbuddy.domain.AlertPolicy
 import com.quietbuddy.domain.MoodEngine
 import com.quietbuddy.audio.LevelProcessor
 import dagger.hilt.android.AndroidEntryPoint
@@ -53,8 +52,10 @@ class ListeningService : LifecycleService() {
     private val moodCounts = IntArray(Mood.values().size)
     private var lastNotifMs = 0L
     private var lastNotifMood: Mood? = null
-    private var lastChimeMs = 0L
-    private var tone: ToneGenerator? = null
+    private val alerts = AlertPolicy()
+    private var sounder: AlertSounder? = null
+    // While our own alert tone is in the mic's rolling window, hold the mood so Buddy doesn't react to it.
+    private var holdMoodUntilMs = 0L
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -88,6 +89,8 @@ class ListeningService : LifecycleService() {
         }
         running = true
         engine.reset()
+        alerts.reset()
+        holdMoodUntilMs = 0L
         moodCounts.fill(0)
         bus.setMood(Mood.HAPPY)
 
@@ -125,12 +128,20 @@ class ListeningService : LifecycleService() {
         bus.emitSample(r.sample)
         val cal = Calendar.getInstance().apply { timeInMillis = ts }
         val minuteOfDay = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
-        val before = engine.current
-        val mood = engine.update(r.sample.laeq2sDb, s.effectiveThresholds(minuteOfDay), ts)
+        val mood = if (ts < holdMoodUntilMs) engine.current
+        else engine.update(r.sample.laeq2sDb, s.effectiveThresholds(minuteOfDay), ts)
         bus.setMood(mood)
         moodCounts[mood.ordinal]++
 
-        if (s.chimeOnSad && mood != before && mood >= Mood.SAD && before < Mood.SAD) chime(ts)
+        if (s.chimeOnSad) {
+            alerts.onMood(mood, ts)?.let { alertMood ->
+                val sounder = sounder ?: AlertSounder().also { sounder = it }
+                val lengthMs = sounder.play(alertMood)
+                if (lengthMs > 0) holdMoodUntilMs = ts + lengthMs + LevelProcessor.DEFAULT_WINDOW_MS + 200
+            }
+        } else {
+            alerts.reset()
+        }
 
         r.completedMinute?.let { recordMinute(it) }
 
@@ -154,15 +165,6 @@ class ListeningService : LifecycleService() {
         val dominant = Mood.values()[best]
         moodCounts.fill(0)
         lifecycleScope.launch(Dispatchers.IO + NonCancellable) { history.recordMinute(m, dominant) }
-    }
-
-    private fun chime(now: Long) {
-        if (now - lastChimeMs < 2 * 60_000L) return
-        lastChimeMs = now
-        runCatching {
-            val t = tone ?: ToneGenerator(AudioManager.STREAM_NOTIFICATION, 40).also { tone = it }
-            t.startTone(ToneGenerator.TONE_PROP_BEEP, 200)
-        }
     }
 
     private fun onCaptureFailure() {
@@ -230,8 +232,8 @@ class ListeningService : LifecycleService() {
     override fun onDestroy() {
         capture?.stop()
         capture = null
-        tone?.release()
-        tone = null
+        sounder?.release()
+        sounder = null
         if (running) {
             running = false
             bus.setState(ListeningState.PAUSED)

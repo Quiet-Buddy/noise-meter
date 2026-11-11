@@ -21,34 +21,43 @@ class MoodEngineTest {
     }
 
     @Test
-    fun loudLevelChangesOnlyAfterDwell() {
+    fun loudLevelChangesAfterShortDwell() {
         val engine = MoodEngine()
         assertEquals(Mood.HAPPY, engine.update(70f, thresholds, 0L))
-        assertEquals(Mood.HAPPY, engine.update(70f, thresholds, 1_000L))
-        assertEquals(Mood.HAPPY, engine.update(70f, thresholds, 2_900L))
+        assertEquals(Mood.HAPPY, engine.update(70f, thresholds, 500L))
         // 70 dB is WORRIED under Thresholds(65, 75).
-        assertEquals(Mood.WORRIED, engine.update(70f, thresholds, 3_000L))
+        assertEquals(Mood.WORRIED, engine.update(70f, thresholds, 800L))
     }
 
     @Test
-    fun dwellBoundaryIsExactlyThreeSeconds() {
+    fun riseDwellBoundaryIsExact() {
         val engine = MoodEngine()
         engine.update(70f, thresholds, 0L)
-        assertEquals(Mood.HAPPY, engine.update(70f, thresholds, 2_999L))
-        assertEquals(Mood.WORRIED, engine.update(70f, thresholds, 3_000L))
+        assertEquals(Mood.HAPPY, engine.update(70f, thresholds, 799L))
+        assertEquals(Mood.WORRIED, engine.update(70f, thresholds, 800L))
     }
 
     @Test
-    fun flickerAroundEdgeDoesNotChangeMood() {
+    fun briefPeakDoesNotChangeMood() {
+        val engine = MoodEngine()
+        engine.update(90f, thresholds, 0L)
+        engine.update(90f, thresholds, 500L)
+        assertEquals(Mood.HAPPY, engine.update(45f, thresholds, 600L))
+        assertEquals(Mood.HAPPY, engine.update(90f, thresholds, 700L))
+        assertEquals(Mood.HAPPY, engine.update(90f, thresholds, 1_400L))
+        assertEquals(Mood.EARS_COVERED, engine.update(90f, thresholds, 1_500L))
+    }
+
+    @Test
+    fun flickerBetweenLoudBandsEscalatesToCalmerOne() {
         val engine = MoodEngine()
         var t = 0L
-        // Alternate between WORRIED (66 dB) and FINE (60 dB) every 100 ms.
+        // Alternate between WORRIED (66 dB) and FINE (60 dB) every 100 ms: consistently above HAPPY.
         repeat(100) { i ->
-            val level = if (i % 2 == 0) 66f else 60f
-            assertEquals(Mood.HAPPY, engine.update(level, thresholds, t))
+            engine.update(if (i % 2 == 0) 66f else 60f, thresholds, t)
             t += 100
         }
-        assertEquals(Mood.HAPPY, engine.current)
+        assertEquals(Mood.FINE, engine.current)
     }
 
     @Test
@@ -68,8 +77,16 @@ class MoodEngineTest {
     fun jumpFromHappyToEarsCoveredAfterDwell() {
         val engine = MoodEngine()
         engine.update(90f, thresholds, 0L)
-        assertEquals(Mood.HAPPY, engine.update(90f, thresholds, 2_999L))
-        assertEquals(Mood.EARS_COVERED, engine.update(90f, thresholds, 3_000L))
+        assertEquals(Mood.HAPPY, engine.update(90f, thresholds, 799L))
+        assertEquals(Mood.EARS_COVERED, engine.update(90f, thresholds, 800L))
+    }
+
+    @Test
+    fun calmingDownStillTakesThreeSeconds() {
+        val engine = MoodEngine(initial = Mood.SAD)
+        engine.update(45f, thresholds, 0L)
+        assertEquals(Mood.SAD, engine.update(45f, thresholds, 2_999L))
+        assertEquals(Mood.HAPPY, engine.update(45f, thresholds, 3_000L))
     }
 
     @Test
@@ -81,8 +98,8 @@ class MoodEngineTest {
 
         // Pending timer from before reset must not carry over.
         engine.update(90f, thresholds, 1_000L)
-        assertEquals(Mood.HAPPY, engine.update(90f, thresholds, 3_999L))
-        assertEquals(Mood.EARS_COVERED, engine.update(90f, thresholds, 4_000L))
+        assertEquals(Mood.HAPPY, engine.update(90f, thresholds, 1_799L))
+        assertEquals(Mood.EARS_COVERED, engine.update(90f, thresholds, 1_800L))
 
         engine.reset(Mood.SAD)
         assertEquals(Mood.SAD, engine.current)
