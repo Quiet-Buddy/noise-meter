@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Quiet Buddy</string>
+    <string name="nav_home">Inicio</string>
+    <string name="nav_history">Historial</string>
+    <string name="nav_settings">Ajustes</string>
+    <string name="svc_channel_listening">Escuchando</string>
+    <string name="svc_title">Buddy está escuchando · %1$s</string>
+    <string name="svc_text">%1$s · %2$d dB</string>
+    <string name="svc_pause">Pausar</string>
+    <string name="svc_mood_happy">Feliz</string>
+    <string name="svc_mood_fine">Bien</string>
+    <string name="svc_mood_worried">Preocupado</string>
+    <string name="svc_mood_sad">Triste</string>
+    <string name="svc_mood_ears">Tapándose los oídos</string>
+</resources>

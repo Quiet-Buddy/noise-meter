@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Buddy mood states</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;font-family:'Nunito',system-ui,sans-serif;color:#1F2A37;-webkit-font-smoothing:antialiased}
+a{color:#2E6FBF}a:hover{color:#1F538F}
+</style>
+</helmet>
+<div style="width: 1200px; height: 440px; box-sizing: border-box; background: #FFFFFF; padding: 32px 40px; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 24px">
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; background: #F4F8FB; border-radius: 24px; padding: 20px 16px">
+    <svg width="180" height="180" viewBox="0 0 200 200" role="img" aria-label="Buddy, happy">
+      <path d="M78 30 C 72 14, 80 8, 92 18" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M100 26 C 100 10, 108 6, 116 14" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <ellipse cx="100" cy="108" rx="78" ry="80" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <ellipse cx="52" cy="124" rx="13" ry="8" fill="#FF9AA2" opacity="0.8"></ellipse>
+      <ellipse cx="148" cy="124" rx="13" ry="8" fill="#FF9AA2" opacity="0.8"></ellipse>
+      <path d="M58 96 Q 70 82 82 96" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M118 96 Q 130 82 142 96" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M68 126 Q 100 160 132 126 Z" fill="#5B2A2A" stroke="#2B2B2B" stroke-width="4" stroke-linejoin="round"></path>
+      <path d="M84 140 Q 100 152 116 140 Q 100 158 84 140 Z" fill="#FF7A85"></path>
+      <ellipse cx="74" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <ellipse cx="126" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+    </svg>
+    <div style="font-size: 20px; font-weight: 800; color: #1F2A37">Happy</div>
+    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: #DDF3E8; color: #1E6B49; font-size: 14px; font-weight: 800">below 55 dB</div>
+    <div style="font-size: 13px; font-weight: 700; color: #5B6B7A; text-align: center; line-height: 1.4">“Ahh, I can hear the birds outside.”</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; background: #F4F8FB; border-radius: 24px; padding: 20px 16px">
+    <svg width="180" height="180" viewBox="0 0 200 200" role="img" aria-label="Buddy, fine">
+      <path d="M78 30 C 72 14, 80 8, 92 18" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M100 26 C 100 10, 108 6, 116 14" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <ellipse cx="100" cy="108" rx="78" ry="80" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <ellipse cx="52" cy="124" rx="13" ry="8" fill="#FF9AA2" opacity="0.6"></ellipse>
+      <ellipse cx="148" cy="124" rx="13" ry="8" fill="#FF9AA2" opacity="0.6"></ellipse>
+      <circle cx="72" cy="96" r="9" fill="#2B2B2B"></circle>
+      <circle cx="75" cy="92" r="3" fill="#FFFFFF"></circle>
+      <circle cx="128" cy="96" r="9" fill="#2B2B2B"></circle>
+      <circle cx="131" cy="92" r="3" fill="#FFFFFF"></circle>
+      <path d="M78 134 Q 100 150 122 134" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <ellipse cx="74" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <ellipse cx="126" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+    </svg>
+    <div style="font-size: 20px; font-weight: 800; color: #1F2A37">Fine</div>
+    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: #DDF3E8; color: #1E6B49; font-size: 14px; font-weight: 800">55 to 65 dB</div>
+    <div style="font-size: 13px; font-weight: 700; color: #5B6B7A; text-align: center; line-height: 1.4">“Nice. Everyone's chatting.”</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; background: #FFF6E5; border-radius: 24px; padding: 20px 16px">
+    <svg width="180" height="180" viewBox="0 0 200 200" role="img" aria-label="Buddy, worried">
+      <path d="M78 30 C 72 14, 80 8, 92 18" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M100 26 C 100 10, 108 6, 116 14" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <ellipse cx="100" cy="108" rx="78" ry="80" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <path d="M56 70 L 84 78" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M144 70 L 116 78" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <circle cx="72" cy="100" r="9" fill="#2B2B2B"></circle>
+      <circle cx="75" cy="96" r="3" fill="#FFFFFF"></circle>
+      <circle cx="128" cy="100" r="9" fill="#2B2B2B"></circle>
+      <circle cx="131" cy="96" r="3" fill="#FFFFFF"></circle>
+      <path d="M76 140 Q 88 128 100 140 Q 112 152 124 140" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M160 70 Q 166 84 160 92 Q 154 84 160 70 Z" fill="#8FC8FF" stroke="#2B2B2B" stroke-width="3"></path>
+      <ellipse cx="74" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <ellipse cx="126" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+    </svg>
+    <div style="font-size: 20px; font-weight: 800; color: #1F2A37">Worried</div>
+    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: #FDE8C4; color: #7A4F0A; font-size: 14px; font-weight: 800">65 to 75 dB</div>
+    <div style="font-size: 13px; font-weight: 700; color: #5B6B7A; text-align: center; line-height: 1.4">“Hmm, it's getting a bit loud in here.”</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; background: #FFF1EE; border-radius: 24px; padding: 20px 16px">
+    <svg width="180" height="180" viewBox="0 0 200 200" role="img" aria-label="Buddy, sad">
+      <path d="M78 30 C 72 14, 80 8, 92 18" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M100 26 C 100 10, 108 6, 116 14" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <ellipse cx="100" cy="108" rx="78" ry="80" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <path d="M58 76 L 84 68" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M142 76 L 116 68" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <circle cx="72" cy="100" r="9" fill="#2B2B2B"></circle>
+      <circle cx="75" cy="96" r="3" fill="#FFFFFF"></circle>
+      <circle cx="128" cy="100" r="9" fill="#2B2B2B"></circle>
+      <circle cx="131" cy="96" r="3" fill="#FFFFFF"></circle>
+      <path d="M74 148 Q 100 126 126 148" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M140 112 Q 148 128 140 136 Q 132 128 140 112 Z" fill="#8FC8FF" stroke="#2B2B2B" stroke-width="3"></path>
+      <ellipse cx="74" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <ellipse cx="126" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+    </svg>
+    <div style="font-size: 20px; font-weight: 800; color: #1F2A37">Sad</div>
+    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: #FAD6CF; color: #8A2E21; font-size: 14px; font-weight: 800">75 to 85 dB</div>
+    <div style="font-size: 13px; font-weight: 700; color: #5B6B7A; text-align: center; line-height: 1.4">“Ouch. Can we use our indoor voices?”</div>
+  </div>
+
+  <div style="display: flex; flex-direction: column; align-items: center; gap: 10px; background: #FFE4DE; border-radius: 24px; padding: 20px 16px">
+    <svg width="180" height="180" viewBox="0 0 200 200" role="img" aria-label="Buddy, covering its ears">
+      <path d="M78 30 C 72 14, 80 8, 92 18" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M100 26 C 100 10, 108 6, 116 14" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <ellipse cx="100" cy="108" rx="78" ry="80" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <path d="M58 84 L 82 94" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M142 84 L 118 94" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M66 100 L 80 106" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M134 100 L 120 106" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <path d="M74 140 Q 84 128 94 140 Q 104 152 114 140 Q 122 130 128 140" fill="none" stroke="#2B2B2B" stroke-width="5" stroke-linecap="round"></path>
+      <ellipse cx="34" cy="112" rx="22" ry="28" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <path d="M22 92 L 22 80 M 34 88 L 34 76 M 46 92 L 46 82" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <ellipse cx="166" cy="112" rx="22" ry="28" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <path d="M154 92 L 154 82 M 166 88 L 166 76 M 178 92 L 178 80" fill="none" stroke="#2B2B2B" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M6 60 L 14 56 M 6 76 L 14 76 M 6 92 L 14 96" fill="none" stroke="#D9513F" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M194 60 L 186 56 M 194 76 L 186 76 M 194 92 L 186 96" fill="none" stroke="#D9513F" stroke-width="4" stroke-linecap="round"></path>
+      <path d="M150 54 Q 154 66 150 72 Q 146 66 150 54 Z" fill="#8FC8FF" stroke="#2B2B2B" stroke-width="3"></path>
+      <ellipse cx="74" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+      <ellipse cx="126" cy="186" rx="18" ry="8" fill="{{buddy}}" stroke="#2B2B2B" stroke-width="4"></ellipse>
+    </svg>
+    <div style="font-size: 20px; font-weight: 800; color: #1F2A37">Ears covered</div>
+    <div style="display: inline-flex; align-items: center; gap: 8px; padding: 6px 14px; border-radius: 999px; background: #FAD6CF; color: #8A2E21; font-size: 14px; font-weight: 800">85 dB and above</div>
+    <div style="font-size: 13px; font-weight: 700; color: #5B6B7A; text-align: center; line-height: 1.4">“Too loud! My ears!”</div>
+  </div>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"buddy":{"editor":"color","default":"#FFC94D","options":["#FFC94D","#8EDC9A","#8FC8FF","#FFA6C9"],"section":"Buddy"},"$preview":{"width":1200,"height":440}}'>
+class Component extends DCLogic {
+  renderVals() {
+    return { buddy: this.props.buddy ?? '#FFC94D' };
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,417 @@
+package com.quietbuddy.ui.home
+
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.Arrangement.spacedBy
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Mic
+import androidx.compose.material.icons.rounded.MicOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.quietbuddy.core.ListeningState
+import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.buddy.Buddy
+import com.quietbuddy.ui.theme.QB
+import java.text.SimpleDateFormat
+import java.util.Calendar
+import java.util.Date
+import java.util.Locale
+import kotlin.math.roundToInt
+
+@Composable
+fun HomeScreen() {
+    val viewModel: HomeViewModel = hiltViewModel()
+    val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val context = LocalContext.current
+
+    val permissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { granted ->
+        if (granted) {
+            viewModel.start()
+        } else if (context.findActivity()?.let { !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.RECORD_AUDIO) } == true) {
+            // Permanently denied: the system will no longer show the dialog, so send the user to settings.
+            openAppSettings(context)
+        }
+    }
+
+    fun wake() {
+        if (hasMicPermission(context)) viewModel.start() else permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
+    }
+
+    LaunchedEffect(Unit) {
+        if (hasMicPermission(context)) viewModel.start()
+    }
+
+    val background by animateColorAsState(QB.screenBackground(state.mood), tween(600), label = "background")
+    val listening = state.listening == ListeningState.LISTENING
+
+    Box(Modifier.fillMaxSize().background(background)) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .statusBarsPadding()
+                .navigationBarsPadding()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 24.dp, vertical = 16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Header(
+                roomName = state.roomName,
+                listening = listening,
+                onToggle = { if (listening) viewModel.pause() else wake() },
+            )
+            Spacer(Modifier.height(16.dp))
+            BuddyRing(mood = state.mood, db = state.db)
+            Spacer(Modifier.height(8.dp))
+            DbReadout(db = state.db)
+            Spacer(Modifier.height(8.dp))
+            BandPill(mood = state.mood, listening = state.listening)
+            Spacer(Modifier.height(16.dp))
+            SpeechBubble(text = state.speechLine)
+            Spacer(Modifier.height(16.dp))
+
+            if (!listening) {
+                NotListeningMessage(state.listening)
+                Spacer(Modifier.height(12.dp))
+                DarkButton(text = "Wake Buddy up", onClick = ::wake)
+                Spacer(Modifier.height(16.dp))
+            }
+
+            BandBar(mood = state.mood)
+            Spacer(Modifier.height(16.dp))
+            Row(horizontalArrangement = spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+                StatCard(
+                    label = "Calm time today",
+                    value = formatMinutes(state.calmMinutes),
+                    modifier = Modifier.weight(1f),
+                )
+                StatCard(
+                    label = "Loudest moment",
+                    value = state.loudestDb?.let { "${it.roundToInt()} dB" } ?: "–",
+                    sub = state.loudestAtMs?.let { formatTime(it) },
+                    modifier = Modifier.weight(1f),
+                )
+            }
+            Spacer(Modifier.height(16.dp))
+            ChallengeSection(
+                challenge = state.challenge,
+                canStart = listening && (state.mood == Mood.SAD || state.mood == Mood.EARS_COVERED),
+                onStart = viewModel::startChallenge,
+            )
+            Spacer(Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
+    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+    val greeting = when (hour) {
+        in 5..11 -> "Good morning"
+        in 12..16 -> "Good afternoon"
+        else -> "Good evening"
+    }
+    Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+        Column(Modifier.weight(1f)) {
+            Text(greeting, style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
+            Text(roomName, style = MaterialTheme.typography.headlineSmall)
+        }
+        IconButton(
+            onClick = onToggle,
+            modifier = Modifier.size(48.dp).background(QB.Card, CircleShape),
+        ) {
+            Icon(
+                imageVector = if (listening) Icons.Rounded.Mic else Icons.Rounded.MicOff,
+                contentDescription = if (listening) "Pause listening" else "Resume listening",
+                tint = QB.Ink,
+            )
+        }
+    }
+}
+
+@Composable
+private fun BuddyRing(mood: Mood?, db: Int?) {
+    val target = if (mood == null || db == null) 0f else ((db - 30f) / 70f).coerceIn(0f, 1f)
+    val progress by animateFloatAsState(target, tween(600), label = "ringProgress")
+    val arcColor by animateColorAsState(mood?.let { QB.bandColor(it) } ?: QB.Line, tween(600), label = "ringColor")
+
+    Box(Modifier.size(300.dp), contentAlignment = Alignment.Center) {
+        Canvas(Modifier.fillMaxSize()) {
+            val strokePx = 16.dp.toPx()
+            val inset = strokePx / 2f
+            val arcSize = Size(this.size.width - 2 * inset, this.size.height - 2 * inset)
+            drawArc(
+                color = QB.Line,
+                startAngle = -90f,
+                sweepAngle = 360f,
+                useCenter = false,
+                topLeft = Offset(inset, inset),
+                size = arcSize,
+                style = Stroke(width = strokePx),
+            )
+            if (progress > 0f) {
+                drawArc(
+                    color = arcColor,
+                    startAngle = -90f,
+                    sweepAngle = 360f * progress,
+                    useCenter = false,
+                    topLeft = Offset(inset, inset),
+                    size = arcSize,
+                    style = Stroke(width = strokePx, cap = StrokeCap.Round),
+                )
+            }
+        }
+        Buddy(mood = mood, modifier = Modifier.size(200.dp))
+    }
+}
+
+@Composable
+private fun DbReadout(db: Int?) {
+    Row(verticalAlignment = Alignment.Bottom) {
+        Text(db?.toString() ?: "–", style = MaterialTheme.typography.displayLarge)
+        Spacer(Modifier.width(6.dp))
+        Text(
+            "dB",
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 12.dp),
+        )
+    }
+}
+
+@Composable
+private fun BandPill(mood: Mood?, listening: ListeningState) {
+    val label = when (mood) {
+        Mood.HAPPY, Mood.FINE -> "Nice and calm"
+        Mood.WORRIED -> "Getting loud"
+        Mood.SAD -> "Too loud!"
+        Mood.EARS_COVERED -> "Way too loud!"
+        null -> if (listening == ListeningState.PAUSED) "Paused" else "Sleeping"
+    }
+    val soft = mood?.let { QB.bandSoft(it) } ?: QB.AccentSoft
+    val text = mood?.let { QB.bandText(it) } ?: QB.InkSoft
+    Box(
+        Modifier
+            .clip(RoundedCornerShape(50))
+            .background(soft)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(label, style = MaterialTheme.typography.titleMedium, color = text)
+    }
+}
+
+@Composable
+private fun SpeechBubble(text: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = QB.Card),
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth().padding(20.dp),
+        )
+    }
+}
+
+@Composable
+private fun NotListeningMessage(listening: ListeningState) {
+    val message = when (listening) {
+        ListeningState.NO_PERMISSION -> "Buddy needs the microphone to hear the room."
+        ListeningState.MIC_BUSY -> "Someone else is using the microphone."
+        else -> null
+    } ?: return
+    Text(
+        message,
+        style = MaterialTheme.typography.bodyMedium,
+        color = QB.InkSoft,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun BandBar(mood: Mood?) {
+    val active = when (mood) {
+        null -> -1
+        Mood.HAPPY, Mood.FINE -> 0
+        Mood.WORRIED -> 1
+        Mood.SAD, Mood.EARS_COVERED -> 2
+    }
+    val segments = listOf(
+        Triple("Calm", QB.Calm, 0),
+        Triple("Getting loud", QB.Loud, 1),
+        Triple("Too loud", QB.TooLoud, 2),
+    )
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = spacedBy(6.dp)) {
+        segments.forEach { (_, color, index) ->
+            Box(
+                Modifier
+                    .weight(1f)
+                    .height(10.dp)
+                    .clip(RoundedCornerShape(5.dp))
+                    .background(if (index == active) color else QB.Line),
+            )
+        }
+    }
+    Spacer(Modifier.height(6.dp))
+    Row(Modifier.fillMaxWidth(), horizontalArrangement = spacedBy(6.dp)) {
+        segments.forEach { (label, _, _) ->
+            Text(
+                label,
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.weight(1f),
+            )
+        }
+    }
+}
+
+@Composable
+private fun StatCard(label: String, value: String, modifier: Modifier = Modifier, sub: String? = null) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = QB.Card),
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            Text(label, style = MaterialTheme.typography.labelSmall)
+            Spacer(Modifier.height(4.dp))
+            Text(value, style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = QB.Ink))
+            if (sub != null) {
+                Text(sub, style = MaterialTheme.typography.labelSmall)
+            }
+        }
+    }
+}
+
+@Composable
+private fun ChallengeSection(challenge: ChallengeState, canStart: Boolean, onStart: () -> Unit) {
+    when (challenge) {
+        is ChallengeState.Running -> Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = QB.Card),
+        ) {
+            Text(
+                "Shh… ${challenge.secondsLeft} s",
+                style = MaterialTheme.typography.headlineSmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+            )
+        }
+        is ChallengeState.Finished -> Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(containerColor = if (challenge.won) QB.CalmSoft else QB.TooLoudSoft),
+        ) {
+            Text(
+                if (challenge.won) "Buddy is dancing! You did it." else "So close! Try again?",
+                style = MaterialTheme.typography.titleMedium,
+                color = if (challenge.won) QB.CalmText else QB.TooLoudText,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+            )
+        }
+        ChallengeState.Idle -> if (canStart) {
+            DarkButton(text = "Start a 30-second Quiet Challenge", onClick = onStart)
+        }
+    }
+}
+
+@Composable
+private fun DarkButton(text: String, onClick: () -> Unit) {
+    Button(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = QB.Ink, contentColor = Color.White),
+    ) {
+        Text(text, style = MaterialTheme.typography.titleMedium, color = Color.White)
+    }
+}
+
+private fun formatMinutes(minutes: Int): String {
+    val h = minutes / 60
+    val m = minutes % 60
+    return if (h > 0) "$h h $m min" else "$m min"
+}
+
+private fun formatTime(ms: Long): String =
+    SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(ms))
+
+private fun hasMicPermission(context: Context): Boolean =
+    ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+}
+
+private fun openAppSettings(context: Context) {
+    context.startActivity(
+        Intent(
+            Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+            Uri.fromParts("package", context.packageName, null),
+        ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+    )
+}
