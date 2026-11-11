@@ -12,7 +12,7 @@ import kotlin.math.sqrt
 class LevelProcessor(
     private val sampleRate: Int,
     var calibrationOffsetDb: Float,
-    private val windowMs: Long = 2_000,
+    private val windowMs: Long = DEFAULT_WINDOW_MS,
 ) {
     data class Result(val sample: LevelSample, val completedMinute: MinuteAggregate?)
 
@@ -100,5 +100,9 @@ class LevelProcessor(
         minMin = Float.MAX_VALUE
         minMax = -Float.MAX_VALUE
         minSeconds = 0.0
+    }
+
+    companion object {
+        const val DEFAULT_WINDOW_MS = 2_000L
     }
 }

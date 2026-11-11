@@ -70,8 +70,8 @@
     <string name="settings_thresholds_explain">Buddy %1$d dB-tan kezkatzen da eta %2$d dB-tan tristatzen da. Ohiko elkarrizketa 60 dB ingurukoa da.</string>
     <string name="settings_quiet_hours">Isiltasun orduak</string>
     <string name="settings_quiet_hours_sub">%1$s - %2$s, Buddy %3$d dB zorrotzagoa da</string>
-    <string name="settings_chime">Soinu leuna Buddy tristatzen denean</string>
-    <string name="settings_chime_sub">Behin, eta gero 2 minutuz isilik</string>
+    <string name="settings_chime">Soinu-abisuak zarata handia dagoenean</string>
+    <string name="settings_chime_sub">Tonu leuna Buddy kezkatzen denean, indartsuagoa triste dagoenean edo belarriak estaltzen dituenean. Zaratak jarraitzen badu, errepikatu egiten da. Multimediaren bolumena erabiltzen du.</string>
     <string name="settings_keep_listening">Jarraitu entzuten pantaila itzalita</string>
     <string name="settings_keep_listening_sub">Buddy jakinarazpen-barran erakusten du</string>
     <string name="settings_last_done">, azkenekoz %1$s</string>

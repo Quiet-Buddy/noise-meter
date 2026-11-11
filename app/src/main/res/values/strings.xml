@@ -71,8 +71,8 @@
     <string name="settings_thresholds_explain">Buddy gets worried at %1$d dB and sad at %2$d dB. Normal talking is about 60 dB.</string>
     <string name="settings_quiet_hours">Quiet hours</string>
     <string name="settings_quiet_hours_sub">%1$s to %2$s, Buddy is %3$d dB stricter</string>
-    <string name="settings_chime">Soft chime when Buddy gets sad</string>
-    <string name="settings_chime_sub">Once, then quiet for 2 minutes</string>
+    <string name="settings_chime">Sound alerts when it gets loud</string>
+    <string name="settings_chime_sub">A soft tone when Buddy gets worried, stronger when sad or covering ears. Repeats while it stays loud. Uses media volume.</string>
     <string name="settings_keep_listening">Keep listening with screen off</string>
     <string name="settings_keep_listening_sub">Shows Buddy in the notification shade</string>
     <string name="settings_last_done">, last done %1$s</string>
