@@ -66,7 +66,11 @@ If you're a developer and want to build the app yourself, it's a standard Androi
 
 ## Licence
 
-A licence has not been chosen yet.
+Copyright (C) 2026 Quiet Buddy contributors.
+
+Quiet Buddy is free software: you can redistribute it and/or modify it under the terms of the [GNU General Public License](LICENSE) as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version. It is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; see the licence for details.
+
+The licence covers the code. It does not grant permission to use the Quiet Buddy name or icon for modified versions: if you publish a fork, please give it a different name and icon.
 
 ## Building
 
