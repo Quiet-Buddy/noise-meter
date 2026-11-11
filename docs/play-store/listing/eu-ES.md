@@ -14,7 +14,7 @@ Quiet Buddy zure telefonoa zarata neurtzeko tresna leun bihurtzen du. Zenbaki na
 
 Gela lasai dagoenean, Buddy pozik dago. Zarata handitzen denean, Buddy kezkatzen da, gero triste jartzen da eta, azkenean, belarriak estaltzen ditu. Buddyk une bat itxaroten du aurpegia aldatu aurretik, beraz, soinu txiki bakoitzean ez da keinu egiten.
 
-Ezin hobea gela batentzat, haur txikiak dituen etxe batentzat, partekatutako pisu batentzat, ikasteko txoko lasai batentzat edo etxeko bulego batentzat.
+Isiltasuna behar den edozein lekutan erabilgarria: ikasgelak, liburutegiak, ikasketa-gelak, bulegoak, itxarongelak, partekatutako etxeak edo irakurtzeko txoko lasai bat.
 
 Zer egin dezakezu:
 - Lekuari egokitutako zarata muga aukeratu: Isiltasun ordua, Egunerokoa edo Jolasaldia.
@@ -37,4 +37,4 @@ Baimenak:
 
 Zehaztasunari buruz:
 Quiet Buddyk espazio baten zaratari buruzko ideia orokor ona ematen du. Ez da ziurtatutako soinu-neurgailu bat, eta telefono mikrofonoak modelo batetik bestera aldatzen dira. Ez erabili neurketa legal, mediko edo lan segurtasunerako.
-<!-- 2217 / 4000 characters OK -->
+<!-- 2240 / 4000 characters OK -->

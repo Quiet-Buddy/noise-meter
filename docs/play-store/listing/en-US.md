@@ -14,7 +14,7 @@ Quiet Buddy turns your phone into a gentle noise monitor. Instead of a confusing
 
 When the room is calm, Buddy is happy. When it gets louder, Buddy gets worried, then sad, and eventually covers its ears. Buddy waits a moment before changing mood, so it doesn't flicker at every small sound.
 
-Great for a classroom, a home with young children, a shared flat, a quiet study corner or a home office.
+Useful anywhere silence matters: classrooms, libraries, study rooms, offices, waiting rooms, shared homes or a quiet corner for reading.
 
 What you can do:
 - Choose a noise limit that suits the place: Quiet time, Everyday or Playtime.
@@ -37,4 +37,4 @@ Permissions:
 
 A note on accuracy:
 Quiet Buddy gives a good general idea of how loud a space is. It is not a certified sound level meter, and phone microphones vary from model to model. Do not use it for legal, medical or workplace safety measurements.
-<!-- 1898 / 4000 characters OK -->
+<!-- 1936 / 4000 characters OK -->

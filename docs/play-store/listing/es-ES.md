@@ -14,7 +14,7 @@ Quiet Buddy convierte tu teléfono en un monitor de ruido sencillo. En lugar de 
 
 Cuando la habitación está tranquila, Buddy está feliz. Cuando se pone más ruidosa, Buddy se preocupa, después se entristece y, al final, se tapa los oídos. Buddy espera un momento antes de cambiar de ánimo, así que no parpadea con cada sonido pequeño.
 
-Ideal para una clase, una casa con niños pequeños, un piso compartido, un rincón tranquilo para estudiar o una oficina en casa.
+Útil en cualquier lugar donde haga falta silencio: aulas, bibliotecas, salas de estudio, oficinas, salas de espera, pisos compartidos o un rincón tranquilo para leer.
 
 Qué puedes hacer:
 - Elegir un límite de ruido adecuado para el lugar: Hora de silencio, Cada día o Hora de juego.
@@ -37,4 +37,4 @@ Permisos:
 
 Sobre la precisión:
 Quiet Buddy ofrece una idea general de lo ruidoso que es un espacio. No es un sonómetro certificado, y los micrófonos de los teléfonos varían de un modelo a otro. No lo uses para mediciones legales, médicas ni de seguridad laboral.
-<!-- 2176 / 4000 characters OK -->
+<!-- 2221 / 4000 characters OK -->

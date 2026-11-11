@@ -43,14 +43,13 @@ Draft answers for the Google Play Console forms. Owner to review before submitti
 - Personal information shared with others: **No.**
 - Expected outcome: a low or lowest-age rating (exact rating depends on the answers and the target audience decision below).
 
-## Target audience (OPEN DECISION for the owner)
+## Target audience (recommended: 18 and over)
 
-Not decided here. Choose one:
+Quiet Buddy is a tool for the adults who look after a space: teachers, librarians, office or waiting-room staff, people sharing a home. Children may see the screen in a classroom, but they are not the users who install and configure it.
 
-- **Ages 13 and older (or adults only).** Standard content rating flow. No Families policy requirements. Simplest review path. Child-oriented wording in the store listing (for example "for young children") would need to be reconsidered, since it can push the app toward the Families policy.
-- **Includes children under 13.** The app must comply with the Google Play Families policy: no ads (already the case), no non-compliant SDKs (none present), a privacy policy that covers children, and stricter review of listing claims. Families also require the app to meet the Designed for Families requirements if it is listed there.
-
-Implications to weigh: the current app has no INTERNET permission and no data collection, which makes Families compliance easier. The listing text currently mentions young children as one use case, which the owner should keep or drop based on this decision.
+- In "Target age group", select **18 and over** only (optionally 16–17 too). Do not select any under-13 group, which would bring in the Families policy.
+- "Could your app unintentionally appeal to children?" Answer honestly. The friendly Buddy character could make a reviewer think it does. If Google flags it, point to the listing: it is described as a noise monitor for classrooms, libraries, offices and shared spaces, set up by adults. The app has no ads, no data collection and no internet access.
+- Keep the listing, screenshots and feature graphic adult-facing: show the app in a classroom, office or library, not "for kids".
 
 ## Category and tags (suggestion)
 
