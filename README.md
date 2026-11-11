@@ -73,5 +73,6 @@ A licence has not been chosen yet.
 - Requires JDK 17.
 - Debug build: `./gradlew assembleDebug`
 - Unit tests: `./gradlew testDebugUnitTest`
+- Play Store bundle: `./gradlew bundleRelease` (tag builds fail without signing secrets)
 
 Release signing reads these environment variables: `ANDROID_KEYSTORE_PATH`, `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS`, `ANDROID_KEY_PASSWORD`. In CI they come from repository secrets: `ANDROID_KEYSTORE_BASE64` (base64 of the `.jks` file), `ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEY_ALIAS` and `ANDROID_KEY_PASSWORD`.
