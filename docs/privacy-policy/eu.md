@@ -4,15 +4,15 @@
 
 ## Nor garen
 
-Quiet Buddy Android aplikazio bat egiten duen proiektu txiki eta irekia da. Gehiago jakiteko, bisitatu [quiet-buddy.github.io](https://quiet-buddy.github.io).
+Quiet Buddy Android aplikazio bat egiten duen proiektu txiki eta independentea da. Gehiago jakiteko, bisitatu [quiet-buddy.github.io](https://quiet-buddy.github.io).
 
 Politika honi buruzko galderarik? Idatzi mezu bat helbide honetara: CONTACT_EMAIL_PLACEHOLDER
 
 ## Zer datu atzitzen dituen aplikazioak eta zergatik
 
-- **Mikrofonoa (RECORD_AUDIO).** Quiet Buddyk mikrofonoa soilik erabiltzen du gelak zenbateraino zarata duen neurtzeko. Ez du audioa grabatzen, gordetzen ez ta erreproduzitzen, eta ez du saiatzen esaten dena ulertzen.
+- **Mikrofonoa (RECORD_AUDIO).** Quiet Buddyk mikrofonoa soilik erabiltzen du gelan zenbateko zarata dagoen neurtzeko. Ez du audioa grabatzen, gordetzen ezta erreproduzitzen, eta ez da esaten dena ulertzen saiatzen.
 - **Jakinarazpenak (POST_NOTIFICATIONS).** Buddyren une honetako aurpegiera erakusteko balio dute, aplikazioa atzealdean dagoen bitartean, eta zarata handia dagoenean abisatzeko.
-- **Zerbitzu lehen mailakoa (FOREGROUND_SERVICE, FOREGROUND_SERVICE_MICROPHONE).** Entzuteak martxan jarraitzea ahalbidetzen du aplikazioa atzealdean dagoenean. Entzutea edozein unetan geldi dezakezu jakinarazpenetik.
+- **Lehen planoko zerbitzua (FOREGROUND_SERVICE, FOREGROUND_SERVICE_MICROPHONE).** Entzuteak martxan jarraitzea ahalbidetzen du aplikazioa atzealdean dagoenean. Entzutea edozein unetan geldi dezakezu jakinarazpenetik.
 
 Quiet Buddyk ez du zure kontaktuetara, kokapenera, argazkietara, fitxategietara edo kamerara sarbiderik eskatzen.
 
@@ -27,7 +27,7 @@ Aplikazioak ez du interneteko sarbiderik. Zure datuak ez dira inora bidaltzen.
 
 ## Zer partekatzen den
 
-Ezer ez. Quiet Buddyk ez die inori datuak partekatzen, saltzen edo transferitzen. Ez ditu kontuak, iragarkiak, analisiak ez ta hirugarrenen software garapen kitik (SDK).
+Ezer ez. Quiet Buddyk ez die inori datuak partekatzen, saltzen edo transferitzen. Ez du konturik, iragarkirik, analitikarik ezta hirugarrenen garapen-kitik (SDK) ere.
 
 ## Datuen gordetze eta ezabatze
 

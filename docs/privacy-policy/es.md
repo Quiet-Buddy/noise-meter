@@ -4,7 +4,7 @@
 
 ## Quiénes somos
 
-Quiet Buddy es un pequeño proyecto de código abierto que desarrolla una aplicación para Android. Puedes saber más en [quiet-buddy.github.io](https://quiet-buddy.github.io).
+Quiet Buddy es un pequeño proyecto independiente que desarrolla una aplicación para Android. Puedes saber más en [quiet-buddy.github.io](https://quiet-buddy.github.io).
 
 ¿Tienes preguntas sobre esta política? Escríbenos a: CONTACT_EMAIL_PLACEHOLDER
 
