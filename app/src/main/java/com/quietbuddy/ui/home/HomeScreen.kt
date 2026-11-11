@@ -29,7 +29,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -103,14 +104,16 @@ fun HomeScreen() {
     val background by animateColorAsState(QB.screenBackground(state.mood), tween(600), label = "background")
     val listening = state.listening == ListeningState.LISTENING
 
-    Box(Modifier.fillMaxSize().background(background)) {
+    BoxWithConstraints(Modifier.fillMaxSize().background(background).statusBarsPadding()) {
+        // Size the ring from the space left after the rest of the home content (about 430dp), so the whole
+        // listening screen fits without scrolling on typical phones. Taller states (challenge, wake button) scroll.
+        val ringSize = minOf(maxHeight - 430.dp, maxWidth - 48.dp).coerceIn(160.dp, 300.dp)
         Column(
             Modifier
                 .fillMaxSize()
-                .statusBarsPadding()
-                .navigationBarsPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp, vertical = 16.dp),
+                .padding(horizontal = 24.dp)
+                .padding(top = 12.dp, bottom = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Header(
@@ -118,15 +121,15 @@ fun HomeScreen() {
                 listening = listening,
                 onToggle = { if (listening) viewModel.pause() else wake() },
             )
-            Spacer(Modifier.height(16.dp))
-            BuddyRing(mood = state.mood, db = state.db)
             Spacer(Modifier.height(8.dp))
+            BuddyRing(mood = state.mood, db = state.db, size = ringSize)
+            Spacer(Modifier.height(4.dp))
             DbReadout(db = state.db)
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(4.dp))
             BandPill(mood = state.mood, listening = state.listening)
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
             SpeechBubble(text = stringResource(state.speechLine))
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
 
             if (!listening) {
                 NotListeningMessage(state.listening)
@@ -136,7 +139,7 @@ fun HomeScreen() {
             }
 
             BandBar(mood = state.mood)
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(12.dp))
             Row(horizontalArrangement = spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
                 StatCard(
                     label = stringResource(R.string.home_calm_time_today),
@@ -150,13 +153,14 @@ fun HomeScreen() {
                     modifier = Modifier.weight(1f),
                 )
             }
-            Spacer(Modifier.height(16.dp))
+            if (state.challenge != ChallengeState.Idle || (listening && (state.mood == Mood.SAD || state.mood == Mood.EARS_COVERED))) {
+                Spacer(Modifier.height(12.dp))
+            }
             ChallengeSection(
                 challenge = state.challenge,
                 canStart = listening && (state.mood == Mood.SAD || state.mood == Mood.EARS_COVERED),
                 onStart = viewModel::startChallenge,
             )
-            Spacer(Modifier.height(24.dp))
         }
     }
 }
@@ -188,14 +192,14 @@ private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
 }
 
 @Composable
-private fun BuddyRing(mood: Mood?, db: Int?) {
+private fun BuddyRing(mood: Mood?, db: Int?, size: Dp) {
     val target = if (mood == null || db == null) 0f else ((db - 30f) / 70f).coerceIn(0f, 1f)
     val progress by animateFloatAsState(target, tween(600), label = "ringProgress")
     val arcColor by animateColorAsState(mood?.let { QB.bandColor(it) } ?: QB.Line, tween(600), label = "ringColor")
 
-    Box(Modifier.size(300.dp), contentAlignment = Alignment.Center) {
+    Box(Modifier.size(size), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
-            val strokePx = 16.dp.toPx()
+            val strokePx = (size * 0.053f).coerceAtLeast(10.dp).toPx()
             val inset = strokePx / 2f
             val arcSize = Size(this.size.width - 2 * inset, this.size.height - 2 * inset)
             drawArc(
@@ -219,7 +223,7 @@ private fun BuddyRing(mood: Mood?, db: Int?) {
                 )
             }
         }
-        Buddy(mood = mood, modifier = Modifier.size(200.dp))
+        Buddy(mood = mood, modifier = Modifier.size(size * 2 / 3))
     }
 }
 

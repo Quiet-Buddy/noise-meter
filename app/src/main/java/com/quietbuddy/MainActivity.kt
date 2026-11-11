@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
@@ -123,7 +124,8 @@ private fun Root(vm: MainViewModel = hiltViewModel()) {
             }
         },
     ) { padding ->
-        NavHost(nav, startDestination = start, modifier = Modifier.padding(padding)) {
+        // consumeWindowInsets stops screens that also apply statusBarsPadding() from adding the inset twice.
+        NavHost(nav, startDestination = start, modifier = Modifier.padding(padding).consumeWindowInsets(padding)) {
             composable(Routes.ONBOARDING) {
                 OnboardingScreen(onDone = {
                     nav.navigate(Routes.HOME) {
