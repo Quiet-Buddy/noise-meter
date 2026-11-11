@@ -29,7 +29,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.widthIn
+import com.quietbuddy.ui.SingleColumnMaxWidth
+import com.quietbuddy.ui.TwoPaneMaxWidth
+import com.quietbuddy.ui.isLargeScreen
+import com.quietbuddy.ui.isTwoPane
 import androidx.compose.ui.unit.Dp
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.rememberScrollState
@@ -104,63 +111,124 @@ fun HomeScreen() {
     val background by animateColorAsState(QB.screenBackground(state.mood), tween(600), label = "background")
     val listening = state.listening == ListeningState.LISTENING
 
+    // On tablets the device usually sits on a shelf and is read from across the room, so Buddy and the
+    // number get much bigger there. The cards stay at their normal size.
+    val large = isLargeScreen()
+    val canStartChallenge = listening && (state.mood == Mood.SAD || state.mood == Mood.EARS_COVERED)
+
+    val header: @Composable () -> Unit = {
+        Header(
+            roomName = state.roomName,
+            listening = listening,
+            onToggle = { if (listening) viewModel.pause() else wake() },
+        )
+    }
+    // Everything below the live reading: speech, wake prompt, band bar, stats and challenge.
+    val details: @Composable () -> Unit = {
+        SpeechBubble(text = stringResource(state.speechLine))
+        Spacer(Modifier.height(12.dp))
+
+        if (!listening) {
+            NotListeningMessage(state.listening)
+            Spacer(Modifier.height(12.dp))
+            DarkButton(text = stringResource(R.string.home_wake_buddy), onClick = ::wake)
+            Spacer(Modifier.height(16.dp))
+        }
+
+        BandBar(mood = state.mood)
+        Spacer(Modifier.height(12.dp))
+        Row(horizontalArrangement = spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
+            StatCard(
+                label = stringResource(R.string.home_calm_time_today),
+                value = formatMinutes(state.calmMinutes),
+                modifier = Modifier.weight(1f),
+            )
+            StatCard(
+                label = stringResource(R.string.home_loudest_moment),
+                value = state.loudestDb?.let { "${it.roundToInt()} dB" } ?: "–",
+                sub = state.loudestAtMs?.let { formatTime(it) },
+                modifier = Modifier.weight(1f),
+            )
+        }
+        if (state.challenge != ChallengeState.Idle || canStartChallenge) {
+            Spacer(Modifier.height(12.dp))
+        }
+        ChallengeSection(
+            challenge = state.challenge,
+            canStart = canStartChallenge,
+            onStart = viewModel::startChallenge,
+        )
+    }
+
     BoxWithConstraints(Modifier.fillMaxSize().background(background).statusBarsPadding()) {
-        // Size the ring from the space left after the rest of the home content (about 430dp), so the whole
-        // listening screen fits without scrolling on typical phones. Taller states (challenge, wake button) scroll.
-        val ringSize = minOf(maxHeight - 430.dp, maxWidth - 48.dp).coerceIn(160.dp, 300.dp)
-        Column(
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 24.dp)
-                .padding(top = 12.dp, bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Header(
-                roomName = state.roomName,
-                listening = listening,
-                onToggle = { if (listening) viewModel.pause() else wake() },
-            )
-            Spacer(Modifier.height(8.dp))
-            BuddyRing(mood = state.mood, db = state.db, size = ringSize)
-            Spacer(Modifier.height(4.dp))
-            DbReadout(db = state.db)
-            Spacer(Modifier.height(4.dp))
-            BandPill(mood = state.mood, listening = state.listening)
-            Spacer(Modifier.height(12.dp))
-            SpeechBubble(text = stringResource(state.speechLine))
-            Spacer(Modifier.height(12.dp))
-
-            if (!listening) {
-                NotListeningMessage(state.listening)
+        if (isTwoPane(maxWidth, maxHeight)) {
+            // Landscape: Buddy takes the full height on the left, readings and cards sit on the right.
+            Row(
+                Modifier
+                    .align(Alignment.Center)
+                    .widthIn(max = TwoPaneMaxWidth)
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp, vertical = 16.dp),
+                horizontalArrangement = spacedBy(32.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                BoxWithConstraints(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
+                    val ringSize = minOf(maxWidth, maxHeight).coerceAtMost(if (large) 560.dp else 360.dp)
+                    BuddyRing(mood = state.mood, db = state.db, size = ringSize)
+                }
+                BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
+                    Column(
+                        Modifier
+                            .fillMaxWidth()
+                            .verticalScroll(rememberScrollState())
+                            .heightIn(min = maxHeight),
+                        verticalArrangement = Arrangement.Center,
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                    ) {
+                        header()
+                        Spacer(Modifier.height(if (large) 24.dp else 8.dp))
+                        // Number and pill side by side to save height on phones in landscape.
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = spacedBy(16.dp, Alignment.CenterHorizontally),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            DbReadout(db = state.db, large = large)
+                            BandPill(mood = state.mood, listening = state.listening)
+                        }
+                        Spacer(Modifier.height(if (large) 24.dp else 12.dp))
+                        details()
+                    }
+                }
+            }
+        } else {
+            // Portrait: one column. The ring takes the height left after the rest of the content, so the
+            // listening screen fits without scrolling on typical phones; taller states (challenge, wake button)
+            // scroll. On tablets the column is capped in width and centred.
+            val contentWidth = minOf(maxWidth, SingleColumnMaxWidth)
+            val reserved = if (large) 480.dp else 430.dp
+            val ringSize = minOf(maxHeight - reserved, contentWidth - 48.dp)
+                .coerceIn(160.dp, if (large) 520.dp else 300.dp)
+            Column(
+                Modifier
+                    .align(Alignment.TopCenter)
+                    .widthIn(max = SingleColumnMaxWidth)
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+                    .padding(horizontal = 24.dp)
+                    .padding(top = 12.dp, bottom = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                header()
+                Spacer(Modifier.height(8.dp))
+                BuddyRing(mood = state.mood, db = state.db, size = ringSize)
+                Spacer(Modifier.height(4.dp))
+                DbReadout(db = state.db, large = large)
+                Spacer(Modifier.height(4.dp))
+                BandPill(mood = state.mood, listening = state.listening)
                 Spacer(Modifier.height(12.dp))
-                DarkButton(text = stringResource(R.string.home_wake_buddy), onClick = ::wake)
-                Spacer(Modifier.height(16.dp))
+                details()
             }
-
-            BandBar(mood = state.mood)
-            Spacer(Modifier.height(12.dp))
-            Row(horizontalArrangement = spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-                StatCard(
-                    label = stringResource(R.string.home_calm_time_today),
-                    value = formatMinutes(state.calmMinutes),
-                    modifier = Modifier.weight(1f),
-                )
-                StatCard(
-                    label = stringResource(R.string.home_loudest_moment),
-                    value = state.loudestDb?.let { "${it.roundToInt()} dB" } ?: "–",
-                    sub = state.loudestAtMs?.let { formatTime(it) },
-                    modifier = Modifier.weight(1f),
-                )
-            }
-            if (state.challenge != ChallengeState.Idle || (listening && (state.mood == Mood.SAD || state.mood == Mood.EARS_COVERED))) {
-                Spacer(Modifier.height(12.dp))
-            }
-            ChallengeSection(
-                challenge = state.challenge,
-                canStart = listening && (state.mood == Mood.SAD || state.mood == Mood.EARS_COVERED),
-                onStart = viewModel::startChallenge,
-            )
         }
     }
 }
@@ -228,14 +296,15 @@ private fun BuddyRing(mood: Mood?, db: Int?, size: Dp) {
 }
 
 @Composable
-private fun DbReadout(db: Int?) {
+private fun DbReadout(db: Int?, large: Boolean = false) {
+    val number = MaterialTheme.typography.displayLarge
     Row(verticalAlignment = Alignment.Bottom) {
-        Text(db?.toString() ?: "–", style = MaterialTheme.typography.displayLarge)
+        Text(db?.toString() ?: "–", style = if (large) number.copy(fontSize = 96.sp) else number)
         Spacer(Modifier.width(6.dp))
         Text(
             "dB",
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(bottom = 12.dp),
+            style = MaterialTheme.typography.titleMedium.let { if (large) it.copy(fontSize = 24.sp) else it },
+            modifier = Modifier.padding(bottom = if (large) 22.dp else 12.dp),
         )
     }
 }

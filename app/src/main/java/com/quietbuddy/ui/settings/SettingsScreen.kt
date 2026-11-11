@@ -10,6 +10,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.widthIn
+import com.quietbuddy.ui.SingleColumnMaxWidth
+import com.quietbuddy.ui.TwoPaneMaxWidth
+import com.quietbuddy.ui.isTwoPane
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -68,21 +73,15 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
         // The setting is saved regardless of the answer.
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(QB.Background)
-            .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
+    val header: @Composable () -> Unit = {
         Column {
             Text(settings.roomName, style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
             Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
         }
+    }
 
-        // Sensitivity card
+    // Sensitivity card
+    val sensitivity: @Composable () -> Unit = {
         Column(
             modifier = Modifier.fillMaxWidth().background(QB.Card, CardShape).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -146,8 +145,10 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 color = QB.InkSoft,
             )
         }
+    }
 
-        // Switch rows
+    // Switch rows
+    val switches: @Composable () -> Unit = {
         Column(
             modifier = Modifier.fillMaxWidth().background(QB.Card, CardShape).padding(vertical = 4.dp),
         ) {
@@ -180,8 +181,10 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 },
             )
         }
+    }
 
-        // Navigation rows
+    // Navigation rows
+    val navRows: @Composable () -> Unit = {
         val offset = (settings.calibrationOffsetDb - AppSettings.DEFAULT_CALIBRATION_OFFSET_DB).roundToInt()
         val calibratedText = settings.calibratedAtMs?.let {
             stringResource(R.string.settings_last_done, SimpleDateFormat("d MMM", Locale.getDefault()).format(it))
@@ -207,8 +210,10 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 onClick = onOpenCalibration,
             )
         }
+    }
 
-        // Privacy note
+    // Privacy note
+    val privacy: @Composable () -> Unit = {
         Row(
             modifier = Modifier.fillMaxWidth().background(QB.CalmSoft, CardShape).padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -219,6 +224,44 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = QB.CalmText,
             )
+        }
+    }
+
+    BoxWithConstraints(
+        Modifier
+            .fillMaxSize()
+            .background(QB.Background)
+            .statusBarsPadding(),
+    ) {
+        val twoPane = isTwoPane(maxWidth, maxHeight)
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .widthIn(max = if (twoPane) TwoPaneMaxWidth else SingleColumnMaxWidth)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            header()
+            if (twoPane) {
+                // Landscape: how Buddy reacts on the left, room, calibration and privacy on the right.
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        sensitivity()
+                        switches()
+                    }
+                    Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        navRows()
+                        privacy()
+                    }
+                }
+            } else {
+                sensitivity()
+                switches()
+                navRows()
+                privacy()
+            }
         }
     }
 

@@ -9,6 +9,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.ui.unit.Dp
+import com.quietbuddy.ui.SingleColumnMaxWidth
+import com.quietbuddy.ui.TwoPaneMaxWidth
+import com.quietbuddy.ui.isLargeScreen
+import com.quietbuddy.ui.isTwoPane
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -71,21 +78,17 @@ fun HistoryScreen() {
     val challengesThisWeek = days.sumOf { it.challengesWon }
     val selectedName = LocalDate.ofEpochDay(selected).dayOfWeek.getDisplayName(JTextStyle.FULL, Locale.getDefault())
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(QB.Background)
-            .statusBarsPadding()
-            .verticalScroll(rememberScrollState())
-            .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-    ) {
+    val chartHeight = if (isLargeScreen()) 240.dp else 150.dp
+
+    val header: @Composable () -> Unit = {
         Column {
             Text(settings.roomName, style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
             Text(stringResource(R.string.history_this_week), style = MaterialTheme.typography.headlineSmall)
         }
+    }
 
-        // Seven day buttons
+    // Seven day buttons
+    val dayPicker: @Composable () -> Unit = {
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp), modifier = Modifier.fillMaxWidth()) {
             days.forEachIndexed { index, day ->
                 val isSelected = day.dateEpochDay == selected
@@ -125,8 +128,10 @@ fun HistoryScreen() {
                 }
             }
         }
+    }
 
-        // Hourly chart card
+    // Hourly chart card
+    val chart: @Composable () -> Unit = {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -139,11 +144,11 @@ fun HistoryScreen() {
                 Text(stringResource(R.string.history_average_db), style = MaterialTheme.typography.labelSmall)
             }
             if (hours.isEmpty()) {
-                Box(modifier = Modifier.fillMaxWidth().height(150.dp), contentAlignment = Alignment.Center) {
+                Box(modifier = Modifier.fillMaxWidth().height(chartHeight), contentAlignment = Alignment.Center) {
                     Text(stringResource(R.string.history_no_readings), style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
                 }
             } else {
-                HourlyChart(hours, settings.baseThresholds)
+                HourlyChart(hours, settings.baseThresholds, chartHeight)
             }
             Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                 LegendItem(stringResource(R.string.legend_calm), QB.Calm)
@@ -151,8 +156,10 @@ fun HistoryScreen() {
                 LegendItem(stringResource(R.string.legend_too_loud), QB.TooLoud)
             }
         }
+    }
 
-        // Stat cards
+    // Stat cards
+    val stats: @Composable () -> Unit = {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             StatCard(
                 title = stringResource(R.string.history_calm_time),
@@ -166,8 +173,10 @@ fun HistoryScreen() {
                 modifier = Modifier.weight(1f),
             )
         }
+    }
 
-        // Challenges card
+    // Challenges card
+    val challenges: @Composable () -> Unit = {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -183,15 +192,53 @@ fun HistoryScreen() {
             }
         }
     }
+
+    BoxWithConstraints(
+        Modifier
+            .fillMaxSize()
+            .background(QB.Background)
+            .statusBarsPadding(),
+    ) {
+        val twoPane = isTwoPane(maxWidth, maxHeight)
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .widthIn(max = if (twoPane) TwoPaneMaxWidth else SingleColumnMaxWidth)
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(start = 24.dp, end = 24.dp, top = 16.dp, bottom = 24.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            header()
+            if (twoPane) {
+                // Landscape: the week and its chart on the left, the day's numbers on the right.
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    Column(Modifier.weight(3f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        dayPicker()
+                        chart()
+                    }
+                    Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                        stats()
+                        challenges()
+                    }
+                }
+            } else {
+                dayPicker()
+                chart()
+                stats()
+                challenges()
+            }
+        }
+    }
 }
 
 @Composable
-private fun HourlyChart(bars: List<HourBar>, thresholds: Thresholds) {
+private fun HourlyChart(bars: List<HourBar>, thresholds: Thresholds, height: Dp) {
     val measurer = rememberTextMeasurer()
     val labelStyle = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold, color = QB.InkSoft)
     val peakStyle = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = QB.Ink)
 
-    Canvas(modifier = Modifier.fillMaxWidth().height(150.dp)) {
+    Canvas(modifier = Modifier.fillMaxWidth().height(height)) {
         val leftPad = 26.dp.toPx()
         val topPad = 14.dp.toPx()
         val bottomPad = 20.dp.toPx()
