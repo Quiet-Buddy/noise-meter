@@ -43,6 +43,9 @@ jobs:
             echo "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/upload.jks"
             echo "ANDROID_KEYSTORE_PATH=$RUNNER_TEMP/upload.jks" >> "$GITHUB_ENV"
             echo "SIGNED=true" >> "$GITHUB_ENV"
+          elif [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            echo "::error::Tag builds must be signed with the upload key; set the ANDROID_KEYSTORE_* secrets."
+            exit 1
           else
             echo "SIGNED=false" >> "$GITHUB_ENV"
             echo "::warning::No signing keystore configured; the build is signed with the debug key."
@@ -53,13 +56,16 @@ jobs:
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
-        run: ./gradlew --no-daemon testDebugUnitTest assembleRelease
+        run: ./gradlew --no-daemon testDebugUnitTest assembleRelease bundleRelease
 
-      - name: Rename APK and write checksum
+      - name: Rename APK and bundle and write checksums
         run: |
           NAME="quiet-buddy-${APP_VERSION_NAME}.apk"
           cp app/build/outputs/apk/release/app-release.apk "$NAME"
           sha256sum "$NAME" > "$NAME.sha256"
+          NAME_AAB="quiet-buddy-${APP_VERSION_NAME}.aab"
+          cp app/build/outputs/bundle/release/app-release.aab "$NAME_AAB"
+          sha256sum "$NAME_AAB" > "$NAME_AAB.sha256"
 
       - name: Write release notes
         run: |
@@ -75,11 +81,13 @@ jobs:
           files: |
             quiet-buddy-${{ env.APP_VERSION_NAME }}.apk
             quiet-buddy-${{ env.APP_VERSION_NAME }}.apk.sha256
+            quiet-buddy-${{ env.APP_VERSION_NAME }}.aab
+            quiet-buddy-${{ env.APP_VERSION_NAME }}.aab.sha256
           generate_release_notes: true
           prerelease: ${{ env.SIGNED != 'true' }}
           body_path: ${{ runner.temp }}/notes.md
 
-      - name: Upload APK artifact
+      - name: Upload build artifacts
         if: github.event_name == 'workflow_dispatch'
         uses: actions/upload-artifact@v7
         with:
@@ -87,6 +95,8 @@ jobs:
           path: |
             quiet-buddy-${{ env.APP_VERSION_NAME }}.apk
             quiet-buddy-${{ env.APP_VERSION_NAME }}.apk.sha256
+            quiet-buddy-${{ env.APP_VERSION_NAME }}.aab
+            quiet-buddy-${{ env.APP_VERSION_NAME }}.aab.sha256
           retention-days: 14
 
       - name: Remove keystore
