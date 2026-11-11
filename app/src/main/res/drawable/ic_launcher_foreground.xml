@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp" android:viewportWidth="108" android:viewportHeight="108">
+    <!-- Buddy (happy), drawn in his 200x200 design space and scaled into the 66dp safe zone -->
+    <group android:scaleX="0.34" android:scaleY="0.34" android:translateX="20" android:translateY="19.5">
+        <!-- Hair tufts -->
+        <path android:pathData="M78,30C72,14 80,8 92,18" android:strokeColor="#2B2B2B" android:strokeWidth="5" android:strokeLineCap="round" />
+        <path android:pathData="M100,26C100,10 108,6 116,14" android:strokeColor="#2B2B2B" android:strokeWidth="5" android:strokeLineCap="round" />
+        <!-- Body -->
+        <path android:pathData="M100,108m-78,0a78,80 0,1 1,156 0a78,80 0,1 1,-156 0"
+            android:fillColor="#FFC94D" android:strokeColor="#2B2B2B" android:strokeWidth="5" />
+        <!-- Cheeks -->
+        <path android:pathData="M52,124m-13,0a13,8 0,1 1,26 0a13,8 0,1 1,-26 0" android:fillColor="#CCFF9AA2" />
+        <path android:pathData="M148,124m-13,0a13,8 0,1 1,26 0a13,8 0,1 1,-26 0" android:fillColor="#CCFF9AA2" />
+        <!-- Happy eyes -->
+        <path android:pathData="M58,96Q70,82 82,96" android:strokeColor="#2B2B2B" android:strokeWidth="6" android:strokeLineCap="round" />
+        <path android:pathData="M118,96Q130,82 142,96" android:strokeColor="#2B2B2B" android:strokeWidth="6" android:strokeLineCap="round" />
+        <!-- Open smile -->
+        <path android:pathData="M68,126Q100,160 132,126Z" android:fillColor="#5B2A2A" android:strokeColor="#2B2B2B" android:strokeWidth="5" android:strokeLineJoin="round" />
+        <path android:pathData="M84,140Q100,152 116,140Q100,158 84,140Z" android:fillColor="#FF7A85" />
+    </group>
+</vector>

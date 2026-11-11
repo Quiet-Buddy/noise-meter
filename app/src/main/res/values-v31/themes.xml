@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Theme.QuietBuddy" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/qb_background</item>
+        <item name="android:colorAccent">@color/qb_accent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <!-- Android 12+ splash: Buddy on the brand blue -->
+        <item name="android:windowSplashScreenBackground">@color/qb_accent</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/ic_launcher_foreground</item>
+    </style>
+</resources>

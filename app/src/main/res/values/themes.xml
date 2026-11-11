@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="qb_background">#FFF4F8FB</color>
+    <color name="qb_accent">#FF2E6FBF</color>
+
+    <style name="Theme.QuietBuddy" parent="@android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@color/qb_background</item>
+        <item name="android:colorAccent">@color/qb_accent</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/transparent</item>
+        <item name="android:windowLightStatusBar">true</item>
+    </style>
+</resources>
