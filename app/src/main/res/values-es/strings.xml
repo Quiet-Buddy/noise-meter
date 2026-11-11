@@ -71,7 +71,7 @@
     <string name="settings_quiet_hours">Horas de silencio</string>
     <string name="settings_quiet_hours_sub">De %1$s a %2$s, Buddy es %3$d dB más estricto</string>
     <string name="settings_chime">Avisos sonoros cuando hay mucho ruido</string>
-    <string name="settings_chime_sub">Un tono suave cuando Buddy se preocupa, más fuerte cuando está triste o se tapa los oídos. Se repite mientras siga el ruido. Usa el volumen multimedia.</string>
+    <string name="settings_chime_sub">Buddy hace sonidos divertidos cuando hay mucho ruido: un «chsss» cuando se preocupa, una trompeta triste cuando está triste y una bocina cuando se tapa los oídos. Cambian cada vez y se repiten mientras siga el ruido. Usa el volumen multimedia.</string>
     <string name="settings_keep_listening">Seguir escuchando con la pantalla apagada</string>
     <string name="settings_keep_listening_sub">Muestra a Buddy en la barra de notificaciones</string>
     <string name="settings_last_done">, última vez el %1$s</string>

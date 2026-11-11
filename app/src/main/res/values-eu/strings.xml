@@ -71,7 +71,7 @@
     <string name="settings_quiet_hours">Isiltasun orduak</string>
     <string name="settings_quiet_hours_sub">%1$s - %2$s, Buddy %3$d dB zorrotzagoa da</string>
     <string name="settings_chime">Soinu-abisuak zarata handia dagoenean</string>
-    <string name="settings_chime_sub">Tonu leuna Buddy kezkatzen denean, indartsuagoa triste dagoenean edo belarriak estaltzen dituenean. Zaratak jarraitzen badu, errepikatu egiten da. Multimediaren bolumena erabiltzen du.</string>
+    <string name="settings_chime_sub">Buddyk soinu dibertigarriak egiten ditu zarata handia dagoenean: «xxxt» bat kezkatzen denean, tronpeta triste bat triste dagoenean eta bozina bat belarriak estaltzen dituenean. Aldiro aldatzen dira eta zaratak jarraitzen badu, errepikatu egiten dira. Multimediaren bolumena erabiltzen du.</string>
     <string name="settings_keep_listening">Jarraitu entzuten pantaila itzalita</string>
     <string name="settings_keep_listening_sub">Buddy jakinarazpen-barran erakusten du</string>
     <string name="settings_last_done">, azkenekoz %1$s</string>
