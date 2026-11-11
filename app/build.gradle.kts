@@ -8,11 +8,11 @@ plugins {
 
 android {
     namespace = "com.quietbuddy"
-    compileSdk = 35
+    compileSdk = 36
     defaultConfig {
         applicationId = "com.quietbuddy"
         minSdk = 29
-        targetSdk = 35
+        targetSdk = 36
         versionCode = System.getenv("APP_VERSION_CODE")?.toIntOrNull() ?: 1
         versionName = System.getenv("APP_VERSION_NAME") ?: "0.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -41,9 +41,12 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions { jvmTarget = "17" }
     buildFeatures { compose = true }
     testOptions { unitTests.isReturnDefaultValues = true }
+}
+
+kotlin {
+    compilerOptions { jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17) }
 }
 
 dependencies {
