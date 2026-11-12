@@ -41,5 +41,6 @@ interface Voice {
 object Voices {
     fun of(character: Character): Voice = when (character) {
         Character.BUDDY -> BuddyVoice
+        Character.KITTEN -> BuddyVoice // TODO(kitten): KittenVoice
     }
 }

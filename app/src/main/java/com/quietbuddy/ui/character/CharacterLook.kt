@@ -34,6 +34,7 @@ object CharacterLooks {
 
     fun of(character: Character): CharacterLook = when (character) {
         Character.BUDDY -> Buddy
+        Character.KITTEN -> Buddy // TODO(kitten): KittenArt + KittenPalette
     }
 }
 

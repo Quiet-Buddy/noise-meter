@@ -44,6 +44,7 @@ object AlertSounds {
     // No `else`: a new Character must get a sound set.
     private fun soundSet(character: Character): Map<Mood, List<Recipe>> = when (character) {
         Character.BUDDY -> buddySounds
+        Character.KITTEN -> buddySounds // TODO(kitten): kittenSounds
     }
 
     private class Recipe(val seconds: Double, val gain: Double, val drive: Double, val draw: Buf.() -> Unit)
