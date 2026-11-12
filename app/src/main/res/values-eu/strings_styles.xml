@@ -17,7 +17,7 @@
         <item quantity="one">Minutu lasai %1$d falta da %2$s desblokeatzeko</item>
         <item quantity="other">%1$d minutu lasai falta dira %2$s desblokeatzeko</item>
     </plurals>
-    <string name="style_all_unlocked">Estilo guztiak desblokeatu dituzu!</string>
+    <string name="style_all_unlocked">Sari guztiak desblokeatu dituzu!</string>
 
     <string name="unlock_title">Estilo berria desblokeatu da!</string>
     <string name="unlock_body">Lasaitasunak saria du! %1$s lortu duzu.</string>
@@ -31,8 +31,8 @@
     <string name="unlock_friend_title">Lagun berri bat!</string>
     <string name="unlock_friend_body">Lasaitasunak saria du! %1$s zurekin geratu nahi du.</string>
     <plurals name="unlock_friend_body_more">
-        <item quantity="one">Lasaitasunak saria du! %1$s zurekin geratu nahi du, eta beste estilo %2$d desblokeatu duzu.</item>
-        <item quantity="other">Lasaitasunak saria du! %1$s zurekin geratu nahi du, eta beste %2$d estilo desblokeatu dituzu.</item>
+        <item quantity="one">Lasaitasunak saria du! %1$s zurekin geratu nahi du, eta beste sari %2$d desblokeatu duzu.</item>
+        <item quantity="other">Lasaitasunak saria du! %1$s zurekin geratu nahi du, eta beste %2$d sari desblokeatu dituzu.</item>
     </plurals>
     <plurals name="style_next_friend_hint">
         <item quantity="one">Minutu lasai %1$d falta da %2$s ezagutzeko</item>
@@ -45,4 +45,28 @@
     <string name="characters_in_use">Erabiltzen</string>
     <string name="home_next_reward">%1$d min %2$s desblokeatzeko</string>
     <string name="home_next_reward_friend">%1$d min %2$s ezagutzeko</string>
+
+    <string name="acc_sunglasses">Eguzkitako betaurrekoak</string>
+    <string name="acc_bow">Lazoa</string>
+    <string name="acc_tie">Gorbata</string>
+    <string name="acc_bell_collar">Kanpaitxodun lepokoa</string>
+    <string name="acc_flower">Lorea</string>
+    <string name="acc_top_hat">Kapela altua</string>
+    <string name="acc_boots">Katiuskak</string>
+    <string name="acc_crown">Koroa</string>
+
+    <plurals name="accessory_next_hint">
+        <item quantity="one">Minutu lasai %1$d falta da %2$s desblokeatzeko</item>
+        <item quantity="other">%1$d minutu lasai falta dira %2$s desblokeatzeko</item>
+    </plurals>
+    <string name="home_next_reward_accessory">%1$d min %2$s desblokeatzeko</string>
+    <string name="unlock_accessory_title">Osagarri berria desblokeatu da!</string>
+    <string name="unlock_accessory_body">Lasaitasunak saria du! %1$s lortu duzu.</string>
+    <plurals name="unlock_accessory_body_more">
+        <item quantity="one">Lasaitasunak saria du! %1$s eta beste %2$d lortu dituzu.</item>
+        <item quantity="other">Lasaitasunak saria du! %1$s eta beste %2$d lortu dituzu.</item>
+    </plurals>
+    <string name="unlock_wear">Jantzi</string>
+    <string name="characters_accessories">Osagarriak</string>
+    <string name="accessory_worn">Jantzita</string>
 </resources>

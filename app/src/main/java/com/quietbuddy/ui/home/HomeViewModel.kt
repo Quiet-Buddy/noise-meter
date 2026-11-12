@@ -9,9 +9,11 @@ import com.quietbuddy.core.ListeningController
 import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.ProgressRepository
+import com.quietbuddy.core.Reward
 import com.quietbuddy.core.SettingsRepository
 import com.quietbuddy.core.Unlocks
 import com.quietbuddy.core.Character
+import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.domain.character.BuddyVoice
 import com.quietbuddy.domain.character.Voices
@@ -49,11 +51,13 @@ data class HomeUiState(
     val loudestDb: Float? = null,
     val loudestAtMs: Long? = null,
     val challenge: ChallengeState = ChallengeState.Idle,
-    /** Newly unlocked styles to celebrate, cheapest first; empty when none. */
-    val pendingUnlocks: List<CharacterStyle> = emptyList(),
-    /** The next style to earn; null when everything is unlocked. */
-    val nextReward: CharacterStyle? = null,
+    /** Newly unlocked rewards to celebrate, cheapest first; empty when none. */
+    val pendingUnlocks: List<Reward> = emptyList(),
+    /** The next reward to earn; null when everything is unlocked. */
+    val nextReward: Reward? = null,
     val minutesToNext: Int = 0,
+    /** The selected style of each character, for previewing rewards. */
+    val styles: Map<Character, CharacterStyle> = emptyMap(),
 )
 
 @HiltViewModel
@@ -90,6 +94,7 @@ class HomeViewModel @Inject constructor(
         Snapshot(
             roomName = settings.roomName,
             character = settings.character,
+            styles = Character.entries.associateWith { settings.styleFor(it) },
             listening = listening,
             mood = mood,
             db = latest?.laeq2sDb?.roundToInt(),
@@ -120,17 +125,26 @@ class HomeViewModel @Inject constructor(
             pendingUnlocks = s.pendingUnlocks,
             nextReward = s.nextReward,
             minutesToNext = s.minutesToNext,
+            styles = s.styles,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
-    /** Closes the unlock celebration; with [tryStyle] also switches to that character and style. */
-    fun dismissUnlocks(tryStyle: CharacterStyle?) {
+    /**
+     * Closes the unlock celebration. With [tryReward] also tries it: a style switches to its character and style,
+     * an accessory is put on the character it belongs to, which is switched to.
+     */
+    fun dismissUnlocks(tryReward: Reward?) {
         viewModelScope.launch {
             val pending = uiState.value.pendingUnlocks
-            if (tryStyle != null) {
-                settingsRepository.update {
-                    it.copy(character = tryStyle.character, styles = it.styles + (tryStyle.character to tryStyle))
+            when (tryReward) {
+                is CharacterStyle -> settingsRepository.update {
+                    it.copy(character = tryReward.character, styles = it.styles + (tryReward.character to tryReward))
                 }
+                is Accessory -> settingsRepository.update {
+                    val worn = it.accessoriesFor(tryReward.character) + tryReward
+                    it.copy(character = tryReward.character, accessories = it.accessories + (tryReward.character to worn))
+                }
+                null -> Unit
             }
             progressRepository.markCelebrated(pending)
         }
@@ -173,14 +187,15 @@ class HomeViewModel @Inject constructor(
     private data class Snapshot(
         val roomName: String,
         val character: Character,
+        val styles: Map<Character, CharacterStyle>,
         val listening: ListeningState,
         val mood: Mood,
         val db: Int?,
         val calmMinutes: Int,
         val loudestDb: Float?,
         val loudestAtMs: Long?,
-        val pendingUnlocks: List<CharacterStyle>,
-        val nextReward: CharacterStyle?,
+        val pendingUnlocks: List<Reward>,
+        val nextReward: Reward?,
         val minutesToNext: Int,
     )
 

@@ -9,6 +9,10 @@ import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.withTransform
+import com.quietbuddy.core.Accessory
+import com.quietbuddy.core.AccessorySlot
+import com.quietbuddy.ui.character.AccessoryAnchors
+import com.quietbuddy.ui.character.drawAccessories
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.QB
 import kotlin.math.PI
@@ -301,15 +305,36 @@ private fun DrawScope.eye(cx: Float, cy: Float, p: KittenPose, open: Float) {
  * like Buddy does; only the wrapped sleeping tail and the shock marks reach a few units past the edges, and the
  * canvas doesn't clip.
  */
-fun DrawScope.drawKitten(pose: KittenPose, fx: KittenFx, pal: Palette) {
+fun DrawScope.drawKitten(pose: KittenPose, fx: KittenFx, pal: Palette, accessories: Set<Accessory> = emptySet()) {
     withTransform({
         translate(0f, -4f)
     }) {
-        drawRig(pose, fx, pal)
+        drawRig(pose, fx, pal, accessories)
     }
 }
 
-private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette) {
+private val BodySlots = setOf(AccessorySlot.NECK, AccessorySlot.FEET)
+private val HeadSlots = setOf(AccessorySlot.HEAD, AccessorySlot.FACE)
+
+/**
+ * Where the kitten wears things for pose [p]. Head anchors are in head space (drawHead's translate), so they ride
+ * with headDy; the hat lifts as the fur poofs and the glasses follow the eyes.
+ */
+private fun anchors(p: KittenPose, poof: Float): AccessoryAnchors {
+    // Matches the eyeSpace transform in drawHead: an eye drawn at y = 90 + eyeDy ends up here.
+    val eyeY = 92f + p.eyeDy + EYE_DY - 2f * EYE_S
+    return AccessoryAnchors(
+        hatAt = Offset(100f, 38f - 6f * poof), hatScale = 0.8f, hatTilt = -4f,
+        bowAt = Offset(141f, 42f - 6f * poof), bowScale = 0.75f, bowTilt = 30f,
+        flowerAt = Offset(59f, 42f - 6f * poof), flowerScale = 0.75f, flowerTilt = -30f,
+        collarAt = Offset(100f, 145f), collarScale = 0.9f,
+        leftEye = Offset(70f - EYE_DX, eyeY), rightEye = Offset(130f + EYE_DX, eyeY), lensRx = 21f, lensRy = 17f,
+        neckAt = Offset(100f, 140f), neckScale = 0.9f,
+        leftFoot = Offset(84f, 184f), rightFoot = Offset(116f, 184f), footRx = 16f, footRy = 10f,
+    )
+}
+
+private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette, accessories: Set<Accessory>) {
     val t = fx.time
     val idle = fx.idle
     val sway = if (idle) p.sway * sin(t * PI.toFloat() * 2f * p.swayHz) else 0f
@@ -348,8 +373,14 @@ private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette) {
             }
             ink(toes, pal.outline, 2.5f)
         }
+        // Tie and boots go under the head, so the chin tucks over the knot.
+        val anchors = anchors(p, poof)
+        drawAccessories(accessories, anchors, pal.outline, BodySlots)
 
-        withTransform({ translate(0f, p.headDy) }) { drawHead(p, fx, pal, poof) }
+        withTransform({ translate(0f, p.headDy) }) {
+            drawHead(p, fx, pal, poof)
+            drawAccessories(accessories, anchors, pal.outline, HeadSlots)
+        }
 
         if (p.sparkle > 0.02f) {
             fun tw(k: Float) = if (idle) 0.75f + 0.25f * sin(t * 5f + k) else 1f

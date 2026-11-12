@@ -29,6 +29,7 @@ import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Mood
 import com.quietbuddy.domain.character.Voices
 
@@ -36,10 +37,17 @@ import com.quietbuddy.domain.character.Voices
  * Draws the current character in [mood] (null = asleep) with the shared motions; scales to fit and centres.
  * Animated arts also blend between moods and idle (blink, sway, ...) while composed; pass [animated] false for a
  * still resting pose, e.g. small icons in a list. Idle motion is skipped when the system animation scale is 0.
+ * The character wears what [LocalWardrobe] says unless [accessories] is given, e.g. to preview one.
  */
 @Composable
-fun CharacterView(mood: Mood?, modifier: Modifier = Modifier, animated: Boolean = true) {
+fun CharacterView(
+    mood: Mood?,
+    modifier: Modifier = Modifier,
+    animated: Boolean = true,
+    accessories: Set<Accessory>? = null,
+) {
     val character = LocalCharacter.current
+    val worn = accessories ?: LocalWardrobe.current[character].orEmpty()
     val look = LocalLook
     val art = look.art
     val palette = look.palette
@@ -108,9 +116,9 @@ fun CharacterView(mood: Mood?, modifier: Modifier = Modifier, animated: Boolean 
         }) {
             if (animator != null) {
                 frame // read here so each new frame redraws without recomposing
-                with(animator) { drawFrame(palette) }
+                with(animator) { drawFrame(palette, worn) }
             } else {
-                with(art) { draw(mood, palette) }
+                with(art) { draw(mood, palette, worn) }
             }
         }
     }

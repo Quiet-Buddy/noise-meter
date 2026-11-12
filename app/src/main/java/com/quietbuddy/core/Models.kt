@@ -71,11 +71,26 @@ data class AppSettings(
     val character: Character = Character.DEFAULT,
     /** Selected style per character; a missing entry means [CharacterStyle.defaultFor]. */
     val styles: Map<Character, CharacterStyle> = emptyMap(),
+    /** Accessories each character is wearing, in any combination; a missing entry means none. */
+    val accessories: Map<Character, Set<Accessory>> = emptyMap(),
 ) {
     val baseThresholds: Thresholds get() = Thresholds(worriedFromDb, sadFromDb)
 
     fun styleFor(c: Character): CharacterStyle =
         styles[c]?.takeIf { it.character == c } ?: CharacterStyle.defaultFor(c)
+
+    fun accessoriesFor(c: Character): Set<Accessory> = accessories[c].orEmpty().filterTo(mutableSetOf()) { it.character == c }
+
+    /**
+     * Puts [accessory] on [c], alongside whatever else it wears, or takes it off if already worn.
+     * An accessory that belongs to another character is ignored.
+     */
+    fun toggleAccessory(c: Character, accessory: Accessory): AppSettings {
+        if (accessory.character != c) return this
+        val worn = accessoriesFor(c)
+        val next = if (accessory in worn) worn - accessory else worn + accessory
+        return copy(accessories = accessories + (c to next))
+    }
 
     companion object {
         /** Offset added to dBFS to get approximate dB SPL before the user calibrates. */

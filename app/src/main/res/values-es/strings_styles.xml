@@ -19,7 +19,7 @@
         <item quantity="many">Faltan %1$d minutos en calma para desbloquear a %2$s</item>
         <item quantity="other">Faltan %1$d minutos en calma para desbloquear a %2$s</item>
     </plurals>
-    <string name="style_all_unlocked">¡Has desbloqueado todos los estilos!</string>
+    <string name="style_all_unlocked">¡Has desbloqueado todas las recompensas!</string>
 
     <string name="unlock_title">¡Nuevo estilo desbloqueado!</string>
     <string name="unlock_body">¡La calma tiene premio! Has conseguido a %1$s.</string>
@@ -34,9 +34,9 @@
     <string name="unlock_friend_title">¡Alguien nuevo ha llegado!</string>
     <string name="unlock_friend_body">¡La calma tiene premio! %1$s quiere quedarse contigo.</string>
     <plurals name="unlock_friend_body_more">
-        <item quantity="one">¡La calma tiene premio! %1$s quiere quedarse contigo y has desbloqueado %2$d estilo más.</item>
-        <item quantity="many">¡La calma tiene premio! %1$s quiere quedarse contigo y has desbloqueado %2$d estilos más.</item>
-        <item quantity="other">¡La calma tiene premio! %1$s quiere quedarse contigo y has desbloqueado %2$d estilos más.</item>
+        <item quantity="one">¡La calma tiene premio! %1$s quiere quedarse contigo y has desbloqueado %2$d recompensa más.</item>
+        <item quantity="many">¡La calma tiene premio! %1$s quiere quedarse contigo y has desbloqueado %2$d recompensas más.</item>
+        <item quantity="other">¡La calma tiene premio! %1$s quiere quedarse contigo y has desbloqueado %2$d recompensas más.</item>
     </plurals>
     <plurals name="style_next_friend_hint">
         <item quantity="one">Falta %1$d minuto en calma para conocer a %2$s</item>
@@ -50,4 +50,30 @@
     <string name="characters_in_use">En uso</string>
     <string name="home_next_reward">%1$d min para desbloquear a %2$s</string>
     <string name="home_next_reward_friend">%1$d min para conocer a %2$s</string>
+
+    <string name="acc_sunglasses">Gafas de sol</string>
+    <string name="acc_bow">Lazo</string>
+    <string name="acc_tie">Corbata</string>
+    <string name="acc_bell_collar">Collar con cascabel</string>
+    <string name="acc_flower">Flor</string>
+    <string name="acc_top_hat">Chistera</string>
+    <string name="acc_boots">Botas de agua</string>
+    <string name="acc_crown">Corona</string>
+
+    <plurals name="accessory_next_hint">
+        <item quantity="one">Falta %1$d minuto en calma para desbloquear: %2$s</item>
+        <item quantity="many">Faltan %1$d minutos en calma para desbloquear: %2$s</item>
+        <item quantity="other">Faltan %1$d minutos en calma para desbloquear: %2$s</item>
+    </plurals>
+    <string name="home_next_reward_accessory">%1$d min para desbloquear: %2$s</string>
+    <string name="unlock_accessory_title">¡Nuevo complemento desbloqueado!</string>
+    <string name="unlock_accessory_body">¡La calma tiene premio! Has conseguido: %1$s.</string>
+    <plurals name="unlock_accessory_body_more">
+        <item quantity="one">¡La calma tiene premio! Has conseguido: %1$s y %2$d más.</item>
+        <item quantity="many">¡La calma tiene premio! Has conseguido: %1$s y %2$d más.</item>
+        <item quantity="other">¡La calma tiene premio! Has conseguido: %1$s y %2$d más.</item>
+    </plurals>
+    <string name="unlock_wear">Ponérselo</string>
+    <string name="characters_accessories">Complementos</string>
+    <string name="accessory_worn">Puesto</string>
 </resources>

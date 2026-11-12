@@ -8,6 +8,7 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.QB
@@ -16,8 +17,22 @@ import com.quietbuddy.ui.theme.QB
 object BuddyArt : CharacterArt {
     override val motion = Motion()
 
-    override fun DrawScope.draw(mood: Mood?, palette: Palette) = drawBuddy(mood, palette)
+    override fun DrawScope.draw(mood: Mood?, palette: Palette, accessories: Set<Accessory>) {
+        drawBuddy(mood, palette)
+        drawAccessories(accessories, BuddyAnchors, palette.outline)
+    }
 }
+
+/** Buddy holds still apart from the shared motions, so one set of anchors fits every mood. */
+private val BuddyAnchors = AccessoryAnchors(
+    hatAt = Offset(102f, 33f), hatScale = 0.9f, hatTilt = 6f,
+    bowAt = Offset(140f, 42f), bowScale = 0.9f, bowTilt = 24f,
+    flowerAt = Offset(62f, 42f), flowerScale = 0.8f, flowerTilt = -20f,
+    collarAt = Offset(100f, 158f), collarScale = 0.9f,
+    leftEye = Offset(72f, 97f), rightEye = Offset(128f, 97f), lensRx = 20f, lensRy = 15f,
+    neckAt = Offset(100f, 158f), neckScale = 0.85f,
+    leftFoot = Offset(74f, 186f), rightFoot = Offset(126f, 186f), footRx = 18f, footRy = 8f,
+)
 
 private val Round = StrokeCap.Round
 

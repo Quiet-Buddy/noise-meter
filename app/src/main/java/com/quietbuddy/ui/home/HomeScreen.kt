@@ -84,8 +84,12 @@ import com.quietbuddy.domain.character.Voices
 import com.quietbuddy.ui.character.CharacterView
 import com.quietbuddy.ui.character.LocalCharacter
 import com.quietbuddy.ui.character.LocalStyle
+import com.quietbuddy.ui.character.LocalWardrobe
 import com.quietbuddy.ui.character.nameRes
+import com.quietbuddy.core.Accessory
+import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
+import com.quietbuddy.core.Reward
 import androidx.compose.material3.AlertDialog
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.material3.TextButton
@@ -166,7 +170,7 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
         }
         state.nextReward?.let { reward ->
             Spacer(Modifier.height(4.dp))
-            NextRewardRow(reward = reward, minutes = state.minutesToNext, onClick = onOpenCharacters)
+            NextRewardRow(reward = reward, styles = state.styles, minutes = state.minutesToNext, onClick = onOpenCharacters)
         }
         if (state.challenge != ChallengeState.Idle || canStartChallenge) {
             Spacer(Modifier.height(12.dp))
@@ -180,6 +184,7 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
 
     UnlockDialog(
         unlocks = state.pendingUnlocks,
+        styles = state.styles,
         onTry = { viewModel.dismissUnlocks(it) },
         onLater = { viewModel.dismissUnlocks(null) },
     )
@@ -259,12 +264,13 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
 
 /** A quiet link to the Characters tab showing the next reward; deliberately static and muted. */
 @Composable
-private fun NextRewardRow(reward: CharacterStyle, minutes: Int, onClick: () -> Unit) {
+private fun NextRewardRow(reward: Reward, styles: Map<Character, CharacterStyle>, minutes: Int, onClick: () -> Unit) {
     val palette = LocalPalette.current
-    val text = if (reward.isCharacterDefault) {
-        stringResource(R.string.home_next_reward_friend, minutes, stringResource(Voices.of(reward.character).name))
-    } else {
-        stringResource(R.string.home_next_reward, minutes, stringResource(reward.nameRes))
+    val text = when {
+        reward is CharacterStyle && reward.isCharacterDefault ->
+            stringResource(R.string.home_next_reward_friend, minutes, stringResource(Voices.of(reward.character).name))
+        reward is Accessory -> stringResource(R.string.home_next_reward_accessory, minutes, stringResource(reward.nameRes))
+        else -> stringResource(R.string.home_next_reward, minutes, stringResource(reward.nameRes))
     }
     Row(
         Modifier
@@ -275,15 +281,26 @@ private fun NextRewardRow(reward: CharacterStyle, minutes: Int, onClick: () -> U
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = spacedBy(10.dp),
     ) {
-        CompositionLocalProvider(LocalCharacter provides reward.character, LocalStyle provides reward) {
-            CharacterView(
-                mood = Mood.HAPPY,
-                animated = false,
-                modifier = Modifier.size(28.dp).alpha(0.5f),
-            )
-        }
+        RewardPreview(reward, styles, Modifier.size(28.dp).alpha(0.5f), animated = false)
         Text(text, style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft, modifier = Modifier.weight(1f))
         Text(">", style = MaterialTheme.typography.titleMedium, color = palette.inkSoft)
+    }
+}
+
+/** A happy character showing off [reward]: a style on its own character, an accessory on its own character in the selected style. */
+@Composable
+private fun RewardPreview(reward: Reward, styles: Map<Character, CharacterStyle>, modifier: Modifier, animated: Boolean) {
+    when (reward) {
+        is CharacterStyle -> CompositionLocalProvider(LocalCharacter provides reward.character, LocalStyle provides reward) {
+            CharacterView(mood = Mood.HAPPY, animated = animated, modifier = modifier)
+        }
+        is Accessory -> {
+            val worn = LocalWardrobe.current[reward.character].orEmpty()
+            val style = styles[reward.character] ?: CharacterStyle.defaultFor(reward.character)
+            CompositionLocalProvider(LocalCharacter provides reward.character, LocalStyle provides style) {
+                CharacterView(mood = Mood.HAPPY, animated = animated, modifier = modifier, accessories = worn + reward)
+            }
+        }
     }
 }
 
@@ -555,36 +572,39 @@ private fun openAppSettings(context: Context) {
     )
 }
 
-/** Tells the user about newly earned styles and offers to switch to the newest one. */
+/** Tells the user about newly earned rewards and offers to try the most exciting one: a new friend, else the newest. */
 @Composable
-private fun UnlockDialog(unlocks: List<CharacterStyle>, onTry: (CharacterStyle) -> Unit, onLater: () -> Unit) {
-    val friend = unlocks.firstOrNull { it.isCharacterDefault }
+private fun UnlockDialog(unlocks: List<Reward>, styles: Map<Character, CharacterStyle>, onTry: (Reward) -> Unit, onLater: () -> Unit) {
+    val friend = unlocks.firstOrNull { it is CharacterStyle && it.isCharacterDefault } as CharacterStyle?
     val newest = friend ?: unlocks.maxByOrNull { it.unlockAtCalmMinutes } ?: return
     val name = if (friend != null) stringResource(Voices.of(friend.character).name) else stringResource(newest.nameRes)
+    val more = unlocks.size - 1
+    val (title, body) = when {
+        friend != null -> R.string.unlock_friend_title to
+            if (more > 0) pluralStringResource(R.plurals.unlock_friend_body_more, more, name, more)
+            else stringResource(R.string.unlock_friend_body, name)
+        newest is Accessory -> R.string.unlock_accessory_title to
+            if (more > 0) pluralStringResource(R.plurals.unlock_accessory_body_more, more, name, more)
+            else stringResource(R.string.unlock_accessory_body, name)
+        else -> R.string.unlock_title to
+            if (more > 0) pluralStringResource(R.plurals.unlock_body_more, more, name, more)
+            else stringResource(R.string.unlock_body, name)
+    }
     AlertDialog(
         onDismissRequest = onLater,
-        title = { Text(stringResource(if (friend != null) R.string.unlock_friend_title else R.string.unlock_title), style = MaterialTheme.typography.titleMedium) },
+        title = { Text(stringResource(title), style = MaterialTheme.typography.titleMedium) },
         text = {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                CompositionLocalProvider(LocalCharacter provides newest.character, LocalStyle provides newest) {
-                    CharacterView(mood = Mood.HAPPY, modifier = Modifier.size(120.dp))
-                }
+                RewardPreview(newest, styles, Modifier.size(120.dp), animated = true)
                 Spacer(Modifier.height(12.dp))
-                Text(
-                    if (unlocks.size > 1) {
-                        pluralStringResource(
-                            if (friend != null) R.plurals.unlock_friend_body_more else R.plurals.unlock_body_more,
-                            unlocks.size - 1, name, unlocks.size - 1,
-                        )
-                    } else {
-                        stringResource(if (friend != null) R.string.unlock_friend_body else R.string.unlock_body, name)
-                    },
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Center,
-                )
+                Text(body, style = MaterialTheme.typography.bodyMedium, textAlign = TextAlign.Center)
             }
         },
-        confirmButton = { TextButton(onClick = { onTry(newest) }) { Text(stringResource(R.string.unlock_try)) } },
+        confirmButton = {
+            TextButton(onClick = { onTry(newest) }) {
+                Text(stringResource(if (newest is Accessory) R.string.unlock_wear else R.string.unlock_try))
+            }
+        },
         dismissButton = { TextButton(onClick = onLater) { Text(stringResource(R.string.unlock_later)) } },
     )
 }

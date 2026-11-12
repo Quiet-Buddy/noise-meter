@@ -5,6 +5,7 @@ import androidx.compose.runtime.Immutable
 import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.drawscope.DrawScope
+import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Mood
@@ -28,8 +29,8 @@ data class Motion(
 interface CharacterArt {
     val motion: Motion
 
-    /** Draws the character in a 200x200 design space; [mood] null means asleep. */
-    fun DrawScope.draw(mood: Mood?, palette: Palette)
+    /** Draws the character in a 200x200 design space wearing [accessories]; [mood] null means asleep. */
+    fun DrawScope.draw(mood: Mood?, palette: Palette, accessories: Set<Accessory>)
 }
 
 /** Art that blends between poses and runs idle motion; [CharacterView] drives it frame by frame. */
@@ -46,8 +47,8 @@ interface CharacterAnimator {
     /** Moves time on by [dtSec] seconds. */
     fun advance(dtSec: Float)
 
-    /** Draws the current frame in the 200x200 design space. */
-    fun DrawScope.drawFrame(palette: Palette)
+    /** Draws the current frame in the 200x200 design space, wearing [accessories]. */
+    fun DrawScope.drawFrame(palette: Palette, accessories: Set<Accessory>)
 }
 
 /** A character's art and palette. */
@@ -84,6 +85,9 @@ val LocalCharacter = staticCompositionLocalOf { Character.DEFAULT }
 
 /** The current character's style. Ignored (the default style is used) when it belongs to another character. */
 val LocalStyle = staticCompositionLocalOf { CharacterStyle.defaultFor(Character.DEFAULT) }
+
+/** What each character is wearing (see AppSettings.accessories); characters missing from the map wear nothing. */
+val LocalWardrobe = staticCompositionLocalOf<Map<Character, Set<Accessory>>> { emptyMap() }
 
 /** The current character's look in the current style. */
 val LocalLook: CharacterLook

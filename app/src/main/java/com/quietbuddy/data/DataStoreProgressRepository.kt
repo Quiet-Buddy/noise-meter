@@ -9,9 +9,9 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Progress
 import com.quietbuddy.core.ProgressRepository
+import com.quietbuddy.core.Reward
 import com.quietbuddy.core.SettingsRepository
 import com.quietbuddy.core.Unlocks
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -27,7 +27,7 @@ private val Context.progressDataStore: DataStore<Preferences> by preferencesData
 
 private object ProgressKeys {
     val CALM_MINUTES = longPreferencesKey("calm_minutes")
-    /** CharacterStyle.keys; unknown keys are dropped on read. */
+    /** Reward keys (styles and accessories); unknown keys are dropped on read. */
     val UNLOCKED = stringSetPreferencesKey("unlocked")
     val CELEBRATED = stringSetPreferencesKey("celebrated")
     val BACKFILLED = booleanPreferencesKey("backfilled")
@@ -64,11 +64,11 @@ class DataStoreProgressRepository @Inject constructor(
         }
     }
 
-    override suspend fun markCelebrated(styles: Collection<CharacterStyle>) {
-        if (styles.isEmpty()) return
+    override suspend fun markCelebrated(rewards: Collection<Reward>) {
+        if (rewards.isEmpty()) return
         store.edit { prefs ->
-            prefs[ProgressKeys.CELEBRATED] = prefs.styleSet(ProgressKeys.CELEBRATED).map { it.key }.toSet() +
-                styles.map { it.key }
+            prefs[ProgressKeys.CELEBRATED] = prefs.rewardSet(ProgressKeys.CELEBRATED).map { it.key }.toSet() +
+                rewards.map { it.key }
         }
     }
 
@@ -76,15 +76,15 @@ class DataStoreProgressRepository @Inject constructor(
     private fun androidx.datastore.preferences.core.MutablePreferences.credit(minutes: Long) {
         val total = (this[ProgressKeys.CALM_MINUTES] ?: 0L) + minutes
         this[ProgressKeys.CALM_MINUTES] = total
-        this[ProgressKeys.UNLOCKED] = (styleSet(ProgressKeys.UNLOCKED) + Unlocks.earnedBy(total)).map { it.key }.toSet()
+        this[ProgressKeys.UNLOCKED] = (rewardSet(ProgressKeys.UNLOCKED) + Unlocks.earnedBy(total)).map { it.key }.toSet()
     }
 
-    private fun Preferences.styleSet(key: Preferences.Key<Set<String>>): Set<CharacterStyle> =
-        (this[key].orEmpty().mapNotNull { CharacterStyle.fromKey(it) } + CharacterStyle.entries.filter { it.isFree }).toSet()
+    private fun Preferences.rewardSet(key: Preferences.Key<Set<String>>): Set<Reward> =
+        (this[key].orEmpty().mapNotNull { Reward.fromKey(it) } + Progress.FREE).toSet()
 
     private fun Preferences.toProgress() = Progress(
         calmMinutes = this[ProgressKeys.CALM_MINUTES] ?: 0L,
-        unlocked = styleSet(ProgressKeys.UNLOCKED),
-        celebrated = styleSet(ProgressKeys.CELEBRATED),
+        unlocked = rewardSet(ProgressKeys.UNLOCKED),
+        celebrated = rewardSet(ProgressKeys.CELEBRATED),
     )
 }

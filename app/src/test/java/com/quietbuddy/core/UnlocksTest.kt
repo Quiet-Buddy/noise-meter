@@ -8,7 +8,7 @@ import org.junit.Test
 
 class UnlocksTest {
 
-    private val free = CharacterStyle.entries.filter { it.isFree }.toSet()
+    private val free = Progress.FREE
 
     @Test
     fun earnedByThresholds() {
@@ -17,18 +17,76 @@ class UnlocksTest {
         assertEquals(free + CharacterStyle.BUDDY_MINT, Unlocks.earnedBy(30))
         assertFalse(CharacterStyle.KITTEN_GINGER in Unlocks.earnedBy(119))
         assertTrue(CharacterStyle.KITTEN_GINGER in Unlocks.earnedBy(120))
-        assertEquals(CharacterStyle.entries.toSet() - CharacterStyle.KITTEN_SNOW, Unlocks.earnedBy(599))
-        assertEquals(CharacterStyle.entries.toSet(), Unlocks.earnedBy(600))
+        assertFalse(Accessory.SUNGLASSES in Unlocks.earnedBy(59))
+        assertTrue(Accessory.SUNGLASSES in Unlocks.earnedBy(60))
+        assertEquals(Reward.all.toSet() - Accessory.CROWN, Unlocks.earnedBy(999))
+        assertEquals(Reward.all.toSet(), Unlocks.earnedBy(1000))
     }
 
     @Test
     fun nextIsCheapestUnearned() {
-        assertEquals(CharacterStyle.BUDDY_MINT, Unlocks.next(0))
-        assertEquals(CharacterStyle.KITTEN_GINGER, Unlocks.next(30))
-        assertEquals(CharacterStyle.BUDDY_BERRY, Unlocks.next(120))
-        assertEquals(CharacterStyle.KITTEN_GREY, Unlocks.next(240))
-        assertEquals(CharacterStyle.KITTEN_SNOW, Unlocks.next(400))
-        assertNull(Unlocks.next(600))
+        val order = listOf(
+            0L to CharacterStyle.BUDDY_MINT,
+            30L to Accessory.SUNGLASSES,
+            60L to CharacterStyle.KITTEN_GINGER,
+            120L to Accessory.BOW,
+            180L to CharacterStyle.BUDDY_BERRY,
+            240L to Accessory.TIE,
+            300L to Accessory.BELL_COLLAR,
+            360L to CharacterStyle.KITTEN_GREY,
+            400L to Accessory.TOP_HAT,
+            480L to Accessory.FLOWER,
+            540L to CharacterStyle.KITTEN_SNOW,
+            600L to Accessory.BOOTS,
+            750L to Accessory.CROWN,
+        )
+        for ((minutes, expected) in order) assertEquals("at $minutes", expected, Unlocks.next(minutes))
+        assertNull(Unlocks.next(1000))
+    }
+
+    @Test
+    fun previousThresholdIsLastEarned() {
+        assertEquals(0, Unlocks.previousThreshold(0))
+        assertEquals(30, Unlocks.previousThreshold(59))
+        assertEquals(60, Unlocks.previousThreshold(60))
+        assertEquals(1000, Unlocks.previousThreshold(5000))
+    }
+
+    @Test
+    fun rewardKeysAreUniqueAndRoundTrip() {
+        val keys = Reward.all.map { it.key }
+        assertEquals(keys.size, keys.toSet().size)
+        Reward.all.forEach { assertEquals(it, Reward.fromKey(it.key)) }
+        assertNull(Reward.fromKey("nope"))
+    }
+
+    @Test
+    fun accessoriesCombine() {
+        val all = Accessory.of(Character.KITTEN).fold(AppSettings()) { s, a -> s.toggleAccessory(Character.KITTEN, a) }
+        assertEquals(Accessory.of(Character.KITTEN).toSet(), all.accessoriesFor(Character.KITTEN))
+        assertTrue(all.accessoriesFor(Character.BUDDY).isEmpty())
+        val noBow = all.toggleAccessory(Character.KITTEN, Accessory.BOW)
+        assertEquals(Accessory.of(Character.KITTEN).toSet() - Accessory.BOW, noBow.accessoriesFor(Character.KITTEN))
+    }
+
+    @Test
+    fun toggleIgnoresAnotherCharactersAccessory() {
+        val s = AppSettings()
+        assertEquals(s, s.toggleAccessory(Character.KITTEN, Accessory.TOP_HAT))
+        assertEquals(s, s.toggleAccessory(Character.BUDDY, Accessory.CROWN))
+        val stray = AppSettings(accessories = mapOf(Character.BUDDY to setOf(Accessory.CROWN, Accessory.TIE)))
+        assertEquals(setOf(Accessory.TIE), stray.accessoriesFor(Character.BUDDY))
+    }
+
+    @Test
+    fun everyCharacterHasAccessoriesAndNoneBeforeItsOwner() {
+        Character.entries.forEach { c ->
+            val own = Accessory.of(c)
+            assertTrue("$c has accessories", own.isNotEmpty())
+            val owner = CharacterStyle.defaultFor(c).unlockAtCalmMinutes
+            own.forEach { assertTrue("${it.name} unlocks after $c", it.unlockAtCalmMinutes > owner) }
+        }
+        assertEquals(Accessory.entries.toSet(), Character.entries.flatMap { Accessory.of(it) }.toSet())
     }
 
     private fun minute(laeq: Float, seconds: Int) = MinuteAggregate(0L, laeq, laeq, laeq, seconds)
@@ -45,12 +103,12 @@ class UnlocksTest {
     @Test
     fun pendingCelebrationIsCheapestFirst() {
         val p = Progress(
-            calmMinutes = 600,
-            unlocked = CharacterStyle.entries.toSet(),
+            calmMinutes = 200,
+            unlocked = Unlocks.earnedBy(200),
             celebrated = free,
         )
         assertEquals(
-            listOf(CharacterStyle.BUDDY_MINT, CharacterStyle.KITTEN_GINGER, CharacterStyle.BUDDY_BERRY, CharacterStyle.KITTEN_GREY, CharacterStyle.KITTEN_SNOW),
+            listOf(CharacterStyle.BUDDY_MINT, Accessory.SUNGLASSES, CharacterStyle.KITTEN_GINGER, Accessory.BOW),
             p.pendingCelebration,
         )
         assertTrue(Progress().pendingCelebration.isEmpty())

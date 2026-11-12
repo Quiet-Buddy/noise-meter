@@ -6,11 +6,13 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Lock
@@ -28,6 +30,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.stateDescription
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -35,10 +38,12 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quietbuddy.R
+import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.Progress
+import com.quietbuddy.core.Reward
 import com.quietbuddy.ui.character.CharacterView
 import com.quietbuddy.ui.character.LocalCharacter
 import com.quietbuddy.ui.character.LocalStyle
@@ -64,7 +69,6 @@ internal fun StyleTiles(
     progress: Progress,
     onSelect: (CharacterStyle) -> Unit,
 ) {
-    val palette = LocalPalette.current
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth().selectableGroup(),
@@ -72,57 +76,117 @@ internal fun StyleTiles(
         CharacterStyle.of(character).forEach { style ->
             val unlocked = progress.isUnlocked(style)
             val isSelected = style == selectedStyle
-            val shape = RoundedCornerShape(14.dp)
-            val name = stringResource(style.nameRes)
-            val lockedDescription = if (unlocked) name else stringResource(
-                R.string.style_locked_desc,
-                name,
-                pluralStringResource(R.plurals.style_needs_minutes, style.unlockAtCalmMinutes, style.unlockAtCalmMinutes),
-            )
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .clip(shape)
-                    .background(if (isSelected) palette.accentSoft else palette.background, shape)
-                    .border(2.dp, if (isSelected) palette.accent else palette.line, shape)
-                    .then(
-                        if (unlocked) Modifier.selectable(
-                            selected = isSelected,
-                            role = Role.RadioButton,
-                            onClick = { onSelect(style) },
-                        ) else Modifier,
-                    )
-                    .semantics(mergeDescendants = true) { if (!unlocked) contentDescription = lockedDescription }
-                    .padding(vertical = 8.dp, horizontal = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(2.dp),
+            RewardTile(
+                reward = style,
+                name = stringResource(style.nameRes),
+                unlocked = unlocked,
+                highlighted = isSelected,
+                calmMinutes = progress.calmMinutes,
+                interaction = Modifier.selectable(
+                    selected = isSelected,
+                    enabled = unlocked,
+                    role = Role.RadioButton,
+                    onClick = { onSelect(style) },
+                ),
             ) {
-                LockedPreview(unlocked = unlocked, size = 56.dp) {
-                    CompositionLocalProvider(LocalCharacter provides character, LocalStyle provides style) {
-                        CharacterView(
-                            mood = Mood.HAPPY,
-                            animated = false,
-                            modifier = Modifier.size(56.dp).alpha(if (unlocked) 1f else 0.35f),
-                        )
-                    }
-                }
-                Text(
-                    name,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    color = if (isSelected) palette.accent else palette.ink,
-                    textAlign = TextAlign.Center,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                if (!unlocked) {
-                    Text(
-                        stringResource(R.string.style_progress, progress.calmMinutes.coerceAtMost(style.unlockAtCalmMinutes.toLong()), style.unlockAtCalmMinutes),
-                        style = MaterialTheme.typography.labelSmall,
-                        textAlign = TextAlign.Center,
-                    )
+                CompositionLocalProvider(LocalCharacter provides character, LocalStyle provides style) {
+                    CharacterView(mood = Mood.HAPPY, animated = false, modifier = it)
                 }
             }
+        }
+    }
+}
+
+/**
+ * One tile per accessory of [character], four to a row, each showing it wearing just that accessory in [style].
+ * Tapping an unlocked one puts it on or takes it off; worn ones are highlighted.
+ */
+@Composable
+internal fun AccessoryTiles(
+    character: Character,
+    style: CharacterStyle,
+    worn: Set<Accessory>,
+    progress: Progress,
+    onToggle: (Accessory) -> Unit,
+) {
+    val palette = LocalPalette.current
+    val wornLabel = stringResource(R.string.accessory_worn)
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.characters_accessories), style = MaterialTheme.typography.labelMedium, color = palette.inkSoft)
+        Accessory.of(character).chunked(4).forEach { row ->
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                row.forEach { accessory ->
+                    val unlocked = progress.isUnlocked(accessory)
+                    val isWorn = accessory in worn
+                    RewardTile(
+                        reward = accessory,
+                        name = stringResource(accessory.nameRes),
+                        unlocked = unlocked,
+                        highlighted = isWorn,
+                        calmMinutes = progress.calmMinutes,
+                        interaction = Modifier
+                            .toggleable(value = isWorn, enabled = unlocked, role = Role.Checkbox, onValueChange = { onToggle(accessory) })
+                            .semantics { if (isWorn) stateDescription = wornLabel },
+                    ) {
+                        CompositionLocalProvider(LocalCharacter provides character, LocalStyle provides style) {
+                            CharacterView(mood = Mood.HAPPY, animated = false, modifier = it, accessories = setOf(accessory))
+                        }
+                    }
+                }
+                repeat(4 - row.size) { Box(Modifier.weight(1f)) }
+            }
+        }
+    }
+}
+
+/** A tile with a 56dp preview and a name; locked ones are dimmed, show a lock and the calm-minute progress. */
+@Composable
+private fun RowScope.RewardTile(
+    reward: Reward,
+    name: String,
+    unlocked: Boolean,
+    highlighted: Boolean,
+    calmMinutes: Long,
+    interaction: Modifier,
+    preview: @Composable (Modifier) -> Unit,
+) {
+    val palette = LocalPalette.current
+    val shape = RoundedCornerShape(14.dp)
+    val lockedDescription = if (unlocked) name else stringResource(
+        R.string.style_locked_desc,
+        name,
+        pluralStringResource(R.plurals.style_needs_minutes, reward.unlockAtCalmMinutes, reward.unlockAtCalmMinutes),
+    )
+    Column(
+        modifier = Modifier
+            .weight(1f)
+            .clip(shape)
+            .background(if (highlighted) palette.accentSoft else palette.background, shape)
+            .border(2.dp, if (highlighted) palette.accent else palette.line, shape)
+            .then(if (unlocked) interaction else Modifier)
+            .semantics(mergeDescendants = true) { if (!unlocked) contentDescription = lockedDescription }
+            .padding(vertical = 8.dp, horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(2.dp),
+    ) {
+        LockedPreview(unlocked = unlocked, size = 56.dp) {
+            preview(Modifier.size(56.dp).alpha(if (unlocked) 1f else 0.35f))
+        }
+        Text(
+            name,
+            fontSize = 12.sp,
+            fontWeight = FontWeight.ExtraBold,
+            color = if (highlighted) palette.accent else palette.ink,
+            textAlign = TextAlign.Center,
+            maxLines = 2,
+            overflow = TextOverflow.Ellipsis,
+        )
+        if (!unlocked) {
+            Text(
+                stringResource(R.string.style_progress, calmMinutes.coerceAtMost(reward.unlockAtCalmMinutes.toLong()), reward.unlockAtCalmMinutes),
+                style = MaterialTheme.typography.labelSmall,
+                textAlign = TextAlign.Center,
+            )
         }
     }
 }
