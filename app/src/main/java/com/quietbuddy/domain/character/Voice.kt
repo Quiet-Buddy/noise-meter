@@ -18,6 +18,9 @@ interface Voice {
     /** Speech bubbles for [mood]; at least one. */
     @StringRes fun lines(mood: Mood): List<Int>
 
+    /** Speech when a child taps the character while the room is calm; at least one. */
+    @StringRes fun tapLines(): List<Int>
+
     /** Accessibility description of the character in [mood]; null means asleep. */
     @StringRes fun description(mood: Mood?): Int
 

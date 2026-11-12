@@ -103,4 +103,11 @@
     <string name="speech_ears_1">¡Demasiado ruido! ¡Mis oídos!</string>
     <string name="speech_ears_2">¡Uf! ¡Me tapo los oídos!</string>
     <string name="speech_ears_3">¡Qué ruidazo! ¡Hagamos una pausa tranquila!</string>
+    <!-- TODO review translation -->
+    <string name="speech_tap_1">¡Jijiji, me haces cosquillas!</string>
+    <string name="speech_tap_2">Psst… mantengámonos en silencio juntos.</string>
+    <string name="speech_tap_3">¡Un amigo! Shh, qué calma.</string>
+    <string name="speech_tap_4">Me encantan las caricias tranquilas. ¡Gracias!</string>
+    <string name="speech_tap_5">Ooh, qué acogedor es el silencio.</string>
+    <string name="home_pat_character">Acariciar al personaje</string>
 </resources>

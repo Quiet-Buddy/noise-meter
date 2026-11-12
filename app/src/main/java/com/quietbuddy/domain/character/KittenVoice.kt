@@ -22,6 +22,12 @@ object KittenVoice : Voice {
 
     override fun lines(mood: Mood): List<Int> = lines.getValue(mood)
 
+    private val tapLines = listOf(
+        R.string.kitten_tap_1, R.string.kitten_tap_2, R.string.kitten_tap_3, R.string.kitten_tap_4, R.string.kitten_tap_5,
+    )
+
+    override fun tapLines(): List<Int> = tapLines
+
     override fun description(mood: Mood?): Int = when (mood) {
         null -> R.string.kitten_asleep
         Mood.HAPPY -> R.string.kitten_happy

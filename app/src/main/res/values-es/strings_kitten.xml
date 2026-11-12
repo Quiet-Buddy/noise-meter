@@ -28,4 +28,10 @@
     <string name="kitten_worried">Mochi está preocupado</string>
     <string name="kitten_sad">Mochi está triste</string>
     <string name="kitten_ears">Mochi está asustado, con el pelo erizado</string>
+    <!-- TODO review translation -->
+    <string name="kitten_tap_1">Prrr, prrr… qué agradable.</string>
+    <string name="kitten_tap_2">Prrr… las caricias suaves son mis favoritas.</string>
+    <string name="kitten_tap_3">¡Miau! Detrás de las orejas, porfa.</string>
+    <string name="kitten_tap_4">Shh, ronroneemos juntos, bajito.</string>
+    <string name="kitten_tap_5">Patitas suaves, voces suaves. Prrr.</string>
 </resources>

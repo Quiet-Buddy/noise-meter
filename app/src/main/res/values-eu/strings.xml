@@ -103,4 +103,11 @@
     <string name="speech_ears_1">Zarata gehiegi! Nire belarriak!</string>
     <string name="speech_ears_2">Ene! Belarriak estaltzen ari naiz!</string>
     <string name="speech_ears_3">Zarata handia! Egin dezagun atsedenaldi isil bat!</string>
+    <!-- TODO review translation -->
+    <string name="speech_tap_1">Jijiji, kilimak egiten dizkidazu!</string>
+    <string name="speech_tap_2">Psst… egon gaitezen isilik elkarrekin.</string>
+    <string name="speech_tap_3">Lagun bat! Ixo, zein lasai.</string>
+    <string name="speech_tap_4">Laztan lasaiak maite ditut. Eskerrik asko!</string>
+    <string name="speech_tap_5">Ooh, zein goxoa den isiltasuna.</string>
+    <string name="home_pat_character">Pertsonaia laztandu</string>
 </resources>

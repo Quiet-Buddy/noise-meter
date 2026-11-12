@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 sealed interface ChallengeState {
@@ -58,6 +59,8 @@ data class HomeUiState(
     val nextRewardProgress: Float = 0f,
     /** The selected style of each character, for previewing rewards. */
     val styles: Map<Character, CharacterStyle> = emptyMap(),
+    /** Accepted taps on the character so far; the UI plays a bounce whenever it grows. */
+    val tapCount: Int = 0,
 )
 
 @HiltViewModel
@@ -73,11 +76,21 @@ class HomeViewModel @Inject constructor(
     private val challenge = MutableStateFlow<ChallengeState>(ChallengeState.Idle)
     private var challengeJob: Job? = null
 
+    /** Index into the character's tap lines while a tap reply is showing; null otherwise. */
+    private val tapReply = MutableStateFlow<Int?>(null)
+    private val tapCount = MutableStateFlow(0)
+    private var tapReplyJob: Job? = null
+    private var lastTapAtMs: Long? = null
+
+    /** Wall clock, replaceable in tests so the cooldown needs no real waiting. */
+    internal var clockMs: () -> Long = System::currentTimeMillis
+
     init {
         // Rotate the speech line every time the mood changes (the first value is not a change).
         viewModelScope.launch {
-            levelSource.mood.drop(1).collect {
+            levelSource.mood.drop(1).collect { mood ->
                 speechIndex.update { it + 1 }
+                if (!mood.isCalm()) clearTapReply()
             }
         }
     }
@@ -109,7 +122,7 @@ class HomeViewModel @Inject constructor(
         )
     }
 
-    val uiState: StateFlow<HomeUiState> = combine(snapshot, speechIndex, challenge) { s, index, ch ->
+    val uiState: StateFlow<HomeUiState> = combine(snapshot, speechIndex, challenge, tapReply, tapCount) { s, index, ch, reply, taps ->
         val active = s.listening == ListeningState.LISTENING
         val mood = if (active) s.mood else null
         HomeUiState(
@@ -118,7 +131,12 @@ class HomeViewModel @Inject constructor(
             mood = mood,
             db = if (active) s.db else null,
             speechLine = Voices.of(s.character).let { voice ->
-                if (mood != null) voice.line(mood, index) else voice.sleeping
+                when {
+                    mood == null -> voice.sleeping
+                    // A tap reply only ever answers a calm room; it gives way as soon as that stops.
+                    reply != null && mood.isCalm() -> voice.tapLines().let { it[reply % it.size] }
+                    else -> voice.line(mood, index)
+                }
             },
             calmMinutes = s.calmMinutes,
             challenge = ch,
@@ -127,6 +145,7 @@ class HomeViewModel @Inject constructor(
             minutesToNext = s.minutesToNext,
             nextRewardProgress = s.nextRewardProgress,
             styles = s.styles,
+            tapCount = taps,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
@@ -150,6 +169,32 @@ class HomeViewModel @Inject constructor(
             progressRepository.markCelebrated(pending)
         }
     }
+
+    /**
+     * A child patted the character. Only a calm, listening room is answered (with a rotating line for a few
+     * seconds), so the reward is for being quiet and never for making noise. Rapid taps are ignored.
+     */
+    fun onCharacterTapped() {
+        if (levelSource.state.value != ListeningState.LISTENING || !levelSource.mood.value.isCalm()) return
+        val now = clockMs()
+        if (lastTapAtMs?.let { now - it < TAP_COOLDOWN_MS } == true) return
+        lastTapAtMs = now
+        val count = tapCount.updateAndGet { it + 1 }
+        // Taps are numbered from 1 and each picks the next line, so a line never repeats back to back.
+        tapReply.value = count
+        tapReplyJob?.cancel()
+        tapReplyJob = viewModelScope.launch {
+            delay(TAP_REPLY_MS)
+            tapReply.value = null
+        }
+    }
+
+    private fun clearTapReply() {
+        tapReplyJob?.cancel()
+        tapReply.value = null
+    }
+
+    private fun Mood.isCalm() = this == Mood.HAPPY || this == Mood.FINE
 
     fun start() = controller.start()
 
@@ -202,5 +247,7 @@ class HomeViewModel @Inject constructor(
     private companion object {
         const val CHALLENGE_SECONDS = 30
         const val RESULT_MS = 5_000L
+        const val TAP_COOLDOWN_MS = 1_500L
+        const val TAP_REPLY_MS = 4_000L
     }
 }

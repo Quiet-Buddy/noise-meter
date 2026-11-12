@@ -126,7 +126,7 @@ fun CharacterView(
 
 /** True when the system animator duration scale is 0 (the "remove animations" setting). */
 @Composable
-private fun rememberAnimationsOff(): Boolean {
+internal fun rememberAnimationsOff(): Boolean {
     val resolver = LocalContext.current.contentResolver
     return remember {
         Settings.Global.getFloat(resolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f) == 0f
