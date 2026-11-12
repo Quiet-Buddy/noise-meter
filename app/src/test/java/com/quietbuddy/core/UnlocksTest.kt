@@ -15,6 +15,8 @@ class UnlocksTest {
         assertEquals(free, Unlocks.earnedBy(0))
         assertEquals(free, Unlocks.earnedBy(29))
         assertEquals(free + CharacterStyle.BUDDY_MINT, Unlocks.earnedBy(30))
+        assertFalse(CharacterStyle.KITTEN_GINGER in Unlocks.earnedBy(119))
+        assertTrue(CharacterStyle.KITTEN_GINGER in Unlocks.earnedBy(120))
         assertEquals(CharacterStyle.entries.toSet() - CharacterStyle.KITTEN_SNOW, Unlocks.earnedBy(599))
         assertEquals(CharacterStyle.entries.toSet(), Unlocks.earnedBy(600))
     }
@@ -22,8 +24,10 @@ class UnlocksTest {
     @Test
     fun nextIsCheapestUnearned() {
         assertEquals(CharacterStyle.BUDDY_MINT, Unlocks.next(0))
-        assertEquals(CharacterStyle.KITTEN_GREY, Unlocks.next(30))
-        assertEquals(CharacterStyle.KITTEN_SNOW, Unlocks.next(300))
+        assertEquals(CharacterStyle.KITTEN_GINGER, Unlocks.next(30))
+        assertEquals(CharacterStyle.BUDDY_BERRY, Unlocks.next(120))
+        assertEquals(CharacterStyle.KITTEN_GREY, Unlocks.next(240))
+        assertEquals(CharacterStyle.KITTEN_SNOW, Unlocks.next(400))
         assertNull(Unlocks.next(600))
     }
 
@@ -46,7 +50,7 @@ class UnlocksTest {
             celebrated = free,
         )
         assertEquals(
-            listOf(CharacterStyle.BUDDY_MINT, CharacterStyle.KITTEN_GREY, CharacterStyle.BUDDY_BERRY, CharacterStyle.KITTEN_SNOW),
+            listOf(CharacterStyle.BUDDY_MINT, CharacterStyle.KITTEN_GINGER, CharacterStyle.BUDDY_BERRY, CharacterStyle.KITTEN_GREY, CharacterStyle.KITTEN_SNOW),
             p.pendingCelebration,
         )
         assertTrue(Progress().pendingCelebration.isEmpty())
@@ -58,6 +62,35 @@ class UnlocksTest {
         assertFalse(p.isUnlocked(CharacterStyle.KITTEN_SNOW, AppSettings()))
         assertTrue(p.isUnlocked(CharacterStyle.KITTEN_SNOW, AppSettings(unlockAllStyles = true)))
         assertTrue(p.isUnlocked(CharacterStyle.BUDDY_SUNNY, AppSettings()))
+    }
+
+    @Test
+    fun mochiUnlocksAtOneHundredTwentyMinutes() {
+        val s = AppSettings()
+        val at119 = Progress(calmMinutes = 119, unlocked = Unlocks.earnedBy(119))
+        val at120 = Progress(calmMinutes = 120, unlocked = Unlocks.earnedBy(120))
+        assertFalse(at119.isUnlocked(Character.KITTEN, s))
+        assertTrue(at120.isUnlocked(Character.KITTEN, s))
+    }
+
+    @Test
+    fun buddyIsAlwaysUnlocked() {
+        assertTrue(Progress().isUnlocked(Character.BUDDY, AppSettings()))
+        assertTrue(Progress().isUnlocked(Character.DEFAULT, AppSettings()))
+    }
+
+    @Test
+    fun unlockAllUnlocksMochi() {
+        assertFalse(Progress().isUnlocked(Character.KITTEN, AppSettings()))
+        assertTrue(Progress().isUnlocked(Character.KITTEN, AppSettings(unlockAllStyles = true)))
+    }
+
+    @Test
+    fun characterDefaultStyles() {
+        assertTrue(CharacterStyle.BUDDY_SUNNY.isCharacterDefault)
+        assertTrue(CharacterStyle.KITTEN_GINGER.isCharacterDefault)
+        assertFalse(CharacterStyle.BUDDY_MINT.isCharacterDefault)
+        assertFalse(CharacterStyle.KITTEN_SNOW.isCharacterDefault)
     }
 
     @Test

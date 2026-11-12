@@ -30,4 +30,15 @@
     </plurals>
     <string name="unlock_try">Probatu</string>
     <string name="unlock_later">Geroago</string>
+
+    <string name="unlock_friend_title">Lagun berri bat!</string>
+    <string name="unlock_friend_body">Lasaitasunak saria du! %1$s zurekin geratu nahi du.</string>
+    <plurals name="unlock_friend_body_more">
+        <item quantity="one">Lasaitasunak saria du! %1$s zurekin geratu nahi du, eta beste estilo %2$d desblokeatu duzu.</item>
+        <item quantity="other">Lasaitasunak saria du! %1$s zurekin geratu nahi du, eta beste %2$d estilo desblokeatu dituzu.</item>
+    </plurals>
+    <plurals name="style_next_friend_hint">
+        <item quantity="one">Minutu lasai %1$d falta da %2$s ezagutzeko</item>
+        <item quantity="other">%1$d minutu lasai falta dira %2$s ezagutzeko</item>
+    </plurals>
 </resources>

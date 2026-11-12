@@ -33,4 +33,17 @@
     </plurals>
     <string name="unlock_try">Probar</string>
     <string name="unlock_later">Más tarde</string>
+
+    <string name="unlock_friend_title">¡Alguien nuevo ha llegado!</string>
+    <string name="unlock_friend_body">¡La calma tiene premio! %1$s quiere quedarse contigo.</string>
+    <plurals name="unlock_friend_body_more">
+        <item quantity="one">¡La calma tiene premio! %1$s quiere quedarse contigo y has desbloqueado %2$d estilo más.</item>
+        <item quantity="many">¡La calma tiene premio! %1$s quiere quedarse contigo y has desbloqueado %2$d estilos más.</item>
+        <item quantity="other">¡La calma tiene premio! %1$s quiere quedarse contigo y has desbloqueado %2$d estilos más.</item>
+    </plurals>
+    <plurals name="style_next_friend_hint">
+        <item quantity="one">Falta %1$d minuto en calma para conocer a %2$s</item>
+        <item quantity="many">Faltan %1$d minutos en calma para conocer a %2$s</item>
+        <item quantity="other">Faltan %1$d minutos en calma para conocer a %2$s</item>
+    </plurals>
 </resources>

@@ -3,20 +3,23 @@ package com.quietbuddy.core
 import kotlinx.coroutines.flow.Flow
 
 /**
- * A colour style for a character. Each character has one free default style; the others unlock
+ * A colour style for a character. Buddy's default is free; Mochi's default is earned, and the others unlock
  * as the room collects calm minutes (see [Unlocks]).
  *
  * [key] is persisted (selected style and unlocked set); never change an existing key.
  */
 enum class CharacterStyle(val key: String, val character: Character, val unlockAtCalmMinutes: Int) {
     BUDDY_SUNNY("buddy_sunny", Character.BUDDY, 0),
-    KITTEN_GINGER("kitten_ginger", Character.KITTEN, 0),
     BUDDY_MINT("buddy_mint", Character.BUDDY, 30),
-    KITTEN_GREY("kitten_grey", Character.KITTEN, 120),
-    BUDDY_BERRY("buddy_berry", Character.BUDDY, 300),
+    KITTEN_GINGER("kitten_ginger", Character.KITTEN, 120),
+    BUDDY_BERRY("buddy_berry", Character.BUDDY, 240),
+    KITTEN_GREY("kitten_grey", Character.KITTEN, 400),
     KITTEN_SNOW("kitten_snow", Character.KITTEN, 600);
 
     val isFree: Boolean get() = unlockAtCalmMinutes == 0
+
+    /** True for a character's default style; unlocking it is what unlocks the character itself. */
+    val isCharacterDefault: Boolean get() = this == defaultFor(character)
 
     companion object {
         fun defaultFor(character: Character): CharacterStyle = when (character) {
@@ -66,6 +69,10 @@ data class Progress(
 
     fun isUnlocked(style: CharacterStyle, settings: AppSettings): Boolean =
         settings.unlockAllStyles || style in unlocked
+
+    /** A character is unlocked once its default style is. */
+    fun isUnlocked(character: Character, settings: AppSettings): Boolean =
+        isUnlocked(CharacterStyle.defaultFor(character), settings)
 }
 
 /** Implemented in the data package on its own Preferences DataStore ("progress"). */

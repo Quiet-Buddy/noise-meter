@@ -127,31 +127,51 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 Character.entries.forEach { c ->
                     val selected = settings.character == c
                     val shape = RoundedCornerShape(14.dp)
+                    val unlocked = progress.isUnlocked(c, settings)
+                    val friendStyle = CharacterStyle.defaultFor(c)
+                    val friendName = stringResource(Voices.of(c).name)
+                    val lockedDescription = if (unlocked) friendName else stringResource(
+                        R.string.style_locked_desc,
+                        friendName,
+                        pluralStringResource(R.plurals.style_needs_minutes, friendStyle.unlockAtCalmMinutes, friendStyle.unlockAtCalmMinutes),
+                    )
                     Column(
                         modifier = Modifier
                             .weight(1f)
                             .clip(shape)
                             .background(if (selected) palette.accentSoft else palette.background, shape)
                             .border(2.dp, if (selected) palette.accent else palette.line, shape)
-                            .selectable(
-                                selected = selected,
-                                role = Role.RadioButton,
-                                onClick = { viewModel.setCharacter(c) },
+                            .then(
+                                if (unlocked) Modifier.selectable(
+                                    selected = selected,
+                                    role = Role.RadioButton,
+                                    onClick = { viewModel.setCharacter(c) },
+                                ) else Modifier,
                             )
+                            .semantics(mergeDescendants = true) { if (!unlocked) contentDescription = lockedDescription }
                             .padding(vertical = 12.dp, horizontal = 4.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        CompositionLocalProvider(LocalCharacter provides c, LocalStyle provides settings.styleFor(c)) {
-                            CharacterView(mood = Mood.HAPPY, modifier = Modifier.size(64.dp))
+                        LockedPreview(unlocked = unlocked, size = 64.dp) {
+                            CompositionLocalProvider(LocalCharacter provides c, LocalStyle provides settings.styleFor(c)) {
+                                CharacterView(mood = Mood.HAPPY, modifier = Modifier.size(64.dp).alpha(if (unlocked) 1f else 0.35f))
+                            }
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(selected = selected, onClick = null)
+                            RadioButton(selected = selected, onClick = null, enabled = unlocked)
                             Text(
-                                stringResource(Voices.of(c).name),
+                                friendName,
                                 fontSize = 14.sp,
                                 fontWeight = FontWeight.ExtraBold,
                                 color = if (selected) palette.accent else palette.ink,
+                            )
+                        }
+                        if (!unlocked) {
+                            Text(
+                                stringResource(R.string.style_progress, progress.calmMinutes.coerceAtMost(friendStyle.unlockAtCalmMinutes.toLong()), friendStyle.unlockAtCalmMinutes),
+                                style = MaterialTheme.typography.labelSmall,
+                                textAlign = TextAlign.Center,
                             )
                         }
                     }
@@ -462,6 +482,17 @@ private fun NavRow(title: String, subtitle: String, onClick: () -> Unit) {
 }
 
 
+/** Wraps a character preview; when locked, overlays a lock icon (the preview itself is dimmed by the caller). */
+@Composable
+private fun LockedPreview(unlocked: Boolean, size: androidx.compose.ui.unit.Dp, content: @Composable () -> Unit) {
+    Box(contentAlignment = Alignment.Center) {
+        content()
+        if (!unlocked) {
+            Icon(Icons.Rounded.Lock, contentDescription = null, tint = LocalPalette.current.ink, modifier = Modifier.size(if (size >= 64.dp) 28.dp else 24.dp))
+        }
+    }
+}
+
 /** One tile per style of [character]; locked ones show the calm-minute progress and cannot be picked. */
 @Composable
 private fun StylesSection(
@@ -507,16 +538,13 @@ private fun StylesSection(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(2.dp),
                 ) {
-                    Box(contentAlignment = Alignment.Center) {
+                    LockedPreview(unlocked = unlocked, size = 56.dp) {
                         CompositionLocalProvider(LocalCharacter provides character, LocalStyle provides style) {
                             CharacterView(
                                 mood = Mood.HAPPY,
                                 animated = false,
                                 modifier = Modifier.size(56.dp).alpha(if (unlocked) 1f else 0.35f),
                             )
-                        }
-                        if (!unlocked) {
-                            Icon(Icons.Rounded.Lock, contentDescription = null, tint = palette.ink, modifier = Modifier.size(24.dp))
                         }
                     }
                     Text(
@@ -545,7 +573,11 @@ private fun StylesSection(
                     stringResource(R.string.style_all_unlocked)
                 } else {
                     val remaining = (next.unlockAtCalmMinutes - progress.calmMinutes).toInt().coerceAtLeast(1)
-                    pluralStringResource(R.plurals.style_next_hint, remaining, remaining, stringResource(next.nameRes))
+                    if (next.isCharacterDefault) {
+                        pluralStringResource(R.plurals.style_next_friend_hint, remaining, remaining, stringResource(Voices.of(next.character).name))
+                    } else {
+                        pluralStringResource(R.plurals.style_next_hint, remaining, remaining, stringResource(next.nameRes))
+                    }
                 },
                 style = MaterialTheme.typography.labelSmall,
             )

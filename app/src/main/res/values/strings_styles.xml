@@ -30,4 +30,15 @@
     </plurals>
     <string name="unlock_try">Try it</string>
     <string name="unlock_later">Later</string>
+
+    <string name="unlock_friend_title">A new friend!</string>
+    <string name="unlock_friend_body">All that calm paid off! %1$s wants to stay with you.</string>
+    <plurals name="unlock_friend_body_more">
+        <item quantity="one">All that calm paid off! %1$s wants to stay with you, and you unlocked %2$d more style.</item>
+        <item quantity="other">All that calm paid off! %1$s wants to stay with you, and you unlocked %2$d more styles.</item>
+    </plurals>
+    <plurals name="style_next_friend_hint">
+        <item quantity="one">%1$d more calm minute to meet %2$s</item>
+        <item quantity="other">%1$d more calm minutes to meet %2$s</item>
+    </plurals>
 </resources>

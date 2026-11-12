@@ -521,11 +521,12 @@ private fun openAppSettings(context: Context) {
 /** Tells the user about newly earned styles and offers to switch to the newest one. */
 @Composable
 private fun UnlockDialog(unlocks: List<CharacterStyle>, onTry: (CharacterStyle) -> Unit, onLater: () -> Unit) {
-    val newest = unlocks.maxByOrNull { it.unlockAtCalmMinutes } ?: return
-    val name = stringResource(newest.nameRes)
+    val friend = unlocks.firstOrNull { it.isCharacterDefault }
+    val newest = friend ?: unlocks.maxByOrNull { it.unlockAtCalmMinutes } ?: return
+    val name = if (friend != null) stringResource(Voices.of(friend.character).name) else stringResource(newest.nameRes)
     AlertDialog(
         onDismissRequest = onLater,
-        title = { Text(stringResource(R.string.unlock_title), style = MaterialTheme.typography.titleMedium) },
+        title = { Text(stringResource(if (friend != null) R.string.unlock_friend_title else R.string.unlock_title), style = MaterialTheme.typography.titleMedium) },
         text = {
             Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
                 CompositionLocalProvider(LocalCharacter provides newest.character, LocalStyle provides newest) {
@@ -533,8 +534,14 @@ private fun UnlockDialog(unlocks: List<CharacterStyle>, onTry: (CharacterStyle) 
                 }
                 Spacer(Modifier.height(12.dp))
                 Text(
-                    if (unlocks.size > 1) pluralStringResource(R.plurals.unlock_body_more, unlocks.size - 1, name, unlocks.size - 1)
-                    else stringResource(R.string.unlock_body, name),
+                    if (unlocks.size > 1) {
+                        pluralStringResource(
+                            if (friend != null) R.plurals.unlock_friend_body_more else R.plurals.unlock_body_more,
+                            unlocks.size - 1, name, unlocks.size - 1,
+                        )
+                    } else {
+                        stringResource(if (friend != null) R.string.unlock_friend_body else R.string.unlock_body, name)
+                    },
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                 )
