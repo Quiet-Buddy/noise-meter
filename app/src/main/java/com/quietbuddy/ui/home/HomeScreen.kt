@@ -221,6 +221,8 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
             tapCount = state.tapCount,
             onTap = viewModel::onCharacterTapped,
             onExit = { fullScreen = false },
+            // Always the large chip: full screen is for reading the room from across it.
+            chip = { StatusChip(mood = state.mood, db = state.db, listening = state.listening, large = true) },
             modifier = Modifier.background(background),
         )
         return
@@ -402,6 +404,7 @@ private fun FullScreenStage(
     tapCount: Int,
     onTap: () -> Unit,
     onExit: () -> Unit,
+    chip: @Composable () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     val palette = LocalPalette.current
@@ -419,13 +422,15 @@ private fun FullScreenStage(
             .statusBarsPadding(),
         contentAlignment = Alignment.Center,
     ) {
-        // The bubble (two lines plus tail) and some breathing room sit above the character, in both orientations.
-        // 160dp leaves room for the bubble above and the exit hint below the feet.
-        val size = minOf(maxWidth * 0.9f, maxHeight - 160.dp).coerceAtLeast(120.dp)
+        // The bubble (two lines plus tail) sits above the character and the dB chip below it, in both orientations;
+        // 240dp leaves room for both plus the exit hint at the bottom.
+        val size = minOf(maxWidth * 0.9f, maxHeight - 240.dp).coerceAtLeast(120.dp)
         Column(Modifier.widthIn(max = size.coerceAtLeast(320.dp)), horizontalAlignment = Alignment.CenterHorizontally) {
             SpeechBubble(text = speech)
             Spacer(Modifier.height(4.dp))
             BuddyStage(mood = mood, db = db, size = size, tapCount = tapCount, onTap = onTap)
+            Spacer(Modifier.height(16.dp))
+            chip()
         }
         Text(
             stringResource(R.string.home_full_screen_exit_hint),
