@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kitten_name">Mochi</string>
+    <string name="kitten_listening_title">Mochi está escuchando · %1$s</string>
+    <string name="kitten_greeting">¡Miau! Soy Mochi.</string>
+    <string name="kitten_challenge_won">¡Mochi ronronea a todo volumen! Lo has conseguido.</string>
+    <string name="kitten_sleeping">Zzz… toca el micrófono para despertarme.</string>
+
+    <string name="kitten_happy_1">Prrr, prrr… oigo los pájaros de fuera.</string>
+    <string name="kitten_happy_2">Todo está tranquilo y calentito. Hora de una siesta.</string>
+    <string name="kitten_happy_3">Shh, mis bigotes están muy relajados hoy.</string>
+    <string name="kitten_fine_1">Qué bien. Todos charlan bajito.</string>
+    <string name="kitten_fine_2">Justo la cantidad de ruido adecuada.</string>
+    <string name="kitten_fine_3">Hablar bien, escuchar bien. Prrr.</string>
+    <string name="kitten_worried_1">¿Mrrp? Se está poniendo algo ruidoso aquí.</string>
+    <string name="kitten_worried_2">Me tiemblan las orejitas. ¿Bajamos un poco el volumen?</string>
+    <string name="kitten_worried_3">¿Podemos jugar un poco más bajito?</string>
+    <string name="kitten_sad_1">Miau… ¿podemos hablar más bajito?</string>
+    <string name="kitten_sad_2">Hay mucho ruido. Me tiemblan las patitas.</string>
+    <string name="kitten_sad_3">Por favor, ayúdame a encontrar algo de calma.</string>
+    <string name="kitten_ears_1">¡Fsss! ¡Qué ruido! ¡Se me ha erizado el pelo!</string>
+    <string name="kitten_ears_2">¡Uy! ¡Estoy todo esponjado! ¿Hacemos silencio?</string>
+    <string name="kitten_ears_3">¡Qué ruidazo! ¡Hagamos una pausa tranquila!</string>
+
+    <string name="kitten_asleep">Mochi está dormido</string>
+    <string name="kitten_happy">Mochi está feliz</string>
+    <string name="kitten_fine">Mochi está bien</string>
+    <string name="kitten_worried">Mochi está preocupado</string>
+    <string name="kitten_sad">Mochi está triste</string>
+    <string name="kitten_ears">Mochi está asustado, con el pelo erizado</string>
+</resources>

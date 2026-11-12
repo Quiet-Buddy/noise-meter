@@ -22,6 +22,10 @@ import kotlin.random.Random
  * - Worried: a "shhh", a questioning "hmm?", bubbly "bloop-bloop".
  * - Sad: sad trombone, falling slide whistle, "uh-oh".
  * - Ears covered: "ahooga" horn, siren whoops, "boing-boing".
+ * The kitten's set is made of meows and cat noises (harmonic tones whose pitch rises then falls):
+ * - Worried: a questioning "mrrp?" trill, a small rising "mew?", soft "prrt-prrt" chirps.
+ * - Sad: a long falling "mewww", a whimpering "mew... mew", a sad descending meow.
+ * - Too loud (startled, fur puffed up): a hiss, a vibrato yowl "mrrraaow", a startled double "mreow!".
  *
  * Timbres are rich in harmonics in the 1–4 kHz range, where phone speakers and ears are most
  * sensitive, and are gently saturated so they sound loud and cut through a noisy room.
@@ -44,6 +48,7 @@ object AlertSounds {
     // No `else`: a new Character must get a sound set.
     private fun soundSet(character: Character): Map<Mood, List<Recipe>> = when (character) {
         Character.BUDDY -> buddySounds
+        Character.KITTEN -> kittenSounds
     }
 
     private class Recipe(val seconds: Double, val gain: Double, val drive: Double, val draw: Buf.() -> Unit)
@@ -111,6 +116,70 @@ object AlertSounds {
             },
         ),
     )
+
+    private val kittenSounds: Map<Mood, List<Recipe>> = mapOf(
+        Mood.WORRIED to listOf(
+            // "Mrrp?": a rolled trill that lifts at the end.
+            Recipe(0.7, gain = 0.75, drive = 1.5) {
+                tone(0.0, 0.5, { t -> glide(520.0, 880.0, t / 0.5) }, harmonics = 8, attack = 0.04, release = 0.1,
+                    vibratoHz = 28.0, vibratoDepth = 0.08)
+            },
+            // A small rising "mew?".
+            Recipe(0.6, gain = 0.75, drive = 1.5) {
+                tone(0.0, 0.5, { t -> meow(t / 0.5, 560.0, 900.0, 800.0, peakAt = 0.7) }, harmonics = 8, attack = 0.06,
+                    release = 0.12)
+            },
+            // "Prrt-prrt": two soft chirps.
+            Recipe(0.6, gain = 0.75, drive = 1.5) {
+                for (i in 0..1) {
+                    tone(i * 0.27, 0.2, { t -> glide(600.0 + 120.0 * i, 900.0 + 150.0 * i, t / 0.2) }, harmonics = 7,
+                        attack = 0.02, release = 0.06, vibratoHz = 30.0, vibratoDepth = 0.05)
+                }
+            },
+        ),
+        Mood.SAD to listOf(
+            // A long falling "mewwww".
+            Recipe(1.5, gain = 0.9, drive = 2.0) {
+                tone(0.0, 1.4, { t -> meow(t / 1.4, 600.0, 850.0, 380.0, peakAt = 0.2) }, harmonics = 9, attack = 0.08,
+                    release = 0.25, vibratoHz = 6.0, vibratoDepth = 0.02)
+            },
+            // A whimpering "mew... mew".
+            Recipe(1.4, gain = 0.9, drive = 2.0) {
+                for (i in 0..1) {
+                    tone(i * 0.65, 0.55, { t -> meow(t / 0.55, 520.0 - 40.0 * i, 760.0 - 60.0 * i, 430.0 - 40.0 * i) },
+                        harmonics = 8, attack = 0.07, release = 0.15, vibratoHz = 7.0, vibratoDepth = 0.025)
+                }
+            },
+            // A sad meow that droops step by step.
+            Recipe(1.2, gain = 0.9, drive = 2.0) {
+                tone(0.0, 1.1, { t -> glide(780.0, 400.0, t / 1.0) * (1 + 0.05 * sin(2 * PI * 3 * t)) }, harmonics = 9,
+                    attack = 0.1, release = 0.25, vibratoHz = 5.5, vibratoDepth = 0.02)
+            },
+        ),
+        Mood.EARS_COVERED to listOf(
+            // "Fssssst!": a hiss, with a sharp attack.
+            Recipe(0.9, gain = 1.0, drive = 3.0) {
+                noise(0.0, 0.85, lowHz = 1_500.0, highHz = 5_000.0, attack = 0.01, release = 0.4)
+            },
+            // "Mrrraaow": a wavering yowl.
+            Recipe(1.4, gain = 1.0, drive = 3.0) {
+                tone(0.0, 1.3, { t -> meow(t / 1.3, 500.0, 950.0, 450.0, peakAt = 0.4) }, harmonics = 12, attack = 0.05,
+                    release = 0.2, vibratoHz = 8.0, vibratoDepth = 0.05)
+                noise(0.0, 1.0, lowHz = 1_800.0, highHz = 4_000.0, attack = 0.1, release = 0.4)
+            },
+            // A startled double "mreow! mreow!".
+            Recipe(1.1, gain = 1.0, drive = 3.0) {
+                for (i in 0..1) {
+                    tone(i * 0.5, 0.45, { t -> meow(t / 0.45, 600.0, 1_000.0 - 60.0 * i, 500.0, peakAt = 0.25) },
+                        harmonics = 10, attack = 0.015, release = 0.1, vibratoHz = 9.0, vibratoDepth = 0.03)
+                }
+            },
+        ),
+    )
+
+    /** A meow's pitch contour as [x] goes 0..1: [from] Hz up to [peak] at [peakAt], then down to [to]. */
+    private fun meow(x: Double, from: Double, peak: Double, to: Double, peakAt: Double = 0.35): Double =
+        if (x < peakAt) glide(from, peak, x / peakAt) else glide(peak, to, (x - peakAt) / (1 - peakAt))
 
     /** Exponential (musical) glide from [from] to [to] Hz as [x] goes 0..1, then holds. */
     private fun glide(from: Double, to: Double, x: Double): Double =

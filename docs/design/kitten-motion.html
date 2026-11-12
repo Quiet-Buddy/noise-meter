@@ -1,0 +1,720 @@
+<title>Kitten Mood Motion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: a big stage for the live kitten, mood buttons under it, tuning controls beside it (stacked on phones). */
+:root {
+  --bg: #F4F8FB;
+  --card: #FFFFFF;
+  --ink: #1F2A37;
+  --ink-soft: #5B6B7A;
+  --line: #E3EBF2;
+  --accent: #2E6FBF;
+  --accent-soft: #E7F0FA;
+  --calm: #2E9F6E;   --calm-soft: #DDF3E8;
+  --loud: #C98512;   --loud-soft: #FDE8C4;
+  --too: #D9513F;    --too-soft: #FAD6CF;
+  --sleep: #5A6C8C;  --sleep-soft: #E4E9F3;
+  --font-display: "Baloo 2", "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-body: "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10161D; --card: #18212B; --ink: #E8EEF4; --ink-soft: #9DAEBF; --line: #2A3643;
+    --accent: #86B4EE; --accent-soft: #1F2E40;
+    --calm: #5CC79A; --calm-soft: #CFE7DB; --loud: #E6B04F; --loud-soft: #F3DDB6;
+    --too: #F07D6C; --too-soft: #F1CBC3; --sleep: #9FB0CF; --sleep-soft: #D7DEEA;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10161D; --card: #18212B; --ink: #E8EEF4; --ink-soft: #9DAEBF; --line: #2A3643;
+  --accent: #86B4EE; --accent-soft: #1F2E40;
+  --calm: #5CC79A; --calm-soft: #CFE7DB; --loud: #E6B04F; --loud-soft: #F3DDB6;
+  --too: #F07D6C; --too-soft: #F1CBC3; --sleep: #9FB0CF; --sleep-soft: #D7DEEA;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 32px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: grid; gap: 4px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-height: 1.1; margin: 0; text-wrap: balance; }
+.lede { margin: 0; color: var(--ink-soft); max-width: 62ch; }
+.main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+.stage {
+  position: relative; border-radius: 28px; background: var(--calm-soft);
+  transition: background-color 500ms ease; aspect-ratio: 1 / 1; max-width: 100%;
+  display: grid; place-items: center; overflow: hidden;
+}
+.stage svg { width: 92%; height: 92%; display: block; }
+.stage-tag {
+  position: absolute; left: 16px; top: 14px; font-weight: 800; font-size: 13px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #3B4A5A; background: rgba(255,255,255,0.7); padding: 4px 10px; border-radius: 999px;
+}
+.stage-caption {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); max-width: calc(100% - 32px);
+  font-weight: 800; font-size: 15px; color: #2B3846; background: rgba(255,255,255,0.82);
+  padding: 6px 14px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.moods { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .moods { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.mood {
+  appearance: none; border: 2px solid var(--line); background: var(--card); color: var(--ink);
+  border-radius: 18px; padding: 6px 4px 8px; display: grid; justify-items: center; gap: 0; cursor: pointer;
+  font: 800 13px/1.2 var(--font-body); transition: border-color 150ms, transform 150ms;
+}
+.mood:hover { transform: translateY(-2px); }
+.mood:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.mood[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.mood svg { width: 100%; max-width: 76px; aspect-ratio: 1 / 1; height: auto; }
+.mood .band { font-weight: 700; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+.band.calm { color: var(--calm); } .band.loud { color: var(--loud); } .band.too { color: var(--too); } .band.sleep { color: var(--sleep); }
+.key { color: var(--ink-soft); font-weight: 700; font-size: 11px; }
+
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px; display: grid; gap: 18px; }
+.panel h2 { font-family: var(--font-display); font-weight: 800; font-size: 19px; margin: 0; line-height: 1.2; }
+.group { display: grid; gap: 10px; }
+.group-title { font-weight: 800; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.toggle { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.toggle input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.toggle b { display: block; font-weight: 800; }
+.toggle span { color: var(--ink-soft); font-size: 13.5px; }
+.slider { display: grid; gap: 2px; }
+.slider-head { display: flex; justify-content: space-between; gap: 8px; font-weight: 800; }
+.slider-head output { font-variant-numeric: tabular-nums; color: var(--accent); }
+.slider input { width: 100%; accent-color: var(--accent); }
+.slider small { color: var(--ink-soft); font-size: 13px; }
+.btn {
+  appearance: none; border: 0; border-radius: 14px; padding: 11px 16px; font: 800 15px var(--font-body);
+  background: var(--accent); color: var(--card); cursor: pointer;
+}
+.btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.btn.secondary { background: var(--accent-soft); color: var(--accent); }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.notes { display: grid; gap: 6px; margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 14px; }
+.notes b { color: var(--ink); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Kitten mood motion</h1>
+    <p class="lede">Tap a mood and watch the kitten move into it. Moods can change in any order, including straight from happy to too loud. Number keys 1–6 work too.</p>
+  </header>
+
+  <div class="main">
+    <div class="group">
+      <div class="stage" id="stage">
+        <span class="stage-tag" id="stageTag">Calm</span>
+        <svg id="kitten" viewBox="-10 -10 220 220" role="img" aria-label="Kitten"></svg>
+        <span class="stage-caption" id="caption" hidden></span>
+      </div>
+      <div class="moods" id="moods"></div>
+    </div>
+
+    <aside class="panel">
+      <div class="group">
+        <h2>Noisy room demo</h2>
+        <p class="lede" style="font-size:14px">Plays a made-up classroom hour: quiet, chatter, a sudden bang, settling down, and lights out.</p>
+        <div class="row">
+          <button class="btn" id="playBtn" type="button">Play demo</button>
+          <button class="btn secondary" id="stopBtn" type="button" hidden>Stop</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Motion</div>
+        <label class="toggle"><input type="checkbox" id="blend" checked><div><b>Blend between moods</b><span>Turn off to see today’s instant swap with a bounce.</span></div></label>
+        <label class="toggle"><input type="checkbox" id="idle" checked><div><b>Idle movement</b><span>Blinking, tail sway, ear twitches, breathing, trembling.</span></div></label>
+        <label class="toggle"><input type="checkbox" id="slow"><div><b>Slow motion</b><span>Everything at ¼ speed, to inspect a transition.</span></div></label>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Look</div>
+        <div class="slider">
+          <div class="slider-head"><label for="eyeSize">Eye size</label><output id="eyeOut" for="eyeSize">135%</output></div>
+          <input type="range" id="eyeSize" min="100" max="150" step="5" value="135">
+          <small>100% is the first design. Closed eyes grow half as much.</small>
+        </div>
+        <div class="slider">
+          <div class="slider-head"><label for="eyeHeight">Eye height</label><output id="eyeHOut" for="eyeHeight">8 up</output></div>
+          <input type="range" id="eyeHeight" min="0" max="14" step="1" value="8">
+          <small>How far the eyes sit above their original spot, in design units (the head is 128 wide).</small>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Transition speed</div>
+        <div class="slider">
+          <div class="slider-head"><label for="upMs">Getting louder</label><output id="upOut" for="upMs">180 ms</output></div>
+          <input type="range" id="upMs" min="60" max="800" step="10" value="180">
+          <small>Fast, like a startled cat.</small>
+        </div>
+        <div class="slider">
+          <div class="slider-head"><label for="downMs">Calming down</label><output id="downOut" for="downMs">900 ms</output></div>
+          <input type="range" id="downMs" min="200" max="2500" step="50" value="900">
+          <small>Fur settles slowly; eyes recover first, ears last.</small>
+        </div>
+        <div class="slider">
+          <div class="slider-head"><label for="sleepMs">Falling asleep / waking</label><output id="sleepOut" for="sleepMs">1400 ms</output></div>
+          <input type="range" id="sleepMs" min="300" max="3000" step="50" value="1400">
+          <small>Eyes close last when falling asleep, open first when waking.</small>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">What changes</div>
+        <ul class="notes">
+          <li><b>Fur</b> grows from smooth to bristling for too loud.</li>
+          <li><b>Ears</b> tilt back when worried, droop when sad, fold flat when too loud.</li>
+          <li><b>Tail</b> curls up, droops, bottle-brushes, or wraps the paws asleep.</li>
+          <li><b>Eyes and mouth</b> morph; tears, sweat, sparkles and Z’s fade in.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+// ---------- palette (character art stays the same in both themes) ----------
+const C = {
+  outline: '#4A2E22', body: '#F7B267', cream: '#FFF3E2', stripe: '#E48A3A',
+  innerEar: '#FFB3BE', nose: '#F47C93', cheek: '#FF9AA8', tear: '#8FC8FF',
+  mouth: '#7A3240', tongue: '#FF7A8A', eye: '#3B2418', eyeLow: '#7A5340',
+  loud: '#D9513F', spark: '#FFD45C', bubble: '#DFF1FF',
+};
+
+const f = n => (Math.round(n * 10) / 10).toString();
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const mx = x => 200 - x;
+const mirrorPts = arr => arr.map((v, i) => (i % 2 === 0 ? 200 - v : v));
+
+// ---------- shapes shared by every pose (same point counts so they can blend) ----------
+const EAR_UP   = [50,84, 30,40, 38,18, 42,10, 51,14, 74,26, 98,52];
+const EAR_FLAT = [58,80, 36,74, 13,65,  7,62, 12,58, 38,44, 62,50];
+const IN_UP    = [50,58, 42,36, 45,26, 47,21, 52,24, 66,32, 78,44];
+const IN_FLAT  = [53,72, 37,68, 21,62, 19,60, 22,58, 38,52, 56,56];
+
+const TAIL = {
+  up:    [140,172, 176,172, 180,140, 183,118, 172,106, 164,98, 166,92],
+  down:  [140,176, 164,186, 182,180, 194,175, 194,164, 194,156, 188,152],
+  brush: [140,168, 168,164, 176,136, 180,110, 182,86, 183,66, 182,52],
+  wrap:  [142,172, 168,178, 160,192, 150,200, 100,198, 64,197, 56,188],
+};
+const CLOSED = {
+  happy:   [58,94, 70,78, 82,94],
+  sleep:   [58,92, 70,102, 82,92],
+  squeeze: [60,82, 92,92, 60,102],
+};
+
+// ---------- poses: every mood is just numbers ----------
+const FINE = {
+  poof: 0, tail: TAIL.up, tailFront: 0, sway: 4, swayHz: 0.35,
+  ear: 0, earFold: 0, twitch: 0.12,
+  open: 1, eyeRx: 12, eyeRy: 14, hi: 1, eyeDy: 0, closed: CLOSED.sleep, closedW: 4.5, lashes: 0, blink: 1,
+  browA: 0, brow: [60,70, 70,66, 80,68],
+  mouth: [87,113, 93,120, 100,113, 107,120, 113,113], mouthOpen: 0, fang: 0,
+  cheek: 0.6, sparkle: 0, sweat: 0, sweatX: 160, sweatY: 54, well: 0, tearDrop: 0,
+  zzz: 0, bubble: 0, shock: 0, whisker: 0, headDy: 0, shake: 0, breathe: 0,
+};
+const P = (o) => Object.assign({}, FINE, o);
+const POSES = {
+  happy: P({ sway: 8, swayHz: 0.6, open: 0, closed: CLOSED.happy, closedW: 5, blink: 0,
+             mouth: [86,112, 93,120, 100,113, 107,120, 114,112], mouthOpen: 1, cheek: 0.9, sparkle: 1, headDy: -2 }),
+  fine: P({}),
+  worried: P({ ear: -14, twitch: 0.6, sway: 3, swayHz: 1.6, eyeRx: 11, eyeRy: 13, hi: 0.75, eyeDy: 2,
+               browA: 1, brow: [58,72, 68,70, 80,64], mouth: [86,118, 93,113, 100,118, 107,123, 114,117],
+               cheek: 0.35, sweat: 1 }),
+  sad: P({ ear: -48, twitch: 0.04, tail: TAIL.down, sway: 1.2, swayHz: 0.2, eyeDy: 4,
+           browA: 1, brow: [58,76, 70,72, 80,64], mouth: [90,122, 95,114, 100,113, 105,114, 110,122],
+           cheek: 0.35, well: 1, tearDrop: 1, whisker: -10, headDy: 3 }),
+  covered: P({ poof: 1, tail: TAIL.brush, sway: 0, ear: 0, earFold: 1, twitch: 0,
+               open: 0, closed: CLOSED.squeeze, closedW: 5, blink: 0,
+               mouth: [86,116, 93,111, 100,116, 107,121, 114,115], fang: 1,
+               cheek: 0.5, sweat: 1, sweatX: 150, sweatY: 98, shock: 1, whisker: 12, shake: 1 }),
+  asleep: P({ ear: -10, twitch: 0.03, tail: TAIL.wrap, tailFront: 1, sway: 1, swayHz: 0.15,
+              open: 0, closed: CLOSED.sleep, closedW: 4.5, lashes: 1, blink: 0,
+              mouth: [92,114, 96,118, 100,114, 104,118, 108,114],
+              cheek: 0.5, bubble: 1, zzz: 1, whisker: -4, headDy: 4, breathe: 1 }),
+};
+
+const MOODS = [
+  { key: 'happy',   label: 'Happy',    band: 'calm',  bandLabel: 'Calm',     level: 0 },
+  { key: 'fine',    label: 'Fine',     band: 'calm',  bandLabel: 'Calm',     level: 1 },
+  { key: 'worried', label: 'Worried',  band: 'loud',  bandLabel: 'Loud',     level: 2 },
+  { key: 'sad',     label: 'Sad',      band: 'too',   bandLabel: 'Too loud', level: 3 },
+  { key: 'covered', label: 'Too loud', band: 'too',   bandLabel: 'Too loud', level: 4 },
+  { key: 'asleep',  label: 'Asleep',   band: 'sleep', bandLabel: 'Paused',   level: -1 },
+];
+const BY_KEY = Object.fromEntries(MOODS.map(m => [m.key, m]));
+
+// Which part of the body each number belongs to, so parts can move at different moments.
+const GROUP = {
+  poof: 'fur', tail: 'fur', tailFront: 'fur', sway: 'fur', swayHz: 'fur', shake: 'fur',
+  ear: 'ears', earFold: 'ears', twitch: 'ears',
+};
+const groupOf = k => GROUP[k] || 'face';
+// [start, end] of each part's movement, as a fraction of the transition.
+const WINDOWS = {
+  louder: { fur: [0, 1],    ears: [0, 0.8],   face: [0, 0.6] },
+  calmer: { fur: [0, 1],    ears: [0.3, 1],   face: [0, 0.55] },
+  sleep:  { fur: [0, 0.9],  ears: [0.1, 0.7], face: [0.35, 1] },
+  wake:   { fur: [0.25, 1], ears: [0.2, 0.75], face: [0, 0.45] },
+};
+const EASE = {
+  louder: t => 1 - Math.pow(1 - t, 3),
+  calmer: t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  sleep:  t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+  wake:   t => 1 - Math.pow(1 - t, 2),
+};
+
+function lerpPose(a, b, tFor) {
+  const out = {};
+  for (const k in b) {
+    const t = tFor(k);
+    if (Array.isArray(b[k])) out[k] = b[k].map((v, i) => lerp(a[k][i], v, t));
+    else out[k] = lerp(a[k], b[k], t);
+  }
+  return out;
+}
+const clonePose = p => JSON.parse(JSON.stringify(p));
+
+// ---------- drawing helpers ----------
+const path = (d, fill, w = 4, extra = '') =>
+  `<path d="${d}" fill="${fill}" stroke="${C.outline}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round" ${extra}/>`;
+const fillPath = (d, fill, extra = '') => `<path d="${d}" fill="${fill}" ${extra}/>`;
+const ink = (d, w = 4, color = C.outline, extra = '') =>
+  `<path d="${d}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+const ell = (cx, cy, rx, ry, fill, stroke = false, w = 4, extra = '') =>
+  `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(Math.max(0, rx))}" ry="${f(Math.max(0, ry))}" fill="${fill}" ${stroke ? `stroke="${C.outline}" stroke-width="${w}"` : ''} ${extra}/>`;
+const op = a => `opacity="${f(clamp(a) * 100) / 100}"`;
+const q3 = p => `M ${f(p[0])} ${f(p[1])} Q ${f(p[2])} ${f(p[3])} ${f(p[4])} ${f(p[5])} Q ${f(p[6])} ${f(p[7])} ${f(p[8])} ${f(p[9])} Q ${f(p[10])} ${f(p[11])} ${f(p[12])} ${f(p[13])} Z`;
+const q1 = p => `M ${f(p[0])} ${f(p[1])} Q ${f(p[2])} ${f(p[3])} ${f(p[4])} ${f(p[5])}`;
+const q2 = p => `M ${f(p[0])} ${f(p[1])} Q ${f(p[2])} ${f(p[3])} ${f(p[4])} ${f(p[5])} Q ${f(p[6])} ${f(p[7])} ${f(p[8])} ${f(p[9])}`;
+
+// Ellipse outline made of fur tufts; depthAt(angle, i) sets how far each tuft sticks out.
+function fluffy(cx, cy, rx, ry, n, depthAt, sweep) {
+  const pt = (a, k) => { const r = a * Math.PI / 180; return [cx + (rx + k) * Math.cos(r), cy + (ry + k) * Math.sin(r)]; };
+  const span = 360 / n;
+  let p = pt(-90, 0);
+  let d = `M ${f(p[0])} ${f(p[1])}`;
+  for (let i = 0; i < n; i++) {
+    const a = -90 + i * span;
+    const dd = depthAt(a + span * 0.5, i);
+    const c1 = pt(a + span * 0.3, dd * 0.8), tip = pt(a + span * sweep, dd), c2 = pt(a + span * 0.9, dd * 0.2), v = pt(a + span, 0);
+    d += ` Q ${f(c1[0])} ${f(c1[1])} ${f(tip[0])} ${f(tip[1])} Q ${f(c2[0])} ${f(c2[1])} ${f(v[0])} ${f(v[1])}`;
+  }
+  return d + ' Z';
+}
+const zone = (a, centers, half, soft) => {
+  let w = 0;
+  for (const c of centers) w = Math.max(w, clamp((half - Math.abs(a - c)) / soft));
+  return w;
+};
+const vary = i => 1 + 0.35 * Math.sin(i * 2.4 + 0.7);
+
+// Tail as an outlined tube along three quadratic segments; poof thickens it and adds bristles.
+function tail(pts, poof, swayDeg) {
+  const [bx, by] = [pts[0], pts[1]];
+  const rad = swayDeg * Math.PI / 180, cs = Math.cos(rad), sn = Math.sin(rad);
+  const P = [];
+  for (let i = 0; i < pts.length; i += 2) {
+    const dx = pts[i] - bx, dy = pts[i + 1] - by;
+    P.push([bx + dx * cs - dy * sn, by + dx * sn + dy * cs]);
+  }
+  const segs = [[P[0], P[1], P[2]], [P[2], P[3], P[4]], [P[4], P[5], P[6]]];
+  const samples = [];
+  const N = 14;
+  segs.forEach((s, si) => {
+    for (let j = si === 0 ? 0 : 1; j <= N; j++) {
+      const t = j / N, u = 1 - t;
+      const x = u * u * s[0][0] + 2 * u * t * s[1][0] + t * t * s[2][0];
+      const y = u * u * s[0][1] + 2 * u * t * s[1][1] + t * t * s[2][1];
+      let tx = 2 * u * (s[1][0] - s[0][0]) + 2 * t * (s[2][0] - s[1][0]);
+      let ty = 2 * u * (s[1][1] - s[0][1]) + 2 * t * (s[2][1] - s[1][1]);
+      const len = Math.hypot(tx, ty) || 1; tx /= len; ty /= len;
+      samples.push({ x, y, tx, ty });
+    }
+  });
+  const R = 9 + poof * 4, spike = poof * 7;
+  const tri = i => [0, 0.5, 1, 0.5][i % 4];
+  const left = [], right = [];
+  samples.forEach((s, i) => {
+    const nx = -s.ty, ny = s.tx;
+    const fade = smooth(0, 4, i);
+    const rl = R + spike * tri(i) * fade, rr = R + spike * tri(i + 2) * fade;
+    left.push([s.x + nx * rl, s.y + ny * rl]);
+    right.push([s.x - nx * rr, s.y - ny * rr]);
+  });
+  const e = samples[samples.length - 1];
+  const cap = [];
+  for (let k = 1; k < 8; k++) {
+    const a = Math.PI * k / 8, nx = -e.ty, ny = e.tx;
+    const r = R + spike * 0.6;
+    cap.push([e.x + (nx * Math.cos(a) + e.tx * Math.sin(a)) * r, e.y + (ny * Math.cos(a) + e.ty * Math.sin(a)) * r]);
+  }
+  const all = [...left, ...cap, ...right.reverse()];
+  const d = 'M ' + all.map(p => `${f(p[0])} ${f(p[1])}`).join(' L ') + ' Z';
+  let stripes = '';
+  for (const fr of [0.5, 0.68, 0.85]) {
+    const s = samples[Math.round(fr * (samples.length - 1))];
+    const nx = -s.ty, ny = s.tx, r = R * 0.55;
+    stripes += `M ${f(s.x + nx * r)} ${f(s.y + ny * r)} L ${f(s.x - nx * r)} ${f(s.y - ny * r)} `;
+  }
+  return path(d, C.body) + ink(stripes, 3.5, C.stripe);
+}
+
+function earSvg(p, side, twitchDeg) {
+  const fold = p.earFold;
+  let outer = EAR_UP.map((v, i) => lerp(v, EAR_FLAT[i], fold));
+  let inner = IN_UP.map((v, i) => lerp(v, IN_FLAT[i], fold));
+  let tufts = 'M 52 54 Q 50 42 47 34 M 57 52 Q 57 42 55 36 M 62 50 Q 63 43 63 38';
+  let px = 66, angle = p.ear + twitchDeg;
+  if (side === 'R') {
+    outer = mirrorPts(outer); inner = mirrorPts(inner);
+    tufts = 'M 148 54 Q 150 42 153 34 M 143 52 Q 143 42 145 36 M 138 50 Q 137 43 137 38';
+    px = 134; angle = -angle;
+  }
+  return `<g transform="rotate(${f(angle)} ${px} 60)">` + path(q3(outer), C.body) + fillPath(q3(inner), C.innerEar)
+    + ink(tufts, 2, C.cream, op(1 - fold * 1.4)) + '</g>';
+}
+
+function sparkle(x, y, s, a) {
+  const d = `M ${f(x)} ${f(y - s)} Q ${f(x + s * .18)} ${f(y - s * .18)} ${f(x + s)} ${f(y)} Q ${f(x + s * .18)} ${f(y + s * .18)} ${f(x)} ${f(y + s)} Q ${f(x - s * .18)} ${f(y + s * .18)} ${f(x - s)} ${f(y)} Q ${f(x - s * .18)} ${f(y - s * .18)} ${f(x)} ${f(y - s)} Z`;
+  return path(d, C.spark, 2, op(a));
+}
+function drop(x, y, h, a) {
+  return path(`M ${f(x)} ${f(y)} Q ${f(x + h * .35)} ${f(y + h * .7)} ${f(x)} ${f(y + h)} Q ${f(x - h * .35)} ${f(y + h * .7)} ${f(x)} ${f(y)} Z`, C.tear, 2.5, op(a));
+}
+
+function eye(cx, cy, p, open) {
+  let o = '';
+  if (open > 0.03) {
+    const ry = p.eyeRy * open, rx = p.eyeRx;
+    o += ell(cx, cy, rx, ry, C.eye);
+    o += fillPath(`M ${f(cx - rx + 2)} ${f(cy + 3 * open)} Q ${f(cx)} ${f(cy + (ry + 3))} ${f(cx + rx - 2)} ${f(cy + 3 * open)} Q ${f(cx)} ${f(cy + ry - 5 * open)} ${f(cx - rx + 2)} ${f(cy + 3 * open)} Z`, C.eyeLow);
+    const ha = smooth(0.45, 0.8, open);
+    const big = lerp(4, 5, p.hi);
+    o += ell(cx + 4, cy - 5 * open, big, big * 1.1 * open, '#FFFFFF', false, 0, op(ha));
+    o += ell(cx - 4, cy + 6 * open, 2.4, 2.4 * open, '#FFFFFF', false, 0, op(ha));
+  }
+  return o;
+}
+
+// ---------- one full frame ----------
+function render(p, fx) {
+  const t = fx.time;
+  const sway = fx.idle ? p.sway * Math.sin(t * Math.PI * 2 * p.swayHz) : 0;
+  const tremble = fx.idle ? p.shake : 0;
+  const poofJitter = tremble * 0.12 * Math.sin(t * 47);
+  const poof = clamp(p.poof + poofJitter, 0, 1.2);
+  let o = '';
+
+  // tail behind the body
+  const tailSvg = tail(p.tail, poof, sway);
+  if (p.tailFront < 0.5) o += tailSvg;
+
+  // body
+  const body = fluffy(100, 158, 46 + 6 * poof, 34 + 2 * poof, 20,
+    (a, i) => 6 * zone(a, [10, 170], 20, 8) + poof * 8 * vary(i), 0.66);
+  o += path(body, C.body);
+  o += fillPath('M 76 132 Q 100 142 124 132 Q 128 146 120 156 Q 117 152 114 160 Q 110 154 106 164 Q 102 157 100 166 Q 98 157 94 164 Q 90 154 86 160 Q 83 152 80 156 Q 72 146 76 132 Z', C.cream);
+  o += ink(`M ${f(70 - 4 * poof)} 152 L ${f(76 - 2 * poof)} 150 M ${f(130 + 4 * poof)} 152 L ${f(124 + 2 * poof)} 150`, 2.5, C.stripe);
+  if (p.tailFront >= 0.5) o += tailSvg;
+  for (const cx of [84, 116]) {
+    o += ell(cx, 184, 16, 10, C.cream, true);
+    o += ink(`M ${cx - 5} 178 L ${cx - 5} 184 M ${cx + 5} 178 L ${cx + 5} 184`, 2.5);
+  }
+
+  // head group
+  o += `<g transform="translate(0 ${f(p.headDy)})">`;
+  o += earSvg(p, 'L', fx.twitchL) + earSvg(p, 'R', fx.twitchR);
+  o += path('M 90 40 Q 91 32 94 30 Q 96 34 99 34 Q 100 26 105 24 Q 105 30 107 33 Q 109 30 112 30 Q 110 35 111 40 Z', C.body);
+  const head = fluffy(100, 88, 64, 54, 28,
+    (a, i) => 10 * zone(a, [12, 168], 26, 8) + poof * 9 * vary(i), 0.66);
+  o += path(head, C.body);
+  // markings
+  o += fillPath('M 95 35 Q 100 56 105 35 Z', C.stripe) + fillPath('M 80 38 Q 87 54 89 36 Z', C.stripe) + fillPath('M 120 38 Q 113 54 111 36 Z', C.stripe);
+  o += fillPath('M 37 82 Q 50 85 37 89 Z', C.stripe) + fillPath('M 163 82 Q 150 85 163 89 Z', C.stripe);
+  o += fillPath('M 38 96 Q 48 98 39 102 Z', C.stripe) + fillPath('M 162 96 Q 152 98 161 102 Z', C.stripe);
+  o += ell(89, 112, 15, 11, C.cream) + ell(111, 112, 15, 11, C.cream) + ell(100, 120, 14, 8, C.cream);
+  // whiskers
+  const wk = 'M 60 108 Q 42 103 24 102 M 60 114 Q 42 115 24 120 M 62 119 Q 48 124 34 132';
+  const wkR = 'M 140 108 Q 158 103 176 102 M 140 114 Q 158 115 176 120 M 138 119 Q 152 124 166 132';
+  o += `<g transform="rotate(${f(-p.whisker)} 60 112)">${ink(wk, 2, C.outline, 'opacity="0.75"')}</g>`;
+  o += `<g transform="rotate(${f(p.whisker)} 140 112)">${ink(wkR, 2, C.outline, 'opacity="0.75"')}</g>`;
+  // cheeks
+  o += ell(55, 112, 11, 7, C.cheek, false, 0, op(p.cheek)) + ell(145, 112, 11, 7, C.cheek, false, 0, op(p.cheek));
+  // eyes are drawn at the base size, then scaled about each eye's centre by EYE.s
+  const E = fx.eye || EYE;
+  const lift = (E.s - 1) * 15 - E.dy;  // brows ride with the eyes and clear their bigger tops
+  const eyeT = (side, sc) => {
+    const cx = side === 'L' ? 70 : 130, cy = 92 + p.eyeDy;
+    const dx = side === 'L' ? -E.dx : E.dx;
+    return `translate(${f(cx + dx)} ${f(cy + E.dy)}) scale(${sc}) translate(${-cx} ${f(-cy)})`;
+  };
+  const closedS = 1 + (E.s - 1) * 0.5;
+  // brows
+  if (p.browA > 0.02) {
+    o += `<g transform="translate(${f(-E.dx)} ${f(-lift)})">${ink(q1(p.brow), 4, C.outline, op(p.browA))}</g>`;
+    o += `<g transform="translate(${f(E.dx)} ${f(-lift)})">${ink(q1(mirrorPts(p.brow)), 4, C.outline, op(p.browA))}</g>`;
+  }
+  // eyes: open shape, then the closed stroke for blinks and closed-eye moods
+  const effOpen = p.open * (1 - p.blink * fx.blink);
+  const ca = 1 - smooth(0.08, 0.4, effOpen);
+  const shape = p.open > 0.5 ? CLOSED.sleep.map((v, i) => v + (i % 2 ? p.eyeDy : 0)) : p.closed;
+  const wellA = 0.9 * p.well * smooth(0.3, 0.8, effOpen);
+  let L = eye(70, 90 + p.eyeDy, p, effOpen), R = eye(130, 90 + p.eyeDy, p, effOpen);
+  let LC = '', RC = '';
+  if (ca > 0.02) { LC += ink(q1(shape), p.closedW, C.outline, op(ca)); RC += ink(q1(mirrorPts(shape)), p.closedW, C.outline, op(ca)); }
+  if (p.lashes > 0.02) {
+    LC += ink('M 60 94 L 55 98 M 64 97 L 61 102', 2.5, C.outline, op(p.lashes));
+    RC += ink('M 140 94 L 145 98 M 136 97 L 139 102', 2.5, C.outline, op(p.lashes));
+  }
+  if (p.well > 0.02) {
+    L += fillPath('M 59 100 Q 70 112 81 100 Q 70 106 59 100 Z', C.tear, op(wellA));
+    R += fillPath('M 141 100 Q 130 112 119 100 Q 130 106 141 100 Z', C.tear, op(wellA));
+  }
+  o += `<g transform="${eyeT('L', E.s)}">${L}</g><g transform="${eyeT('R', E.s)}">${R}</g>`;
+  if (LC) o += `<g transform="${eyeT('L', closedS)}">${LC}</g><g transform="${eyeT('R', closedS)}">${RC}</g>`;
+  // mouth
+  if (p.mouthOpen > 0.02) {
+    const mo = p.mouthOpen;
+    o += path(`M 90 116 Q 100 ${f(116 + 20 * mo)} 110 116 Q 100 120 90 116 Z`, C.mouth, 3);
+    o += fillPath(`M 94 ${f(116 + 8 * mo)} Q 100 ${f(116 + 4 * mo)} 106 ${f(116 + 8 * mo)} Q 104 ${f(116 + 15 * mo)} 100 ${f(116 + 15 * mo)} Q 96 ${f(116 + 15 * mo)} 94 ${f(116 + 8 * mo)} Z`, C.tongue, op(mo));
+  }
+  o += ink(q2(p.mouth), 3);
+  if (p.fang > 0.02) o += path('M 90 115.5 L 92.5 121 L 95 117 Z', '#FFFFFF', 1.6, op(p.fang));
+  o += ink(`M 100 110 L ${f(p.mouth[4])} ${f(p.mouth[5])}`, 3);
+  o += path('M 93 102 Q 100 98 107 102 Q 105 108 100 110 Q 95 108 93 102 Z', C.nose, 2.5);
+  o += ell(97, 102.5, 2.2, 1.2, '#FFFFFF', false, 0, 'opacity="0.8"');
+  // extras
+  if (p.sweat > 0.02) o += drop(p.sweatX, p.sweatY, 16 - 3 * p.shake, p.sweat);
+  if (p.tearDrop > 0.02) {
+    const ph = fx.idle ? (t * 0.55) % 1 : 0.3;
+    const E2 = fx.eye || EYE;
+    o += drop(138 + E2.dx + 4 * (E2.s - 1), 106 + (E2.s - 1) * 12 + E2.dy + ph * 16, 18, p.tearDrop * (1 - smooth(0.75, 1, ph)) * smooth(0.3, 0.8, effOpen));
+  }
+  if (p.bubble > 0.02) {
+    const br = 7 * (0.7 + 0.3 * (fx.idle ? 0.5 - 0.5 * Math.cos(t * Math.PI) : 1));
+    o += ell(112, 106, br, br, C.bubble, true, 2, op(0.9 * p.bubble)) + ell(110, 104, 2, 1.5, '#FFFFFF', false, 0, op(p.bubble));
+  }
+  o += '</g>';
+
+  if (p.sparkle > 0.02) {
+    const tw = k => (fx.idle ? 0.75 + 0.25 * Math.sin(t * 5 + k) : 1);
+    o += sparkle(26, 46, 8 * tw(0), p.sparkle) + sparkle(176, 36, 6 * tw(2), p.sparkle) + sparkle(184, 66, 4 * tw(4), p.sparkle);
+  }
+  if (p.zzz > 0.02) {
+    const bob = fx.idle ? Math.sin(t * 1.6) * 2.5 : 0;
+    o += `<g transform="translate(0 ${f(bob)})">` + ink('M 172 50 L 186 50 L 172 64 L 186 64', 3.5, C.outline, op(p.zzz))
+      + ink('M 188 28 L 197 28 L 188 37 L 197 37', 3, C.outline, op(p.zzz)) + '</g>';
+  }
+  if (p.shock > 0.02) {
+    const fl = fx.idle ? 0.7 + 0.3 * Math.sin(t * 22) : 1;
+    const s = 'M 40 22 L 30 10 M 58 12 L 54 -2 M 160 22 L 170 10 M 142 12 L 146 -2';
+    o += ink(s, 4, C.loud, op(p.shock * fl));
+  }
+
+  // whole-body motion: shake, breathing, bounce
+  const dx = (fx.idle ? tremble * 3 * Math.sin(t * Math.PI * 2 / 0.12) : 0) + fx.shakeDx;
+  const breath = fx.idle ? 1 + 0.02 * p.breathe * (0.5 - 0.5 * Math.cos(t * Math.PI)) : 1;
+  const s = breath * fx.bounce;
+  return `<g transform="translate(${f(dx)} 0) translate(100 100) scale(${s.toFixed(4)}) translate(-100 -100)">${o}</g>`;
+}
+
+let EYE = { s: 1.35, dx: 2, dy: -6 };
+const eyeFor = (pct, up) => { const k = pct / 100; return { s: k, dx: (k - 1) * 5.7, dy: (k - 1) * 5.7 - up }; };
+const STATIC_FX = { time: 0, idle: false, blink: 0, twitchL: 0, twitchR: 0, bounce: 1, shakeDx: 0 };
+
+// ---------- state ----------
+const svg = document.getElementById('kitten');
+const stage = document.getElementById('stage');
+const stageTag = document.getElementById('stageTag');
+const caption = document.getElementById('caption');
+const ctl = {
+  blend: document.getElementById('blend'), idle: document.getElementById('idle'), slow: document.getElementById('slow'),
+  up: document.getElementById('upMs'), down: document.getElementById('downMs'), sleep: document.getElementById('sleepMs'),
+};
+if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ctl.idle.checked = false;
+
+let clock = 0;                 // scaled time in seconds
+let current = clonePose(POSES.happy);
+let moodKey = 'happy';
+let trans = null;              // { from, to, start, dur, kind }
+let bounceStart = -10;
+let nextBlink = 1.5, blinkStart = -10;
+let twitch = { start: -10, side: 'L', next: 2 };
+
+function kindFor(fromKey, toKey) {
+  if (toKey === 'asleep') return 'sleep';
+  if (fromKey === 'asleep') return 'wake';
+  return BY_KEY[toKey].level > BY_KEY[fromKey].level ? 'louder' : 'calmer';
+}
+
+function setMood(key) {
+  if (key === moodKey && !trans) return;
+  const kind = kindFor(moodKey, key);
+  const dur = { louder: +ctl.up.value, calmer: +ctl.down.value, sleep: +ctl.sleep.value, wake: +ctl.sleep.value }[kind] / 1000;
+  if (ctl.blend.checked) {
+    trans = { from: clonePose(current), to: POSES[key], start: clock, dur, kind };
+  } else {
+    trans = null;
+    current = clonePose(POSES[key]);
+  }
+  bounceStart = clock;
+  moodKey = key;
+  const m = BY_KEY[key];
+  stage.style.backgroundColor = `var(--${m.band}-soft)`;
+  stageTag.textContent = m.bandLabel;
+  svg.setAttribute('aria-label', `Kitten, ${m.label.toLowerCase()}`);
+  document.querySelectorAll('.mood').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.key === key)));
+}
+
+function step(dt) {
+  clock += dt;
+  if (trans) {
+    const e = (clock - trans.start) / trans.dur;
+    const w = WINDOWS[trans.kind], ease = EASE[trans.kind];
+    current = lerpPose(trans.from, trans.to, k => {
+      const [a, b] = w[groupOf(k)];
+      return ease(clamp((e - a) / (b - a)));
+    });
+    // The tail wraps to the front (asleep) or back via a low side pose, so it never slides through the body.
+    if ((trans.from.tailFront >= 0.5) !== (trans.to.tailFront >= 0.5)) {
+      const [a, b] = w.fur;
+      const tf = ease(clamp((e - a) / (b - a)));
+      const first = tf < 0.5, u = first ? tf * 2 : (tf - 0.5) * 2;
+      current.tail = first ? trans.from.tail.map((v, i) => lerp(v, TAIL.down[i], u))
+                           : TAIL.down.map((v, i) => lerp(v, trans.to.tail[i], u));
+      current.tailFront = first ? (trans.from.tailFront >= 0.5 ? 1 : 0) : (trans.to.tailFront >= 0.5 ? 1 : 0);
+    }
+    if (e >= 1) { current = clonePose(trans.to); trans = null; }
+  }
+  // blinking
+  if (clock > nextBlink) { blinkStart = clock; nextBlink = clock + 2.2 + Math.random() * 3.2; }
+  const bp = (clock - blinkStart) / 0.16;
+  const blink = bp >= 0 && bp <= 1 ? Math.sin(Math.PI * bp) : 0;
+  // ear twitches: random, more often when worried
+  if (clock > twitch.next) {
+    if (Math.random() < current.twitch * 2) { twitch.start = clock; twitch.side = Math.random() < 0.5 ? 'L' : 'R'; }
+    twitch.next = clock + 0.5;
+  }
+  const tp = (clock - twitch.start) / 0.26;
+  const tw = tp >= 0 && tp <= 1 ? -14 * Math.sin(Math.PI * tp) : 0;
+  // bounce on mood change, as the app does today: 1 -> 1.06 -> 1 over 400 ms
+  const bt = (clock - bounceStart) / 0.4;
+  const bounce = bt >= 0 && bt <= 1 ? 1 + 0.06 * Math.sin(Math.PI * bt) : 1;
+  const idle = ctl.idle.checked;
+  svg.innerHTML = render(current, {
+    time: clock, idle, blink: idle ? blink : 0,
+    twitchL: idle && twitch.side === 'L' ? tw : 0, twitchR: idle && twitch.side === 'R' ? tw : 0,
+    bounce, shakeDx: 0,
+  });
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000) * (ctl.slow.checked ? 0.25 : 1);
+  last = now;
+  step(dt);
+  demoTick();
+  requestAnimationFrame(frame);
+}
+
+// ---------- mood buttons with resting-pose thumbnails ----------
+const moodsEl = document.getElementById('moods');
+MOODS.forEach((m, i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'mood'; b.dataset.key = m.key; b.id = `mood-${m.key}`;
+  b.setAttribute('aria-pressed', String(m.key === moodKey));
+  b.innerHTML = `<svg viewBox="-10 -10 220 220" aria-hidden="true" class="thumb">${render(POSES[m.key], STATIC_FX)}</svg>`
+    + `<span>${m.label}</span><span class="band ${m.band}">${m.bandLabel}</span><span class="key">${i + 1}</span>`;
+  b.addEventListener('click', () => { stopDemo(); setMood(m.key); });
+  moodsEl.appendChild(b);
+});
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input')) return;
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 6) { stopDemo(); setMood(MOODS[n - 1].key); }
+});
+
+// ---------- sliders ----------
+const bindSlider = (input, outId) => {
+  const out = document.getElementById(outId);
+  const show = () => { out.textContent = `${input.value} ms`; };
+  input.addEventListener('input', show); show();
+};
+const eyeInput = document.getElementById('eyeSize'), eyeOut = document.getElementById('eyeOut');
+const eyeHInput = document.getElementById('eyeHeight'), eyeHOut = document.getElementById('eyeHOut');
+const applyEyes = () => {
+  eyeOut.textContent = `${eyeInput.value}%`;
+  eyeHOut.textContent = `${eyeHInput.value} up`;
+  EYE = eyeFor(+eyeInput.value, +eyeHInput.value);
+  document.querySelectorAll('.mood').forEach(b => { b.querySelector('.thumb').innerHTML = render(POSES[b.dataset.key], STATIC_FX); });
+};
+eyeInput.addEventListener('input', applyEyes);
+eyeHInput.addEventListener('input', applyEyes);
+applyEyes();
+bindSlider(ctl.up, 'upOut'); bindSlider(ctl.down, 'downOut'); bindSlider(ctl.sleep, 'sleepOut');
+
+// ---------- noisy room demo ----------
+const SCRIPT = [
+  ['asleep', 2.2, 'Before class: app paused'],
+  ['happy', 2.6, 'Quiet room'],
+  ['fine', 2.2, 'Some chatter'],
+  ['worried', 2.2, 'Chatter builds'],
+  ['sad', 2.0, 'Getting really loud'],
+  ['covered', 2.4, 'Way too loud'],
+  ['sad', 1.8, 'Calming a little'],
+  ['worried', 1.8, 'Calming more'],
+  ['fine', 2.0, 'Back to normal'],
+  ['happy', 2.6, 'Quiet again'],
+  ['covered', 2.0, 'Someone drops a chair!'],
+  ['fine', 2.4, 'Settling down'],
+  ['happy', 2.6, 'Quiet work time'],
+  ['asleep', 3.0, 'End of class: paused'],
+];
+let demo = null;
+const playBtn = document.getElementById('playBtn'), stopBtn = document.getElementById('stopBtn');
+function startDemo() {
+  demo = { i: -1, until: clock };
+  playBtn.hidden = true; stopBtn.hidden = false; caption.hidden = false;
+}
+function stopDemo() {
+  if (!demo) return;
+  demo = null; playBtn.hidden = false; stopBtn.hidden = true; caption.hidden = true;
+}
+function demoTick() {
+  if (!demo || clock < demo.until) return;
+  demo.i++;
+  if (demo.i >= SCRIPT.length) { stopDemo(); return; }
+  const [key, hold, text] = SCRIPT[demo.i];
+  setMood(key);
+  caption.textContent = text;
+  demo.until = clock + hold;
+}
+playBtn.addEventListener('click', startDemo);
+stopBtn.addEventListener('click', stopDemo);
+
+
+// first frame renders synchronously so the page is complete at rest
+setMood('happy');
+step(0);
+requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
+})();
+</script>

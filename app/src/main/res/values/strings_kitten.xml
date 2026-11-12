@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="kitten_name">Mochi</string>
+    <string name="kitten_listening_title">Mochi is listening · %1$s</string>
+    <string name="kitten_greeting">Mrrow! I\'m Mochi.</string>
+    <string name="kitten_challenge_won">Mochi is purring loudly! You did it.</string>
+    <string name="kitten_sleeping">Zzz… tap the microphone to wake me up.</string>
+
+    <string name="kitten_happy_1">Purr purr… I can hear the birds outside.</string>
+    <string name="kitten_happy_2">Everything is calm and cozy. Time for a nap.</string>
+    <string name="kitten_happy_3">Shh, my whiskers feel so relaxed today.</string>
+    <string name="kitten_fine_1">Nice. Everyone\'s chatting softly.</string>
+    <string name="kitten_fine_2">Just the right amount of noise.</string>
+    <string name="kitten_fine_3">Good talking, good listening. Purr.</string>
+    <string name="kitten_worried_1">Mrrp? It\'s getting a bit loud in here.</string>
+    <string name="kitten_worried_2">My ears are wiggling. Can we bring the volume down?</string>
+    <string name="kitten_worried_3">Could we play a little more quietly?</string>
+    <string name="kitten_sad_1">Mew… can we use our indoor voices?</string>
+    <string name="kitten_sad_2">That\'s a lot of noise. My paws feel shaky.</string>
+    <string name="kitten_sad_3">Please help me find some quiet.</string>
+    <string name="kitten_ears_1">Hiss! That was so loud, my fur puffed up!</string>
+    <string name="kitten_ears_2">Eek! I\'m all fluffy! Can we be quiet?</string>
+    <string name="kitten_ears_3">Big noise! Let\'s take a quiet break!</string>
+
+    <string name="kitten_asleep">Mochi is asleep</string>
+    <string name="kitten_happy">Mochi is happy</string>
+    <string name="kitten_fine">Mochi is fine</string>
+    <string name="kitten_worried">Mochi is worried</string>
+    <string name="kitten_sad">Mochi is sad</string>
+    <string name="kitten_ears">Mochi is startled, with puffed-up fur</string>
+</resources>

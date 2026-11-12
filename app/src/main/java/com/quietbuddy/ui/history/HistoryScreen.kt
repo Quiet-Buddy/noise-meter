@@ -119,7 +119,7 @@ fun HistoryScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    CharacterView(day.dominantMood, Modifier.size(30.dp))
+                    CharacterView(day.dominantMood, Modifier.size(30.dp), animated = false)
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = if (isToday) stringResource(R.string.history_today) else weekday,

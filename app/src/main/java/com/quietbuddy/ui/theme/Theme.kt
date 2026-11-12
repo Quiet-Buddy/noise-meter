@@ -55,6 +55,23 @@ val BuddyPalette = Palette(
     tongue = Color(0xFFFF7A85),
 )
 
+/** Kitten: warm paper and ginger. */
+val KittenPalette = Palette(
+    ink = Color(0xFF2E211B),
+    inkSoft = Color(0xFF6E5A4E),
+    background = Color(0xFFFBF6F1),
+    card = Color(0xFFFFFFFF),
+    line = Color(0xFFEFE3D8),
+    accent = Color(0xFFB85A22),
+    accentSoft = Color(0xFFFBEADC),
+    outline = Color(0xFF4A2E22),
+    body = Color(0xFFF7B267),
+    cheek = Color(0xFFFF9AA8),
+    tear = Color(0xFF8FC8FF),
+    mouth = Color(0xFF7A3240),
+    tongue = Color(0xFFFF7A8A),
+)
+
 val LocalPalette = staticCompositionLocalOf { BuddyPalette }
 
 /** Band colours. Fixed for every character so the colours always mean the same thing. */
