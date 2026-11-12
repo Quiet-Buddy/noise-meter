@@ -67,12 +67,11 @@ data class Progress(
     val pendingCelebration: List<CharacterStyle>
         get() = (unlocked - celebrated).sortedBy { it.unlockAtCalmMinutes }
 
-    fun isUnlocked(style: CharacterStyle, settings: AppSettings): Boolean =
-        settings.unlockAllStyles || style in unlocked
+    fun isUnlocked(style: CharacterStyle): Boolean = style in unlocked
 
     /** A character is unlocked once its default style is. */
-    fun isUnlocked(character: Character, settings: AppSettings): Boolean =
-        isUnlocked(CharacterStyle.defaultFor(character), settings)
+    fun isUnlocked(character: Character): Boolean =
+        isUnlocked(CharacterStyle.defaultFor(character))
 }
 
 /** Implemented in the data package on its own Preferences DataStore ("progress"). */

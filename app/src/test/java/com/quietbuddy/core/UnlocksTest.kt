@@ -57,32 +57,17 @@ class UnlocksTest {
     }
 
     @Test
-    fun isUnlockedHonoursUnlockAll() {
-        val p = Progress()
-        assertFalse(p.isUnlocked(CharacterStyle.KITTEN_SNOW, AppSettings()))
-        assertTrue(p.isUnlocked(CharacterStyle.KITTEN_SNOW, AppSettings(unlockAllStyles = true)))
-        assertTrue(p.isUnlocked(CharacterStyle.BUDDY_SUNNY, AppSettings()))
-    }
-
-    @Test
     fun mochiUnlocksAtOneHundredTwentyMinutes() {
-        val s = AppSettings()
         val at119 = Progress(calmMinutes = 119, unlocked = Unlocks.earnedBy(119))
         val at120 = Progress(calmMinutes = 120, unlocked = Unlocks.earnedBy(120))
-        assertFalse(at119.isUnlocked(Character.KITTEN, s))
-        assertTrue(at120.isUnlocked(Character.KITTEN, s))
+        assertFalse(at119.isUnlocked(Character.KITTEN))
+        assertTrue(at120.isUnlocked(Character.KITTEN))
     }
 
     @Test
     fun buddyIsAlwaysUnlocked() {
-        assertTrue(Progress().isUnlocked(Character.BUDDY, AppSettings()))
-        assertTrue(Progress().isUnlocked(Character.DEFAULT, AppSettings()))
-    }
-
-    @Test
-    fun unlockAllUnlocksMochi() {
-        assertFalse(Progress().isUnlocked(Character.KITTEN, AppSettings()))
-        assertTrue(Progress().isUnlocked(Character.KITTEN, AppSettings(unlockAllStyles = true)))
+        assertTrue(Progress().isUnlocked(Character.BUDDY))
+        assertTrue(Progress().isUnlocked(Character.DEFAULT))
     }
 
     @Test

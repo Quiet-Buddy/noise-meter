@@ -49,9 +49,9 @@ data class HomeUiState(
     val loudestDb: Float? = null,
     val loudestAtMs: Long? = null,
     val challenge: ChallengeState = ChallengeState.Idle,
-    /** Newly unlocked styles to celebrate, cheapest first; empty when none or when everything is unlocked anyway. */
+    /** Newly unlocked styles to celebrate, cheapest first; empty when none. */
     val pendingUnlocks: List<CharacterStyle> = emptyList(),
-    /** The next style to earn; null when everything is unlocked or unlockAllStyles is on. */
+    /** The next style to earn; null when everything is unlocked. */
     val nextReward: CharacterStyle? = null,
     val minutesToNext: Int = 0,
 )
@@ -86,7 +86,7 @@ class HomeViewModel @Inject constructor(
         historyRepository.lastDays(1),
     ) { (settings, progress), latest, mood, listening, days ->
         val today = days.lastOrNull()
-        val next = if (settings.unlockAllStyles) null else Unlocks.next(progress.calmMinutes)
+        val next = Unlocks.next(progress.calmMinutes)
         Snapshot(
             roomName = settings.roomName,
             character = settings.character,
@@ -96,7 +96,7 @@ class HomeViewModel @Inject constructor(
             calmMinutes = today?.calmMinutes ?: 0,
             loudestDb = today?.loudestDb,
             loudestAtMs = today?.loudestAtMs,
-            pendingUnlocks = if (settings.unlockAllStyles) emptyList() else progress.pendingCelebration,
+            pendingUnlocks = progress.pendingCelebration,
             nextReward = next,
             minutesToNext = next?.let { (it.unlockAtCalmMinutes - progress.calmMinutes).toInt().coerceAtLeast(1) } ?: 0,
         )

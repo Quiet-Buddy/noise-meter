@@ -71,8 +71,6 @@ data class AppSettings(
     val character: Character = Character.DEFAULT,
     /** Selected style per character; a missing entry means [CharacterStyle.defaultFor]. */
     val styles: Map<Character, CharacterStyle> = emptyMap(),
-    /** For adults who just want to pick: every style is available without earning it. */
-    val unlockAllStyles: Boolean = false,
 ) {
     val baseThresholds: Thresholds get() = Thresholds(worriedFromDb, sadFromDb)
 

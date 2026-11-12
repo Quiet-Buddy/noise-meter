@@ -35,7 +35,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.quietbuddy.R
-import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Mood
@@ -62,7 +61,6 @@ internal fun LockedPreview(unlocked: Boolean, size: Dp, content: @Composable () 
 internal fun StyleTiles(
     character: Character,
     selectedStyle: CharacterStyle?,
-    settings: AppSettings,
     progress: Progress,
     onSelect: (CharacterStyle) -> Unit,
 ) {
@@ -72,7 +70,7 @@ internal fun StyleTiles(
         modifier = Modifier.fillMaxWidth().selectableGroup(),
     ) {
         CharacterStyle.of(character).forEach { style ->
-            val unlocked = progress.isUnlocked(style, settings)
+            val unlocked = progress.isUnlocked(style)
             val isSelected = style == selectedStyle
             val shape = RoundedCornerShape(14.dp)
             val name = stringResource(style.nameRes)

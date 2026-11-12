@@ -40,7 +40,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setKeepScreenOn(enabled: Boolean) = update { it.copy(keepScreenOn = enabled) }
 
-    fun setUnlockAllStyles(enabled: Boolean) = update { it.copy(unlockAllStyles = enabled) }
 
     fun setRoomName(name: String) = update {
         val trimmed = name.trim()

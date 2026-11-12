@@ -30,8 +30,7 @@ class CharactersViewModel @Inject constructor(
     /** Switches to [style]'s character and style, if it is unlocked. */
     fun select(style: CharacterStyle) {
         viewModelScope.launch {
-            val current = settingsRepository.settings.first()
-            if (!progressRepository.progress.first().isUnlocked(style, current)) return@launch
+            if (!progressRepository.progress.first().isUnlocked(style)) return@launch
             settingsRepository.update {
                 it.copy(character = style.character, styles = it.styles + (style.character to style))
             }

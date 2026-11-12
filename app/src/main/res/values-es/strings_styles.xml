@@ -20,8 +20,6 @@
         <item quantity="other">Faltan %1$d minutos en calma para desbloquear a %2$s</item>
     </plurals>
     <string name="style_all_unlocked">¡Has desbloqueado todos los estilos!</string>
-    <string name="settings_unlock_all">Desbloquear todos los estilos</string>
-    <string name="settings_unlock_all_sub">Sin tener que ganarlos con minutos en calma</string>
 
     <string name="unlock_title">¡Nuevo estilo desbloqueado!</string>
     <string name="unlock_body">¡La calma tiene premio! Has conseguido a %1$s.</string>

@@ -173,12 +173,6 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 checked = settings.keepScreenOn,
                 onCheckedChange = viewModel::setKeepScreenOn,
             )
-            SwitchRow(
-                title = stringResource(R.string.settings_unlock_all),
-                subtitle = stringResource(R.string.settings_unlock_all_sub),
-                checked = settings.unlockAllStyles,
-                onCheckedChange = viewModel::setUnlockAllStyles,
-            )
         }
     }
 

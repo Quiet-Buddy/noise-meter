@@ -18,8 +18,6 @@
         <item quantity="other">%1$d minutu lasai falta dira %2$s desblokeatzeko</item>
     </plurals>
     <string name="style_all_unlocked">Estilo guztiak desblokeatu dituzu!</string>
-    <string name="settings_unlock_all">Desblokeatu estilo guztiak</string>
-    <string name="settings_unlock_all_sub">Minutu lasaiekin irabazi beharrik gabe</string>
 
     <string name="unlock_title">Estilo berria desblokeatu da!</string>
     <string name="unlock_body">Lasaitasunak saria du! %1$s lortu duzu.</string>

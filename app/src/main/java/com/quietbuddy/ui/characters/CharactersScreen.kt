@@ -64,12 +64,10 @@ fun CharactersScreen() {
                 Text(stringResource(R.string.characters_title), style = MaterialTheme.typography.headlineSmall)
             }
 
-            if (!settings.unlockAllStyles) {
-                ProgressCard(calmMinutes = progress.calmMinutes)
-            }
+            ProgressCard(calmMinutes = progress.calmMinutes)
 
             Character.entries.forEach { c ->
-                val unlocked = progress.isUnlocked(c, settings)
+                val unlocked = progress.isUnlocked(c)
                 val friend = CharacterStyle.defaultFor(c)
                 Column(
                     modifier = Modifier.fillMaxWidth().background(palette.card, CardShape).padding(16.dp),
@@ -106,7 +104,6 @@ fun CharactersScreen() {
                     StyleTiles(
                         character = c,
                         selectedStyle = if (settings.character == c) settings.styleFor(c) else null,
-                        settings = settings,
                         progress = progress,
                         onSelect = viewModel::select,
                     )

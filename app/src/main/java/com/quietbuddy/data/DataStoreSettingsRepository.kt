@@ -43,7 +43,6 @@ private object Keys {
     val CHARACTER = stringPreferencesKey("character")
     /** CharacterStyle.key of the selected style for [c]; absent or mismatched means the character's default. */
     fun style(c: Character) = stringPreferencesKey("style_${c.key}")
-    val UNLOCK_ALL_STYLES = booleanPreferencesKey("unlock_all_styles")
 }
 
 @Singleton
@@ -86,7 +85,6 @@ class DataStoreSettingsRepository @Inject constructor(
             styles = Character.entries.mapNotNull { c ->
                 CharacterStyle.fromKey(this[Keys.style(c)])?.takeIf { it.character == c }?.let { c to it }
             }.toMap(),
-            unlockAllStyles = this[Keys.UNLOCK_ALL_STYLES] ?: d.unlockAllStyles,
         )
     }
 
@@ -109,6 +107,6 @@ class DataStoreSettingsRepository @Inject constructor(
             if (style != null) this[Keys.style(c)] = style.key
             else remove(Keys.style(c))
         }
-        this[Keys.UNLOCK_ALL_STYLES] = s.unlockAllStyles
+        remove(booleanPreferencesKey("unlock_all_styles")) // option removed; drop it from old installs
     }
 }
