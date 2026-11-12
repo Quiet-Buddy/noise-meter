@@ -27,6 +27,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -50,6 +51,8 @@ import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.ListeningController
 import com.quietbuddy.core.SettingsRepository
 import com.quietbuddy.ui.Routes
+import com.quietbuddy.ui.character.CharacterLooks
+import com.quietbuddy.ui.character.LocalCharacter
 import com.quietbuddy.ui.history.HistoryScreen
 import com.quietbuddy.ui.home.HomeScreen
 import com.quietbuddy.ui.onboarding.OnboardingScreen
@@ -83,7 +86,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            QuietBuddyTheme { Root() }
+            Root()
         }
     }
 }
@@ -100,13 +103,21 @@ private val tabs = listOf(
 private fun Root(vm: MainViewModel = hiltViewModel()) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val loaded = settings ?: return
+    val look = CharacterLooks.of(loaded.character)
+    CompositionLocalProvider(LocalCharacter provides loaded.character) {
+        QuietBuddyTheme(look.palette) { AppContent(loaded, vm.controller) }
+    }
+}
+
+@Composable
+private fun AppContent(loaded: AppSettings, controller: ListeningController) {
 
     // Stop listening when the UI goes away, unless the user asked to keep listening.
     val keep by rememberUpdatedState(loaded.keepListening)
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val obs = LifecycleEventObserver { _, e ->
-            if (e == Lifecycle.Event.ON_STOP && !keep) vm.controller.pause()
+            if (e == Lifecycle.Event.ON_STOP && !keep) controller.pause()
         }
         lifecycleOwner.lifecycle.addObserver(obs)
         onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }

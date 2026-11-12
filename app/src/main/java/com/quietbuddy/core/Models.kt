@@ -72,6 +72,7 @@ data class AppSettings(
     val calibrationOffsetDb: Float = DEFAULT_CALIBRATION_OFFSET_DB,
     val calibratedAtMs: Long? = null,
     val onboardingDone: Boolean = false,
+    val character: Character = Character.DEFAULT,
 ) {
     val baseThresholds: Thresholds get() = Thresholds(worriedFromDb, sadFromDb)
 

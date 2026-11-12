@@ -9,7 +9,9 @@ import com.quietbuddy.core.ListeningController
 import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.SettingsRepository
-import com.quietbuddy.domain.SpeechLines
+import com.quietbuddy.core.Character
+import com.quietbuddy.domain.character.BuddyVoice
+import com.quietbuddy.domain.character.Voices
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.math.roundToInt
@@ -39,7 +41,7 @@ data class HomeUiState(
     /** Null whenever Buddy is asleep (not LISTENING). */
     val mood: Mood? = null,
     val db: Int? = null,
-    @StringRes val speechLine: Int = SpeechLines.SLEEPING,
+    @StringRes val speechLine: Int = BuddyVoice.sleeping,
     val calmMinutes: Int = 0,
     val loudestDb: Float? = null,
     val loudestAtMs: Long? = null,
@@ -77,6 +79,7 @@ class HomeViewModel @Inject constructor(
         val today = days.lastOrNull()
         Snapshot(
             roomName = settings.roomName,
+            character = settings.character,
             listening = listening,
             mood = mood,
             db = latest?.laeq2sDb?.roundToInt(),
@@ -94,7 +97,9 @@ class HomeViewModel @Inject constructor(
             listening = s.listening,
             mood = mood,
             db = if (active) s.db else null,
-            speechLine = if (mood != null) SpeechLines.line(mood, index) else SpeechLines.SLEEPING,
+            speechLine = Voices.of(s.character).let { voice ->
+                if (mood != null) voice.line(mood, index) else voice.sleeping
+            },
             calmMinutes = s.calmMinutes,
             loudestDb = s.loudestDb,
             loudestAtMs = s.loudestAtMs,
@@ -137,6 +142,7 @@ class HomeViewModel @Inject constructor(
 
     private data class Snapshot(
         val roomName: String,
+        val character: Character,
         val listening: ListeningState,
         val mood: Mood,
         val db: Int?,

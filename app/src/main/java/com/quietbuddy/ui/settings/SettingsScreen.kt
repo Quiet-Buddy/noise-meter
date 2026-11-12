@@ -57,6 +57,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.Preset
+import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -66,6 +67,7 @@ private val CardShape = RoundedCornerShape(20.dp)
 
 @Composable
 fun SettingsScreen(onOpenCalibration: () -> Unit) {
+    val palette = LocalPalette.current
     val viewModel: SettingsViewModel = hiltViewModel()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     var showRoomDialog by rememberSaveable { mutableStateOf(false) }
@@ -81,7 +83,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
 
     val header: @Composable () -> Unit = {
         Column {
-            Text(settings.roomName, style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
+            Text(settings.roomName, style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
             Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
         }
     }
@@ -89,7 +91,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
     // Sensitivity card
     val sensitivity: @Composable () -> Unit = {
         Column(
-            modifier = Modifier.fillMaxWidth().background(QB.Card, CardShape).padding(16.dp),
+            modifier = Modifier.fillMaxWidth().background(palette.card, CardShape).padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(stringResource(R.string.settings_sensitivity), style = MaterialTheme.typography.titleMedium)
@@ -106,8 +108,8 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                             .weight(1f)
                             .heightIn(min = 48.dp)
                             .clip(shape)
-                            .background(if (selected) QB.AccentSoft else QB.Background, shape)
-                            .border(2.dp, if (selected) QB.Accent else QB.Line, shape)
+                            .background(if (selected) palette.accentSoft else palette.background, shape)
+                            .border(2.dp, if (selected) palette.accent else palette.line, shape)
                             .clickable(role = Role.RadioButton, onClick = { viewModel.selectPreset(preset) })
                             .padding(horizontal = 4.dp),
                         horizontalArrangement = Arrangement.Center,
@@ -117,7 +119,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                             label,
                             fontSize = 14.sp,
                             fontWeight = FontWeight.ExtraBold,
-                            color = if (selected) QB.Accent else QB.Ink,
+                            color = if (selected) palette.accent else palette.ink,
                         )
                     }
                 }
@@ -133,30 +135,21 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 },
                 valueRange = 30f..100f,
                 colors = SliderDefaults.colors(
-                    thumbColor = QB.Accent,
-                    activeTrackColor = QB.Accent,
+                    thumbColor = palette.accent,
+                    activeTrackColor = palette.accent,
                 ),
             )
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("30 dB", style = MaterialTheme.typography.labelSmall)
                 Text("100 dB", style = MaterialTheme.typography.labelSmall)
             }
-            Text(
-                stringResource(
-                    R.string.settings_thresholds_explain,
-                    displayed.start.roundToInt(),
-                    displayed.endInclusive.roundToInt(),
-                ),
-                style = MaterialTheme.typography.bodyMedium,
-                color = QB.InkSoft,
-            )
         }
     }
 
     // Switch rows
     val switches: @Composable () -> Unit = {
         Column(
-            modifier = Modifier.fillMaxWidth().background(QB.Card, CardShape).padding(vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth().background(palette.card, CardShape).padding(vertical = 4.dp),
         ) {
             SwitchRow(
                 title = stringResource(R.string.settings_quiet_hours),
@@ -202,7 +195,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
             stringResource(R.string.settings_last_done, SimpleDateFormat("d MMM", Locale.getDefault()).format(it))
         } ?: ""
         Column(
-            modifier = Modifier.fillMaxWidth().background(QB.Card, CardShape).padding(vertical = 4.dp),
+            modifier = Modifier.fillMaxWidth().background(palette.card, CardShape).padding(vertical = 4.dp),
         ) {
             NavRow(
                 title = stringResource(R.string.settings_room_name),
@@ -247,7 +240,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
     BoxWithConstraints(
         Modifier
             .fillMaxSize()
-            .background(QB.Background)
+            .background(palette.background)
             .statusBarsPadding(),
     ) {
         val twoPane = isTwoPane(maxWidth, maxHeight)
@@ -352,6 +345,7 @@ private fun SwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
+    val palette = LocalPalette.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -367,13 +361,14 @@ private fun SwitchRow(
         Switch(
             checked = checked,
             onCheckedChange = null,
-            colors = SwitchDefaults.colors(checkedTrackColor = QB.Accent),
+            colors = SwitchDefaults.colors(checkedTrackColor = palette.accent),
         )
     }
 }
 
 @Composable
 private fun NavRow(title: String, subtitle: String, onClick: () -> Unit) {
+    val palette = LocalPalette.current
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -386,7 +381,7 @@ private fun NavRow(title: String, subtitle: String, onClick: () -> Unit) {
             Text(title, style = MaterialTheme.typography.bodyLarge)
             Text(subtitle, style = MaterialTheme.typography.labelSmall)
         }
-        Text(">", style = MaterialTheme.typography.titleMedium, color = QB.InkSoft)
+        Text(">", style = MaterialTheme.typography.titleMedium, color = palette.inkSoft)
     }
 }
 

@@ -1,5 +1,6 @@
 package com.quietbuddy.audio
 
+import com.quietbuddy.core.Character
 import com.quietbuddy.core.Mood
 import kotlin.math.PI
 import kotlin.math.abs
@@ -12,9 +13,12 @@ import kotlin.math.tanh
 import kotlin.random.Random
 
 /**
- * Buddy's cartoon alert sounds, synthesized in code (no audio assets, no network).
+ * Per-character alert sounds, synthesized in code (no audio assets, no network).
  *
- * Each loud mood has several playful variants so repeated reminders don't get boring:
+ * Each [Character] owns a sound set (a recipe list per loud mood); calm moods are silent. The
+ * `when (character)` selecting the set is exhaustive, so adding a character fails to compile until
+ * it has sounds. Each loud mood has several variants so repeated reminders don't get boring.
+ * Buddy's set is cartoonish:
  * - Worried: a "shhh", a questioning "hmm?", bubbly "bloop-bloop".
  * - Sad: sad trombone, falling slide whistle, "uh-oh".
  * - Ears covered: "ahooga" horn, siren whoops, "boing-boing".
@@ -26,20 +30,25 @@ import kotlin.random.Random
 object AlertSounds {
     const val RATE = 44_100
 
-    fun variantCount(mood: Mood): Int = recipes[mood]?.size ?: 0
+    fun variantCount(character: Character, mood: Mood): Int = soundSet(character)[mood]?.size ?: 0
 
-    /** 16-bit mono PCM at [RATE] for [mood]'s [variant] (wrapped), or an empty array for calm moods. */
-    fun render(mood: Mood, variant: Int): ShortArray {
-        val list = recipes[mood] ?: return ShortArray(0)
+    /** 16-bit mono PCM at [RATE] for [character]'s [mood] [variant] (wrapped), or an empty array for calm moods. */
+    fun render(character: Character, mood: Mood, variant: Int): ShortArray {
+        val list = soundSet(character)[mood] ?: return ShortArray(0)
         val r = list[((variant % list.size) + list.size) % list.size]
         val buf = Buf(r.seconds)
         r.draw(buf)
         return buf.finish(r.gain, r.drive)
     }
 
+    // No `else`: a new Character must get a sound set.
+    private fun soundSet(character: Character): Map<Mood, List<Recipe>> = when (character) {
+        Character.BUDDY -> buddySounds
+    }
+
     private class Recipe(val seconds: Double, val gain: Double, val drive: Double, val draw: Buf.() -> Unit)
 
-    private val recipes: Map<Mood, List<Recipe>> = mapOf(
+    private val buddySounds: Map<Mood, List<Recipe>> = mapOf(
         Mood.WORRIED to listOf(
             // "Shhhhh": Buddy shushes.
             Recipe(1.0, gain = 0.75, drive = 1.5) {

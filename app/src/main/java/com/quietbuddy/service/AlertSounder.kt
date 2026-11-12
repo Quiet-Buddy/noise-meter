@@ -4,30 +4,33 @@ import android.media.AudioAttributes
 import android.media.AudioFormat
 import android.media.AudioTrack
 import com.quietbuddy.audio.AlertSounds
+import com.quietbuddy.core.Character
 import com.quietbuddy.core.Mood
 import kotlin.random.Random
 
 /**
- * Plays Buddy's cartoon alert sounds ([AlertSounds]), rotating through each mood's variants so
- * repeated reminders stay fun.
+ * Plays the current character's alert sounds ([AlertSounds]), rotating through each mood's
+ * variants so repeated reminders stay fun. Cached tracks and rotation are keyed by character too, so
+ * switching character never replays the previous one's sound.
  *
  * Uses the media stream (USAGE_MEDIA), which follows the media volume and still plays when the phone
  * is on vibrate/silent, unlike notification sounds.
  */
 class AlertSounder {
-    private val tracks = HashMap<Pair<Mood, Int>, AudioTrack>()
-    private val durations = HashMap<Pair<Mood, Int>, Long>()
+    private val tracks = HashMap<Pair<Pair<Character, Mood>, Int>, AudioTrack>()
+    private val durations = HashMap<Pair<Pair<Character, Mood>, Int>, Long>()
     // Next variant per mood; start at a random one so each session doesn't open with the same sound.
-    private val next = HashMap<Mood, Int>()
+    private val next = HashMap<Pair<Character, Mood>, Int>()
     private var current: AudioTrack? = null
 
-    /** Starts the next sound for [mood]; returns its length in ms (0 if nothing played). Non-blocking. */
-    fun play(mood: Mood): Long {
-        val count = AlertSounds.variantCount(mood)
+    /** Starts the next sound of [character] for [mood]; returns its length in ms (0 if nothing played). Non-blocking. */
+    fun play(character: Character, mood: Mood): Long {
+        val count = AlertSounds.variantCount(character, mood)
         if (count == 0) return 0
-        val variant = next.getOrPut(mood) { Random.nextInt(count) }
-        next[mood] = (variant + 1) % count
-        val key = mood to variant
+        val slot = character to mood
+        val variant = next.getOrPut(slot) { Random.nextInt(count) }
+        next[slot] = (variant + 1) % count
+        val key = slot to variant
         return runCatching {
             current?.let { if (it.playState == AudioTrack.PLAYSTATE_PLAYING) it.stop() }
             val track = tracks.getOrPut(key) { build(key) }
@@ -44,8 +47,8 @@ class AlertSounder {
         current = null
     }
 
-    private fun build(key: Pair<Mood, Int>): AudioTrack {
-        val pcm = AlertSounds.render(key.first, key.second)
+    private fun build(key: Pair<Pair<Character, Mood>, Int>): AudioTrack {
+        val pcm = AlertSounds.render(key.first.first, key.first.second, key.second)
         durations[key] = pcm.size * 1000L / AlertSounds.RATE
         val track = AudioTrack.Builder()
             .setAudioAttributes(

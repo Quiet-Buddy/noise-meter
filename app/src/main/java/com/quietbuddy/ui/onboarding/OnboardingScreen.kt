@@ -54,7 +54,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.quietbuddy.core.Mood
-import com.quietbuddy.ui.buddy.Buddy
+import com.quietbuddy.domain.character.Voices
+import com.quietbuddy.ui.character.CharacterView
+import com.quietbuddy.ui.character.LocalCharacter
+import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 
 private val OnboardingBackground = Color(0xFFFFF7E3)
@@ -69,12 +72,13 @@ fun OnboardingScreen(onDone: () -> Unit) {
     }
 
     val large = isLargeScreen()
+    val voice = Voices.of(LocalCharacter.current)
 
     val welcome: @Composable (buddySize: Dp) -> Unit = { buddySize ->
-        Buddy(mood = Mood.HAPPY, modifier = Modifier.size(buddySize))
+        CharacterView(mood = Mood.HAPPY, modifier = Modifier.size(buddySize))
         Spacer(Modifier.height(16.dp))
         Text(
-            stringResource(R.string.onb_hi),
+            stringResource(voice.greeting),
             style = MaterialTheme.typography.headlineSmall,
             textAlign = TextAlign.Center,
         )
@@ -162,12 +166,13 @@ fun OnboardingScreen(onDone: () -> Unit) {
 /** The "start listening" button and the "maybe later" link, stacked. */
 @Composable
 private fun Actions(onListen: () -> Unit, onLater: () -> Unit) {
+    val palette = LocalPalette.current
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Button(
             onClick = onListen,
             modifier = Modifier.fillMaxWidth().height(60.dp),
             shape = RoundedCornerShape(20.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = QB.Ink, contentColor = Color.White),
+            colors = ButtonDefaults.buttonColors(containerColor = palette.ink, contentColor = Color.White),
         ) {
             Icon(Icons.Rounded.Mic, contentDescription = null, tint = Color.White)
             Spacer(Modifier.width(8.dp))
@@ -177,17 +182,18 @@ private fun Actions(onListen: () -> Unit, onLater: () -> Unit) {
             onClick = onLater,
             modifier = Modifier.heightIn(min = 48.dp),
         ) {
-            Text(stringResource(R.string.onb_later), style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
+            Text(stringResource(R.string.onb_later), style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
         }
     }
 }
 
 @Composable
 private fun InfoRow(icon: ImageVector, title: String, subtitle: String) {
+    val palette = LocalPalette.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = QB.Card),
+        colors = CardDefaults.cardColors(containerColor = palette.card),
     ) {
         Row(
             Modifier.padding(16.dp),
@@ -196,15 +202,15 @@ private fun InfoRow(icon: ImageVector, title: String, subtitle: String) {
             Box(
                 Modifier
                     .size(48.dp)
-                    .background(QB.AccentSoft, CircleShape),
+                    .background(palette.accentSoft, CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
-                Icon(icon, contentDescription = null, tint = QB.Accent)
+                Icon(icon, contentDescription = null, tint = palette.accent)
             }
             Spacer(Modifier.width(12.dp))
             Column {
                 Text(title, style = MaterialTheme.typography.titleMedium)
-                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
+                Text(subtitle, style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
             }
         }
     }
