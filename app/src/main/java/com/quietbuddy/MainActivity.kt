@@ -1,6 +1,7 @@
 package com.quietbuddy
 
 import android.os.Bundle
+import androidx.compose.ui.platform.LocalView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -109,6 +110,13 @@ private fun Root(vm: MainViewModel = hiltViewModel()) {
         }
         lifecycleOwner.lifecycle.addObserver(obs)
         onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
+    }
+
+    // Keep the display on while the app is in front; the flag is dropped automatically when it leaves.
+    val view = LocalView.current
+    DisposableEffect(view, loaded.keepScreenOn) {
+        view.keepScreenOn = loaded.keepScreenOn
+        onDispose { view.keepScreenOn = false }
     }
 
     val start = remember(Unit) { if (loaded.onboardingDone) Routes.HOME else Routes.ONBOARDING }

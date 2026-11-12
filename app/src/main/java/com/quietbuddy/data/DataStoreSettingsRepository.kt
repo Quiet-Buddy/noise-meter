@@ -36,6 +36,7 @@ private object Keys {
     val QUIET_END_MINUTES = intPreferencesKey("quiet_end_minutes")
     val CHIME_ON_SAD = booleanPreferencesKey("chime_on_sad")
     val KEEP_LISTENING = booleanPreferencesKey("keep_listening")
+    val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
     val CALIBRATION_OFFSET_DB = floatPreferencesKey("calibration_offset_db")
     /** Absent means null. */
     val CALIBRATED_AT_MS = longPreferencesKey("calibrated_at_ms")
@@ -77,6 +78,7 @@ class DataStoreSettingsRepository @Inject constructor(
             quietEndMinutes = this[Keys.QUIET_END_MINUTES] ?: d.quietEndMinutes,
             chimeOnSad = this[Keys.CHIME_ON_SAD] ?: d.chimeOnSad,
             keepListening = this[Keys.KEEP_LISTENING] ?: d.keepListening,
+            keepScreenOn = this[Keys.KEEP_SCREEN_ON] ?: d.keepScreenOn,
             calibrationOffsetDb = this[Keys.CALIBRATION_OFFSET_DB] ?: d.calibrationOffsetDb,
             calibratedAtMs = this[Keys.CALIBRATED_AT_MS],
             onboardingDone = this[Keys.ONBOARDING_DONE] ?: d.onboardingDone,
@@ -93,6 +95,7 @@ class DataStoreSettingsRepository @Inject constructor(
         this[Keys.QUIET_END_MINUTES] = s.quietEndMinutes
         this[Keys.CHIME_ON_SAD] = s.chimeOnSad
         this[Keys.KEEP_LISTENING] = s.keepListening
+        this[Keys.KEEP_SCREEN_ON] = s.keepScreenOn
         this[Keys.CALIBRATION_OFFSET_DB] = s.calibrationOffsetDb
         val calibrated = s.calibratedAtMs
         if (calibrated != null) this[Keys.CALIBRATED_AT_MS] = calibrated

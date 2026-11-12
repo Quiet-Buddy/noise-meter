@@ -68,6 +68,7 @@ data class AppSettings(
     val quietEndMinutes: Int = 8 * 60,
     val chimeOnSad: Boolean = false,
     val keepListening: Boolean = false,
+    val keepScreenOn: Boolean = true,
     val calibrationOffsetDb: Float = DEFAULT_CALIBRATION_OFFSET_DB,
     val calibratedAtMs: Long? = null,
     val onboardingDone: Boolean = false,
