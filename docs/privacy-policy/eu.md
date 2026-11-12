@@ -6,7 +6,7 @@
 
 Quiet Buddy Android aplikazio bat egiten duen kode irekiko proiektu txiki bat da. Gehiago jakiteko, bisitatu [quiet-buddy.github.io](https://quiet-buddy.github.io).
 
-Politika honi buruzko galderarik? Idatzi mezu bat helbide honetara: CONTACT_EMAIL_PLACEHOLDER
+Politika honi buruzko galderarik? Ireki gai bat hemen: [https://github.com/Quiet-Buddy/noise-meter/issues](https://github.com/Quiet-Buddy/noise-meter/issues).
 
 ## Zer datu atzitzen dituen aplikazioak eta zergatik
 

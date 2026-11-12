@@ -6,7 +6,7 @@
 
 Quiet Buddy es un pequeño proyecto de código abierto que desarrolla una aplicación para Android. Puedes saber más en [quiet-buddy.github.io](https://quiet-buddy.github.io).
 
-¿Tienes preguntas sobre esta política? Escríbenos a: CONTACT_EMAIL_PLACEHOLDER
+¿Tienes preguntas sobre esta política? Abre una incidencia en [https://github.com/Quiet-Buddy/noise-meter/issues](https://github.com/Quiet-Buddy/noise-meter/issues).
 
 ## Qué datos usa la aplicación y para qué
 
