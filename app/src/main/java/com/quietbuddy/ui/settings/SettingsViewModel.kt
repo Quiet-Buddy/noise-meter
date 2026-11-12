@@ -39,6 +39,8 @@ class SettingsViewModel @Inject constructor(
 
     fun setKeepListening(enabled: Boolean) = update { it.copy(keepListening = enabled) }
 
+    fun setKeepScreenOn(enabled: Boolean) = update { it.copy(keepScreenOn = enabled) }
+
     fun setRoomName(name: String) = update {
         val trimmed = name.trim()
         if (trimmed.isEmpty()) it else it.copy(roomName = trimmed)

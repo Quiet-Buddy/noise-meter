@@ -186,6 +186,12 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                     }
                 },
             )
+            SwitchRow(
+                title = stringResource(R.string.settings_keep_screen_on),
+                subtitle = stringResource(R.string.settings_keep_screen_on_sub),
+                checked = settings.keepScreenOn,
+                onCheckedChange = viewModel::setKeepScreenOn,
+            )
         }
     }
 

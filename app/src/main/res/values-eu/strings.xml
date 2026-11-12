@@ -73,6 +73,8 @@
     <string name="settings_chime">Soinu-abisuak zarata handia dagoenean</string>
     <string name="settings_chime_sub">Buddyk soinu dibertigarriak egiten ditu zarata handia dagoenean. Multimediaren bolumena erabiltzen du.</string>
     <string name="settings_keep_listening">Jarraitu entzuten pantaila itzalita</string>
+    <string name="settings_keep_screen_on">Mantendu pantaila piztuta</string>
+    <string name="settings_keep_screen_on_sub">Aplikazioa irekita dagoen bitartean pantaila ez da itzaliko</string>
     <string name="settings_keep_listening_sub">Buddy jakinarazpen-barran erakusten du</string>
     <string name="settings_last_done">, azkenekoz %1$s</string>
     <string name="settings_language">Hizkuntza</string>
