@@ -27,6 +27,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -128,7 +129,7 @@ private fun ProgressCard(calmMinutes: Long) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Text(stringResource(R.string.characters_calm_collected), style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
-        Text(calmMinutes.toString(), style = MaterialTheme.typography.displaySmall)
+        Text(calmMinutes.toString(), style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.ExtraBold))
         LinearProgressIndicator(
             progress = { fraction },
             modifier = Modifier.fillMaxWidth(),
