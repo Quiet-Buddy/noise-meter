@@ -72,6 +72,8 @@
     <string name="settings_chime">Avisos sonoros cuando hay mucho ruido</string>
     <string name="settings_chime_sub">Reproduce sonidos divertidos cuando hay mucho ruido. Usa el volumen multimedia.</string>
     <string name="settings_keep_listening">Seguir escuchando con la pantalla apagada</string>
+    <string name="settings_keep_screen_on">Mantener la pantalla encendida</string>
+    <string name="settings_keep_screen_on_sub">Evita que la pantalla se apague mientras la app está abierta</string>
     <string name="settings_keep_listening_sub">Se muestra en la barra de notificaciones</string>
     <string name="settings_last_done">, última vez el %1$s</string>
     <string name="settings_language">Idioma</string>

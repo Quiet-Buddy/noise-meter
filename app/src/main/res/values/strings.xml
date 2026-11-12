@@ -73,6 +73,8 @@
     <string name="settings_chime">Sound alerts when it gets loud</string>
     <string name="settings_chime_sub">Plays funny sounds when it gets loud. Uses media volume.</string>
     <string name="settings_keep_listening">Keep listening with screen off</string>
+    <string name="settings_keep_screen_on">Keep screen on</string>
+    <string name="settings_keep_screen_on_sub">Stops the display from sleeping while the app is open</string>
     <string name="settings_keep_listening_sub">Shows in the notification shade</string>
     <string name="settings_last_done">, last done %1$s</string>
     <string name="settings_language">Language</string>
