@@ -29,6 +29,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.RangeSlider
 import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
@@ -36,6 +37,9 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
+import android.app.Activity
+import com.quietbuddy.core.AppLanguage
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -66,6 +70,8 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
     var showRoomDialog by rememberSaveable { mutableStateOf(false) }
     var roomDraft by rememberSaveable { mutableStateOf("") }
+    var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
     // Slider value while the user drags; committed on release.
     var dragRange by remember { mutableStateOf<ClosedFloatingPointRange<Float>?>(null) }
 
@@ -209,6 +215,11 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 ),
                 onClick = onOpenCalibration,
             )
+            NavRow(
+                title = stringResource(R.string.settings_language),
+                subtitle = languageLabel(AppLanguage.current(context)),
+                onClick = { showLanguageDialog = true },
+            )
         }
     }
 
@@ -265,6 +276,36 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
         }
     }
 
+    if (showLanguageDialog) {
+        val currentTag = AppLanguage.current(context)
+        AlertDialog(
+            onDismissRequest = { showLanguageDialog = false },
+            title = { Text(stringResource(R.string.settings_language), style = MaterialTheme.typography.titleMedium) },
+            text = {
+                Column {
+                    AppLanguage.options.forEach { tag ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .heightIn(min = 48.dp)
+                                .clickable(role = Role.RadioButton) {
+                                    showLanguageDialog = false
+                                    if (tag != currentTag) (context as? Activity)?.let { AppLanguage.set(it, tag) }
+                                },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            RadioButton(selected = tag == currentTag, onClick = null)
+                            Text(languageLabel(tag), Modifier.padding(start = 12.dp), style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showLanguageDialog = false }) { Text(stringResource(R.string.common_cancel)) }
+            },
+        )
+    }
+
     if (showRoomDialog) {
         AlertDialog(
             onDismissRequest = { showRoomDialog = false },
@@ -288,6 +329,14 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
             },
         )
     }
+}
+
+@Composable
+private fun languageLabel(tag: String): String = when (tag) {
+    "en" -> "English"
+    "es" -> "Español"
+    "eu" -> "Euskara"
+    else -> stringResource(R.string.settings_language_system)
 }
 
 @Composable

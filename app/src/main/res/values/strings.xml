@@ -76,6 +76,8 @@
     <string name="settings_keep_listening">Keep listening with screen off</string>
     <string name="settings_keep_listening_sub">Shows Buddy in the notification shade</string>
     <string name="settings_last_done">, last done %1$s</string>
+    <string name="settings_language">Language</string>
+    <string name="settings_language_system">System default</string>
     <string name="settings_room_name">Room name</string>
     <string name="settings_offset">Offset %1$s dB%2$s</string>
     <string name="settings_privacy">Buddy never records or sends audio. Everything stays on this phone.</string>
