@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="style_buddy_sunny">Buddy Soleado</string>
+    <string name="style_buddy_mint">Buddy Menta</string>
+    <string name="style_buddy_berry">Buddy Frambuesa</string>
+    <string name="style_kitten_ginger">Mochi Naranja</string>
+    <string name="style_kitten_grey">Mochi Gris</string>
+    <string name="style_kitten_snow">Mochi Nieve</string>
+
+    <string name="settings_styles">Estilos</string>
+    <string name="style_progress">%1$d / %2$d min</string>
+    <string name="style_locked_desc">%1$s, bloqueado. %2$s</string>
+    <plurals name="style_needs_minutes">
+        <item quantity="one">Necesita %1$d minuto en calma</item>
+        <item quantity="many">Necesita %1$d minutos en calma</item>
+        <item quantity="other">Necesita %1$d minutos en calma</item>
+    </plurals>
+    <plurals name="style_next_hint">
+        <item quantity="one">Falta %1$d minuto en calma para desbloquear a %2$s</item>
+        <item quantity="many">Faltan %1$d minutos en calma para desbloquear a %2$s</item>
+        <item quantity="other">Faltan %1$d minutos en calma para desbloquear a %2$s</item>
+    </plurals>
+    <string name="style_all_unlocked">¡Has desbloqueado todos los estilos!</string>
+    <string name="settings_unlock_all">Desbloquear todos los estilos</string>
+    <string name="settings_unlock_all_sub">Sin tener que ganarlos con minutos en calma</string>
+
+    <string name="unlock_title">¡Nuevo estilo desbloqueado!</string>
+    <string name="unlock_body">¡La calma tiene premio! Has conseguido a %1$s.</string>
+    <plurals name="unlock_body_more">
+        <item quantity="one">¡La calma tiene premio! Has conseguido a %1$s y %2$d más.</item>
+        <item quantity="many">¡La calma tiene premio! Has conseguido a %1$s y %2$d más.</item>
+        <item quantity="other">¡La calma tiene premio! Has conseguido a %1$s y %2$d más.</item>
+    </plurals>
+    <string name="unlock_try">Probar</string>
+    <string name="unlock_later">Más tarde</string>
+</resources>

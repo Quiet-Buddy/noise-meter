@@ -6,9 +6,14 @@ import androidx.compose.runtime.ReadOnlyComposable
 import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import com.quietbuddy.core.Character
+import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.kitten.KittenArt
+import com.quietbuddy.ui.theme.BuddyBerryPalette
+import com.quietbuddy.ui.theme.BuddyMintPalette
 import com.quietbuddy.ui.theme.BuddyPalette
+import com.quietbuddy.ui.theme.KittenGreyPalette
+import com.quietbuddy.ui.theme.KittenSnowPalette
 import com.quietbuddy.ui.theme.KittenPalette
 import com.quietbuddy.ui.theme.Palette
 
@@ -50,18 +55,40 @@ interface CharacterAnimator {
 class CharacterLook(val art: CharacterArt, val palette: Palette)
 
 object CharacterLooks {
-    private val Buddy = CharacterLook(BuddyArt, BuddyPalette)
-    private val Kitten = CharacterLook(KittenArt, KittenPalette)
-
-    fun of(character: Character): CharacterLook = when (character) {
-        Character.BUDDY -> Buddy
-        Character.KITTEN -> Kitten
+    private val looks: Map<CharacterStyle, CharacterLook> = CharacterStyle.entries.associateWith { style ->
+        val palette = when (style) {
+            CharacterStyle.BUDDY_SUNNY -> BuddyPalette
+            CharacterStyle.BUDDY_MINT -> BuddyMintPalette
+            CharacterStyle.BUDDY_BERRY -> BuddyBerryPalette
+            CharacterStyle.KITTEN_GINGER -> KittenPalette
+            CharacterStyle.KITTEN_GREY -> KittenGreyPalette
+            CharacterStyle.KITTEN_SNOW -> KittenSnowPalette
+        }
+        CharacterLook(
+            art = when (style.character) {
+                Character.BUDDY -> BuddyArt
+                Character.KITTEN -> KittenArt
+            },
+            palette = palette,
+        )
     }
+
+    fun of(style: CharacterStyle): CharacterLook = looks.getValue(style)
+
+    /** The character's free default style. */
+    fun of(character: Character): CharacterLook = of(CharacterStyle.defaultFor(character))
 }
 
 /** The character the UI is currently themed with. */
 val LocalCharacter = staticCompositionLocalOf { Character.DEFAULT }
 
-/** The current character's look. */
+/** The current character's style. Ignored (the default style is used) when it belongs to another character. */
+val LocalStyle = staticCompositionLocalOf { CharacterStyle.defaultFor(Character.DEFAULT) }
+
+/** The current character's look in the current style. */
 val LocalLook: CharacterLook
-    @Composable @ReadOnlyComposable get() = CharacterLooks.of(LocalCharacter.current)
+    @Composable @ReadOnlyComposable get() {
+        val character = LocalCharacter.current
+        val style = LocalStyle.current.takeIf { it.character == character } ?: CharacterStyle.defaultFor(character)
+        return CharacterLooks.of(style)
+    }

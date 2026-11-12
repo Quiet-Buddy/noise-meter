@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="style_buddy_sunny">Buddy Eguzkitsua</string>
+    <string name="style_buddy_mint">Buddy Menta</string>
+    <string name="style_buddy_berry">Buddy Mugurdia</string>
+    <string name="style_kitten_ginger">Mochi Laranja</string>
+    <string name="style_kitten_grey">Mochi Grisa</string>
+    <string name="style_kitten_snow">Mochi Elurra</string>
+
+    <string name="settings_styles">Estiloak</string>
+    <string name="style_progress">%1$d / %2$d min</string>
+    <string name="style_locked_desc">%1$s, blokeatuta. %2$s</string>
+    <plurals name="style_needs_minutes">
+        <item quantity="one">Minutu lasai %1$d behar du</item>
+        <item quantity="other">%1$d minutu lasai behar ditu</item>
+    </plurals>
+    <plurals name="style_next_hint">
+        <item quantity="one">Minutu lasai %1$d falta da %2$s desblokeatzeko</item>
+        <item quantity="other">%1$d minutu lasai falta dira %2$s desblokeatzeko</item>
+    </plurals>
+    <string name="style_all_unlocked">Estilo guztiak desblokeatu dituzu!</string>
+    <string name="settings_unlock_all">Desblokeatu estilo guztiak</string>
+    <string name="settings_unlock_all_sub">Minutu lasaiekin irabazi beharrik gabe</string>
+
+    <string name="unlock_title">Estilo berria desblokeatu da!</string>
+    <string name="unlock_body">Lasaitasunak saria du! %1$s lortu duzu.</string>
+    <plurals name="unlock_body_more">
+        <item quantity="one">Lasaitasunak saria du! %1$s eta beste %2$d lortu dituzu.</item>
+        <item quantity="other">Lasaitasunak saria du! %1$s eta beste %2$d lortu dituzu.</item>
+    </plurals>
+    <string name="unlock_try">Probatu</string>
+    <string name="unlock_later">Geroago</string>
+</resources>

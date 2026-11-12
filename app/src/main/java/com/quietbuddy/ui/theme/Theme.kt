@@ -33,6 +33,9 @@ data class Palette(
     val tear: Color,
     val mouth: Color,
     val tongue: Color,
+    /** Kitten markings: tabby stripes and the pale muzzle, belly and paws. Unused by Buddy. */
+    val stripe: Color = Color(0xFFE48A3A),
+    val cream: Color = Color(0xFFFFF3E2),
 ) {
     /** Screen background for [m]: the alarm tint for the loud moods, the palette's own otherwise. */
     fun screenBackground(m: Mood?) = when (m) { Mood.SAD, Mood.EARS_COVERED -> QB.TooLoudBackground; else -> background }
@@ -70,6 +73,63 @@ val KittenPalette = Palette(
     tear = Color(0xFF8FC8FF),
     mouth = Color(0xFF7A3240),
     tongue = Color(0xFFFF7A8A),
+)
+
+/** Mint Buddy: fresh mint-green body with cool-green chrome. */
+val BuddyMintPalette = BuddyPalette.copy(
+    ink = Color(0xFF1B2B26),
+    inkSoft = Color(0xFF55695F),
+    background = Color(0xFFF2F9F5),
+    line = Color(0xFFDDEBE3),
+    accent = Color(0xFF1F7A57),
+    accentSoft = Color(0xFFE0F3E9),
+    body = Color(0xFF8EE3B4),
+)
+
+/** Berry Buddy: soft raspberry pink-purple. */
+val BuddyBerryPalette = BuddyPalette.copy(
+    ink = Color(0xFF2B1F2E),
+    inkSoft = Color(0xFF6B5870),
+    background = Color(0xFFFBF5FA),
+    line = Color(0xFFEEDFEA),
+    accent = Color(0xFFA8327A),
+    accentSoft = Color(0xFFF8E3F1),
+    outline = Color(0xFF3A2236),
+    body = Color(0xFFE07FB5),
+    cheek = Color(0xFFFFC2D4),
+    mouth = Color(0xFF5B2A3E),
+)
+
+/** Grey Mochi: grey tabby with slate chrome. */
+val KittenGreyPalette = KittenPalette.copy(
+    ink = Color(0xFF1F262D),
+    inkSoft = Color(0xFF5A6670),
+    background = Color(0xFFF3F5F7),
+    line = Color(0xFFE1E6EA),
+    accent = Color(0xFF4A5F78),
+    accentSoft = Color(0xFFE4EAF1),
+    outline = Color(0xFF2F3640),
+    body = Color(0xFFA7B0B9),
+    cheek = Color(0xFFF5A3B0),
+    mouth = Color(0xFF5A3040),
+    stripe = Color(0xFF6B7681),
+    cream = Color(0xFFE3E8EC),
+)
+
+/** Snow Mochi: white-cream coat; a dark slate outline keeps the shape readable. */
+val KittenSnowPalette = KittenPalette.copy(
+    ink = Color(0xFF212A35),
+    inkSoft = Color(0xFF586573),
+    background = Color(0xFFF4F7FA),
+    line = Color(0xFFE2E9F0),
+    accent = Color(0xFF456785),
+    accentSoft = Color(0xFFE6EEF5),
+    outline = Color(0xFF3F4A5C),
+    body = Color(0xFFFBF7F0),
+    cheek = Color(0xFFFFB8C6),
+    mouth = Color(0xFF6A3A4A),
+    stripe = Color(0xFFC3CEDA),
+    cream = Color(0xFFFFFFFF),
 )
 
 val LocalPalette = staticCompositionLocalOf { BuddyPalette }

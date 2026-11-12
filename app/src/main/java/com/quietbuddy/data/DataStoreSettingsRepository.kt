@@ -13,6 +13,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.Character
+import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Preset
 import com.quietbuddy.core.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -40,6 +41,9 @@ private object Keys {
     val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
     /** Character.key; absent or unknown means Character.DEFAULT. */
     val CHARACTER = stringPreferencesKey("character")
+    /** CharacterStyle.key of the selected style for [c]; absent or mismatched means the character's default. */
+    fun style(c: Character) = stringPreferencesKey("style_${c.key}")
+    val UNLOCK_ALL_STYLES = booleanPreferencesKey("unlock_all_styles")
 }
 
 @Singleton
@@ -79,6 +83,10 @@ class DataStoreSettingsRepository @Inject constructor(
             calibratedAtMs = this[Keys.CALIBRATED_AT_MS],
             onboardingDone = this[Keys.ONBOARDING_DONE] ?: d.onboardingDone,
             character = Character.fromKey(this[Keys.CHARACTER]),
+            styles = Character.entries.mapNotNull { c ->
+                CharacterStyle.fromKey(this[Keys.style(c)])?.takeIf { it.character == c }?.let { c to it }
+            }.toMap(),
+            unlockAllStyles = this[Keys.UNLOCK_ALL_STYLES] ?: d.unlockAllStyles,
         )
     }
 
@@ -96,5 +104,11 @@ class DataStoreSettingsRepository @Inject constructor(
         else remove(Keys.CALIBRATED_AT_MS)
         this[Keys.ONBOARDING_DONE] = s.onboardingDone
         this[Keys.CHARACTER] = s.character.key
+        for (c in Character.entries) {
+            val style = s.styles[c]
+            if (style != null) this[Keys.style(c)] = style.key
+            else remove(Keys.style(c))
+        }
+        this[Keys.UNLOCK_ALL_STYLES] = s.unlockAllStyles
     }
 }

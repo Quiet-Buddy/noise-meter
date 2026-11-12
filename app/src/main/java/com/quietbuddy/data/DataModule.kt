@@ -3,6 +3,7 @@ package com.quietbuddy.data
 import android.content.Context
 import androidx.room.Room
 import com.quietbuddy.core.HistoryRepository
+import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.SettingsRepository
 import dagger.Binds
 import dagger.Module
@@ -34,4 +35,7 @@ abstract class DataBindingsModule {
 
     @Binds
     abstract fun bindHistoryRepository(impl: RoomHistoryRepository): HistoryRepository
+
+    @Binds
+    abstract fun bindProgressRepository(impl: DataStoreProgressRepository): ProgressRepository
 }

@@ -80,6 +80,13 @@ import com.quietbuddy.core.Mood
 import com.quietbuddy.domain.character.Voices
 import com.quietbuddy.ui.character.CharacterView
 import com.quietbuddy.ui.character.LocalCharacter
+import com.quietbuddy.ui.character.LocalStyle
+import com.quietbuddy.ui.character.nameRes
+import com.quietbuddy.core.CharacterStyle
+import androidx.compose.material3.AlertDialog
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.CompositionLocalProvider
 import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 import java.text.SimpleDateFormat
@@ -163,6 +170,12 @@ fun HomeScreen() {
             onStart = viewModel::startChallenge,
         )
     }
+
+    UnlockDialog(
+        unlocks = state.pendingUnlocks,
+        onTry = { viewModel.dismissUnlocks(it) },
+        onLater = { viewModel.dismissUnlocks(null) },
+    )
 
     BoxWithConstraints(Modifier.fillMaxSize().background(background).statusBarsPadding()) {
         if (isTwoPane(maxWidth, maxHeight)) {
@@ -502,5 +515,32 @@ private fun openAppSettings(context: Context) {
             Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
             Uri.fromParts("package", context.packageName, null),
         ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+    )
+}
+
+/** Tells the user about newly earned styles and offers to switch to the newest one. */
+@Composable
+private fun UnlockDialog(unlocks: List<CharacterStyle>, onTry: (CharacterStyle) -> Unit, onLater: () -> Unit) {
+    val newest = unlocks.maxByOrNull { it.unlockAtCalmMinutes } ?: return
+    val name = stringResource(newest.nameRes)
+    AlertDialog(
+        onDismissRequest = onLater,
+        title = { Text(stringResource(R.string.unlock_title), style = MaterialTheme.typography.titleMedium) },
+        text = {
+            Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                CompositionLocalProvider(LocalCharacter provides newest.character, LocalStyle provides newest) {
+                    CharacterView(mood = Mood.HAPPY, modifier = Modifier.size(120.dp))
+                }
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    if (unlocks.size > 1) pluralStringResource(R.plurals.unlock_body_more, unlocks.size - 1, name, unlocks.size - 1)
+                    else stringResource(R.string.unlock_body, name),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                )
+            }
+        },
+        confirmButton = { TextButton(onClick = { onTry(newest) }) { Text(stringResource(R.string.unlock_try)) } },
+        dismissButton = { TextButton(onClick = onLater) { Text(stringResource(R.string.unlock_later)) } },
     )
 }

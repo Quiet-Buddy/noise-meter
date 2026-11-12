@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.widthIn
 import com.quietbuddy.ui.SingleColumnMaxWidth
 import com.quietbuddy.ui.TwoPaneMaxWidth
 import com.quietbuddy.ui.isTwoPane
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -66,6 +67,20 @@ import com.quietbuddy.core.Preset
 import com.quietbuddy.domain.character.Voices
 import com.quietbuddy.ui.character.CharacterView
 import com.quietbuddy.ui.character.LocalCharacter
+import com.quietbuddy.ui.character.LocalStyle
+import com.quietbuddy.ui.character.nameRes
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Lock
+import androidx.compose.material3.Icon
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.res.pluralStringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
+import com.quietbuddy.core.CharacterStyle
+import com.quietbuddy.core.Progress
+import com.quietbuddy.core.Unlocks
 import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 import java.text.SimpleDateFormat
@@ -79,6 +94,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
     val palette = LocalPalette.current
     val viewModel: SettingsViewModel = hiltViewModel()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
+    val progress by viewModel.progress.collectAsStateWithLifecycle()
     var showRoomDialog by rememberSaveable { mutableStateOf(false) }
     var roomDraft by rememberSaveable { mutableStateOf("") }
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
@@ -126,7 +142,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(4.dp),
                     ) {
-                        CompositionLocalProvider(LocalCharacter provides c) {
+                        CompositionLocalProvider(LocalCharacter provides c, LocalStyle provides settings.styleFor(c)) {
                             CharacterView(mood = Mood.HAPPY, modifier = Modifier.size(64.dp))
                         }
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -141,6 +157,13 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                     }
                 }
             }
+            StylesSection(
+                character = settings.character,
+                selected = settings.styleFor(settings.character),
+                unlockAll = settings.unlockAllStyles,
+                progress = progress,
+                onSelect = viewModel::setStyle,
+            )
         }
     }
 
@@ -229,6 +252,12 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 subtitle = stringResource(R.string.settings_keep_screen_on_sub),
                 checked = settings.keepScreenOn,
                 onCheckedChange = viewModel::setKeepScreenOn,
+            )
+            SwitchRow(
+                title = stringResource(R.string.settings_unlock_all),
+                subtitle = stringResource(R.string.settings_unlock_all_sub),
+                checked = settings.unlockAllStyles,
+                onCheckedChange = viewModel::setUnlockAllStyles,
             )
         }
     }
@@ -432,3 +461,94 @@ private fun NavRow(title: String, subtitle: String, onClick: () -> Unit) {
     }
 }
 
+
+/** One tile per style of [character]; locked ones show the calm-minute progress and cannot be picked. */
+@Composable
+private fun StylesSection(
+    character: Character,
+    selected: CharacterStyle,
+    unlockAll: Boolean,
+    progress: Progress,
+    onSelect: (CharacterStyle) -> Unit,
+) {
+    val palette = LocalPalette.current
+    val styles = CharacterStyle.of(character)
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(stringResource(R.string.settings_styles), style = MaterialTheme.typography.bodyLarge)
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            modifier = Modifier.fillMaxWidth().selectableGroup(),
+        ) {
+            styles.forEach { style ->
+                val unlocked = unlockAll || style in progress.unlocked
+                val isSelected = style == selected
+                val shape = RoundedCornerShape(14.dp)
+                val name = stringResource(style.nameRes)
+                val lockedDescription = if (unlocked) name else stringResource(
+                    R.string.style_locked_desc,
+                    name,
+                    pluralStringResource(R.plurals.style_needs_minutes, style.unlockAtCalmMinutes, style.unlockAtCalmMinutes),
+                )
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clip(shape)
+                        .background(if (isSelected) palette.accentSoft else palette.background, shape)
+                        .border(2.dp, if (isSelected) palette.accent else palette.line, shape)
+                        .then(
+                            if (unlocked) Modifier.selectable(
+                                selected = isSelected,
+                                role = Role.RadioButton,
+                                onClick = { onSelect(style) },
+                            ) else Modifier,
+                        )
+                        .semantics(mergeDescendants = true) { if (!unlocked) contentDescription = lockedDescription }
+                        .padding(vertical = 8.dp, horizontal = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        CompositionLocalProvider(LocalCharacter provides character, LocalStyle provides style) {
+                            CharacterView(
+                                mood = Mood.HAPPY,
+                                animated = false,
+                                modifier = Modifier.size(56.dp).alpha(if (unlocked) 1f else 0.35f),
+                            )
+                        }
+                        if (!unlocked) {
+                            Icon(Icons.Rounded.Lock, contentDescription = null, tint = palette.ink, modifier = Modifier.size(24.dp))
+                        }
+                    }
+                    Text(
+                        name,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = if (isSelected) palette.accent else palette.ink,
+                        textAlign = TextAlign.Center,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    if (!unlocked) {
+                        Text(
+                            stringResource(R.string.style_progress, progress.calmMinutes.coerceAtMost(style.unlockAtCalmMinutes.toLong()), style.unlockAtCalmMinutes),
+                            style = MaterialTheme.typography.labelSmall,
+                            textAlign = TextAlign.Center,
+                        )
+                    }
+                }
+            }
+        }
+        if (!unlockAll) {
+            val next = Unlocks.next(progress.calmMinutes)
+            Text(
+                if (next == null) {
+                    stringResource(R.string.style_all_unlocked)
+                } else {
+                    val remaining = (next.unlockAtCalmMinutes - progress.calmMinutes).toInt().coerceAtLeast(1)
+                    pluralStringResource(R.plurals.style_next_hint, remaining, remaining, stringResource(next.nameRes))
+                },
+                style = MaterialTheme.typography.labelSmall,
+            )
+        }
+    }
+}

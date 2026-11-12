@@ -53,6 +53,7 @@ import com.quietbuddy.core.SettingsRepository
 import com.quietbuddy.ui.Routes
 import com.quietbuddy.ui.character.CharacterLooks
 import com.quietbuddy.ui.character.LocalCharacter
+import com.quietbuddy.ui.character.LocalStyle
 import com.quietbuddy.ui.history.HistoryScreen
 import com.quietbuddy.ui.home.HomeScreen
 import com.quietbuddy.ui.onboarding.OnboardingScreen
@@ -103,8 +104,9 @@ private val tabs = listOf(
 private fun Root(vm: MainViewModel = hiltViewModel()) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val loaded = settings ?: return
-    val look = CharacterLooks.of(loaded.character)
-    CompositionLocalProvider(LocalCharacter provides loaded.character) {
+    val style = loaded.styleFor(loaded.character)
+    val look = CharacterLooks.of(style)
+    CompositionLocalProvider(LocalCharacter provides loaded.character, LocalStyle provides style) {
         QuietBuddyTheme(look.palette) { AppContent(loaded, vm.controller) }
     }
 }
