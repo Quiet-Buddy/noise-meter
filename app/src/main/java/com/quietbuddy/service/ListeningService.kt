@@ -20,6 +20,7 @@ import com.quietbuddy.R
 import com.quietbuddy.audio.AudioCapture
 import com.quietbuddy.audio.LevelBus
 import com.quietbuddy.core.AppSettings
+import com.quietbuddy.core.Character
 import com.quietbuddy.core.HistoryRepository
 import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.MinuteAggregate
@@ -27,6 +28,7 @@ import com.quietbuddy.core.Mood
 import com.quietbuddy.core.SettingsRepository
 import com.quietbuddy.domain.AlertPolicy
 import com.quietbuddy.domain.MoodEngine
+import com.quietbuddy.domain.character.Voices
 import com.quietbuddy.audio.LevelProcessor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -140,7 +142,7 @@ class ListeningService : LifecycleService() {
         if (s.chimeOnSad) {
             alerts.onMood(mood, ts)?.let { alertMood ->
                 val sounder = sounder ?: AlertSounder().also { sounder = it }
-                val lengthMs = sounder.play(alertMood)
+                val lengthMs = sounder.play(s.character, alertMood)
                 if (lengthMs > 0) holdMoodUntilMs = ts + lengthMs + LevelProcessor.DEFAULT_WINDOW_MS + 200
             }
         } else {
@@ -221,8 +223,12 @@ class ListeningService : LifecycleService() {
         val text = if (db == null) label(mood)
         else getString(R.string.svc_text, label(mood), Math.round(db))
         return NotificationCompat.Builder(this, QuietBuddyApp.CHANNEL_LISTENING)
-            .setSmallIcon(R.drawable.ic_buddy_notification)
-            .setContentTitle(getString(R.string.svc_title, settings.roomName))
+            .setSmallIcon(
+                when (settings.character) {
+                    Character.BUDDY -> R.drawable.ic_buddy_notification
+                }
+            )
+            .setContentTitle(getString(Voices.of(settings.character).listeningTitle, settings.roomName))
             .setContentText(text)
             .setOngoing(true)
             .setOnlyAlertOnce(true)

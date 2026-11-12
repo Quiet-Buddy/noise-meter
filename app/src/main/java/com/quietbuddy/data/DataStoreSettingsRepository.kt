@@ -13,6 +13,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.quietbuddy.core.AppSettings
+import com.quietbuddy.core.Character
 import com.quietbuddy.core.Preset
 import com.quietbuddy.core.SettingsRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -40,6 +41,8 @@ private object Keys {
     /** Absent means null. */
     val CALIBRATED_AT_MS = longPreferencesKey("calibrated_at_ms")
     val ONBOARDING_DONE = booleanPreferencesKey("onboarding_done")
+    /** Character.key; absent or unknown means Character.DEFAULT. */
+    val CHARACTER = stringPreferencesKey("character")
 }
 
 @Singleton
@@ -80,6 +83,7 @@ class DataStoreSettingsRepository @Inject constructor(
             calibrationOffsetDb = this[Keys.CALIBRATION_OFFSET_DB] ?: d.calibrationOffsetDb,
             calibratedAtMs = this[Keys.CALIBRATED_AT_MS],
             onboardingDone = this[Keys.ONBOARDING_DONE] ?: d.onboardingDone,
+            character = Character.fromKey(this[Keys.CHARACTER]),
         )
     }
 
@@ -98,5 +102,6 @@ class DataStoreSettingsRepository @Inject constructor(
         if (calibrated != null) this[Keys.CALIBRATED_AT_MS] = calibrated
         else remove(Keys.CALIBRATED_AT_MS)
         this[Keys.ONBOARDING_DONE] = s.onboardingDone
+        this[Keys.CHARACTER] = s.character.key
     }
 }

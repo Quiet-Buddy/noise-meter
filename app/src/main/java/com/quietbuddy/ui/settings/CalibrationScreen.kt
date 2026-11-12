@@ -41,11 +41,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 import java.util.Locale
 
 @Composable
 fun CalibrationScreen(onBack: () -> Unit) {
+    val palette = LocalPalette.current
     val viewModel: CalibrationViewModel = hiltViewModel()
     val latest by viewModel.latest.collectAsStateWithLifecycle()
     var referenceText by rememberSaveable { mutableStateOf("") }
@@ -55,7 +57,7 @@ fun CalibrationScreen(onBack: () -> Unit) {
     Box(
         Modifier
             .fillMaxSize()
-            .background(QB.Background)
+            .background(palette.background)
             .statusBarsPadding(),
         contentAlignment = Alignment.TopCenter,
     ) {
@@ -70,16 +72,15 @@ fun CalibrationScreen(onBack: () -> Unit) {
         ) {
             Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 IconButton(onClick = onBack, modifier = Modifier.size(48.dp)) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cal_back), tint = QB.Ink)
+                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cal_back), tint = palette.ink)
                 }
                 Text(stringResource(R.string.cal_title), style = MaterialTheme.typography.headlineSmall)
             }
 
             Column(
-                modifier = Modifier.fillMaxWidth().background(QB.Card, RoundedCornerShape(20.dp)).padding(20.dp),
+                modifier = Modifier.fillMaxWidth().background(palette.card, RoundedCornerShape(20.dp)).padding(20.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp),
             ) {
-                Text(stringResource(R.string.cal_hears_now), style = MaterialTheme.typography.labelSmall)
                 Text(
                     current?.let { String.format(Locale.US, "%.0f dB", it) } ?: "-- dB",
                     style = MaterialTheme.typography.displayLarge,
@@ -115,7 +116,7 @@ fun CalibrationScreen(onBack: () -> Unit) {
             Text(
                 stringResource(R.string.cal_silent_hint),
                 style = MaterialTheme.typography.labelSmall,
-                color = QB.InkSoft,
+                color = palette.inkSoft,
             )
         }
     }

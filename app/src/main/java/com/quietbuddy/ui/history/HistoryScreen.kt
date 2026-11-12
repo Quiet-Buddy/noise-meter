@@ -2,7 +2,7 @@ package com.quietbuddy.ui.history
 
 import androidx.compose.ui.res.stringResource
 import com.quietbuddy.R
-import com.quietbuddy.ui.buddy.moodLabelRes
+import com.quietbuddy.ui.character.moodLabelRes
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -56,7 +56,8 @@ import com.quietbuddy.core.DaySummary
 import com.quietbuddy.core.HourBar
 
 import com.quietbuddy.core.Thresholds
-import com.quietbuddy.ui.buddy.Buddy
+import com.quietbuddy.ui.character.CharacterView
+import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 import java.time.Instant
 import java.time.LocalDate
@@ -68,6 +69,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun HistoryScreen() {
+    val palette = LocalPalette.current
     val viewModel: HistoryViewModel = hiltViewModel()
     val days by viewModel.days.collectAsStateWithLifecycle()
     val selected by viewModel.selectedDay.collectAsStateWithLifecycle()
@@ -82,7 +84,7 @@ fun HistoryScreen() {
 
     val header: @Composable () -> Unit = {
         Column {
-            Text(settings.roomName, style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
+            Text(settings.roomName, style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
             Text(stringResource(R.string.history_this_week), style = MaterialTheme.typography.headlineSmall)
         }
     }
@@ -108,8 +110,8 @@ fun HistoryScreen() {
                         .weight(1f)
                         .height(72.dp)
                         .clip(shape)
-                        .background(if (isSelected) QB.AccentSoft else QB.Card)
-                        .border(2.dp, if (isSelected) QB.Accent else QB.Line, shape)
+                        .background(if (isSelected) palette.accentSoft else palette.card)
+                        .border(2.dp, if (isSelected) palette.accent else palette.line, shape)
                         .clickable { viewModel.selectDay(day.dateEpochDay) }
                         .semantics {
                             contentDescription = dayDescription
@@ -117,13 +119,13 @@ fun HistoryScreen() {
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    Buddy(day.dominantMood, Modifier.size(30.dp))
+                    CharacterView(day.dominantMood, Modifier.size(30.dp))
                     Spacer(Modifier.height(4.dp))
                     Text(
                         text = if (isToday) stringResource(R.string.history_today) else weekday,
                         fontSize = 11.sp,
                         fontWeight = FontWeight.ExtraBold,
-                        color = if (isSelected) QB.Accent else QB.InkSoft,
+                        color = if (isSelected) palette.accent else palette.inkSoft,
                     )
                 }
             }
@@ -135,7 +137,7 @@ fun HistoryScreen() {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(QB.Card, RoundedCornerShape(20.dp))
+                .background(palette.card, RoundedCornerShape(20.dp))
                 .padding(start = 18.dp, end = 18.dp, top = 16.dp, bottom = 14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -145,7 +147,7 @@ fun HistoryScreen() {
             }
             if (hours.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().height(chartHeight), contentAlignment = Alignment.Center) {
-                    Text(stringResource(R.string.history_no_readings), style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
+                    Text(stringResource(R.string.history_no_readings), style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
                 }
             } else {
                 HourlyChart(hours, settings.baseThresholds, chartHeight)
@@ -180,7 +182,7 @@ fun HistoryScreen() {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(QB.Card, RoundedCornerShape(20.dp))
+                .background(palette.card, RoundedCornerShape(20.dp))
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -196,7 +198,7 @@ fun HistoryScreen() {
     BoxWithConstraints(
         Modifier
             .fillMaxSize()
-            .background(QB.Background)
+            .background(palette.background)
             .statusBarsPadding(),
     ) {
         val twoPane = isTwoPane(maxWidth, maxHeight)
@@ -234,9 +236,10 @@ fun HistoryScreen() {
 
 @Composable
 private fun HourlyChart(bars: List<HourBar>, thresholds: Thresholds, height: Dp) {
+    val palette = LocalPalette.current
     val measurer = rememberTextMeasurer()
-    val labelStyle = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold, color = QB.InkSoft)
-    val peakStyle = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = QB.Ink)
+    val labelStyle = TextStyle(fontSize = 10.sp, fontWeight = FontWeight.Bold, color = palette.inkSoft)
+    val peakStyle = TextStyle(fontSize = 11.sp, fontWeight = FontWeight.ExtraBold, color = palette.ink)
 
     Canvas(modifier = Modifier.fillMaxWidth().height(height)) {
         val leftPad = 26.dp.toPx()
@@ -252,7 +255,7 @@ private fun HourlyChart(bars: List<HourBar>, thresholds: Thresholds, height: Dp)
         // Gridlines and y labels
         listOf(30, 50, 70, 90).forEach { db ->
             val y = yFor(db.toFloat())
-            drawLine(QB.Line, Offset(x0, y), Offset(x1, y), strokeWidth = 1.dp.toPx())
+            drawLine(palette.line, Offset(x0, y), Offset(x1, y), strokeWidth = 1.dp.toPx())
             val m = measurer.measure("$db", labelStyle)
             drawText(m, topLeft = Offset(leftPad - 6.dp.toPx() - m.size.width, y - m.size.height / 2f))
         }
@@ -321,9 +324,10 @@ private fun LegendItem(label: String, color: Color) {
 
 @Composable
 private fun StatCard(title: String, value: String, modifier: Modifier = Modifier, subtitle: String? = null) {
+    val palette = LocalPalette.current
     Column(
         modifier = modifier
-            .background(QB.Card, RoundedCornerShape(20.dp))
+            .background(palette.card, RoundedCornerShape(20.dp))
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp),
     ) {

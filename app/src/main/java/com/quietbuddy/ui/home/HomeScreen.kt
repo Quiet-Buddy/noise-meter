@@ -77,7 +77,10 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.Mood
-import com.quietbuddy.ui.buddy.Buddy
+import com.quietbuddy.domain.character.Voices
+import com.quietbuddy.ui.character.CharacterView
+import com.quietbuddy.ui.character.LocalCharacter
+import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -87,6 +90,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun HomeScreen() {
+    val palette = LocalPalette.current
     val viewModel: HomeViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -108,7 +112,7 @@ fun HomeScreen() {
         if (hasMicPermission(context)) viewModel.start()
     }
 
-    val background by animateColorAsState(QB.screenBackground(state.mood), tween(600), label = "background")
+    val background by animateColorAsState(palette.screenBackground(state.mood), tween(600), label = "background")
     val listening = state.listening == ListeningState.LISTENING
 
     // On tablets the device usually sits on a shelf and is read from across the room, so Buddy and the
@@ -235,6 +239,7 @@ fun HomeScreen() {
 
 @Composable
 private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
+    val palette = LocalPalette.current
     val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
     val greeting = when (hour) {
         in 5..11 -> stringResource(R.string.greeting_morning)
@@ -243,17 +248,17 @@ private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
     }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Column(Modifier.weight(1f)) {
-            Text(greeting, style = MaterialTheme.typography.bodyMedium, color = QB.InkSoft)
+            Text(greeting, style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
             Text(roomName, style = MaterialTheme.typography.headlineSmall)
         }
         IconButton(
             onClick = onToggle,
-            modifier = Modifier.size(48.dp).background(QB.Card, CircleShape),
+            modifier = Modifier.size(48.dp).background(palette.card, CircleShape),
         ) {
             Icon(
                 imageVector = if (listening) Icons.Rounded.Mic else Icons.Rounded.MicOff,
                 contentDescription = stringResource(if (listening) R.string.home_pause_listening else R.string.home_resume_listening),
-                tint = QB.Ink,
+                tint = palette.ink,
             )
         }
     }
@@ -261,9 +266,10 @@ private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
 
 @Composable
 private fun BuddyRing(mood: Mood?, db: Int?, size: Dp) {
+    val palette = LocalPalette.current
     val target = if (mood == null || db == null) 0f else ((db - 30f) / 70f).coerceIn(0f, 1f)
     val progress by animateFloatAsState(target, tween(600), label = "ringProgress")
-    val arcColor by animateColorAsState(mood?.let { QB.bandColor(it) } ?: QB.Line, tween(600), label = "ringColor")
+    val arcColor by animateColorAsState(mood?.let { QB.bandColor(it) } ?: palette.line, tween(600), label = "ringColor")
 
     Box(Modifier.size(size), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
@@ -271,7 +277,7 @@ private fun BuddyRing(mood: Mood?, db: Int?, size: Dp) {
             val inset = strokePx / 2f
             val arcSize = Size(this.size.width - 2 * inset, this.size.height - 2 * inset)
             drawArc(
-                color = QB.Line,
+                color = palette.line,
                 startAngle = -90f,
                 sweepAngle = 360f,
                 useCenter = false,
@@ -291,7 +297,7 @@ private fun BuddyRing(mood: Mood?, db: Int?, size: Dp) {
                 )
             }
         }
-        Buddy(mood = mood, modifier = Modifier.size(size * 2 / 3))
+        CharacterView(mood = mood, modifier = Modifier.size(size * 2 / 3))
     }
 }
 
@@ -311,6 +317,7 @@ private fun DbReadout(db: Int?, large: Boolean = false) {
 
 @Composable
 private fun BandPill(mood: Mood?, listening: ListeningState) {
+    val palette = LocalPalette.current
     val label = when (mood) {
         Mood.HAPPY, Mood.FINE -> stringResource(R.string.band_nice_calm)
         Mood.WORRIED -> stringResource(R.string.band_getting_loud)
@@ -318,8 +325,8 @@ private fun BandPill(mood: Mood?, listening: ListeningState) {
         Mood.EARS_COVERED -> stringResource(R.string.band_way_too_loud)
         null -> stringResource(if (listening == ListeningState.PAUSED) R.string.band_paused else R.string.band_sleeping)
     }
-    val soft = mood?.let { QB.bandSoft(it) } ?: QB.AccentSoft
-    val text = mood?.let { QB.bandText(it) } ?: QB.InkSoft
+    val soft = mood?.let { QB.bandSoft(it) } ?: palette.accentSoft
+    val text = mood?.let { QB.bandText(it) } ?: palette.inkSoft
     Box(
         Modifier
             .clip(RoundedCornerShape(50))
@@ -333,10 +340,11 @@ private fun BandPill(mood: Mood?, listening: ListeningState) {
 
 @Composable
 private fun SpeechBubble(text: String) {
+    val palette = LocalPalette.current
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = QB.Card),
+        colors = CardDefaults.cardColors(containerColor = palette.card),
     ) {
         Text(
             text = text,
@@ -349,6 +357,7 @@ private fun SpeechBubble(text: String) {
 
 @Composable
 private fun NotListeningMessage(listening: ListeningState) {
+    val palette = LocalPalette.current
     val message = when (listening) {
         ListeningState.NO_PERMISSION -> stringResource(R.string.home_needs_mic)
         ListeningState.MIC_BUSY -> stringResource(R.string.home_mic_busy)
@@ -357,7 +366,7 @@ private fun NotListeningMessage(listening: ListeningState) {
     Text(
         message,
         style = MaterialTheme.typography.bodyMedium,
-        color = QB.InkSoft,
+        color = palette.inkSoft,
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth(),
     )
@@ -365,6 +374,7 @@ private fun NotListeningMessage(listening: ListeningState) {
 
 @Composable
 private fun BandBar(mood: Mood?) {
+    val palette = LocalPalette.current
     val active = when (mood) {
         null -> -1
         Mood.HAPPY, Mood.FINE -> 0
@@ -383,7 +393,7 @@ private fun BandBar(mood: Mood?) {
                     .weight(1f)
                     .height(10.dp)
                     .clip(RoundedCornerShape(5.dp))
-                    .background(if (index == active) color else QB.Line),
+                    .background(if (index == active) color else palette.line),
             )
         }
     }
@@ -402,15 +412,16 @@ private fun BandBar(mood: Mood?) {
 
 @Composable
 private fun StatCard(label: String, value: String, modifier: Modifier = Modifier, sub: String? = null) {
+    val palette = LocalPalette.current
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = QB.Card),
+        colors = CardDefaults.cardColors(containerColor = palette.card),
     ) {
         Column(Modifier.padding(16.dp)) {
             Text(label, style = MaterialTheme.typography.labelSmall)
             Spacer(Modifier.height(4.dp))
-            Text(value, style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = QB.Ink))
+            Text(value, style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = palette.ink))
             if (sub != null) {
                 Text(sub, style = MaterialTheme.typography.labelSmall)
             }
@@ -420,11 +431,13 @@ private fun StatCard(label: String, value: String, modifier: Modifier = Modifier
 
 @Composable
 private fun ChallengeSection(challenge: ChallengeState, canStart: Boolean, onStart: () -> Unit) {
+    val palette = LocalPalette.current
+    val voice = Voices.of(LocalCharacter.current)
     when (challenge) {
         is ChallengeState.Running -> Card(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = QB.Card),
+            colors = CardDefaults.cardColors(containerColor = palette.card),
         ) {
             Text(
                 stringResource(R.string.challenge_running, challenge.secondsLeft),
@@ -439,7 +452,7 @@ private fun ChallengeSection(challenge: ChallengeState, canStart: Boolean, onSta
             colors = CardDefaults.cardColors(containerColor = if (challenge.won) QB.CalmSoft else QB.TooLoudSoft),
         ) {
             Text(
-                stringResource(if (challenge.won) R.string.challenge_won else R.string.challenge_lost),
+                stringResource(if (challenge.won) voice.challengeWon else R.string.challenge_lost),
                 style = MaterialTheme.typography.titleMedium,
                 color = if (challenge.won) QB.CalmText else QB.TooLoudText,
                 textAlign = TextAlign.Center,
@@ -454,11 +467,12 @@ private fun ChallengeSection(challenge: ChallengeState, canStart: Boolean, onSta
 
 @Composable
 private fun DarkButton(text: String, onClick: () -> Unit) {
+    val palette = LocalPalette.current
     Button(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().heightIn(min = 56.dp),
         shape = RoundedCornerShape(20.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = QB.Ink, contentColor = Color.White),
+        colors = ButtonDefaults.buttonColors(containerColor = palette.ink, contentColor = Color.White),
     ) {
         Text(text, style = MaterialTheme.typography.titleMedium, color = Color.White)
     }
