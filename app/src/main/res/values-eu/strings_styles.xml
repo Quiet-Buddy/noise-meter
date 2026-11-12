@@ -7,7 +7,6 @@
     <string name="style_kitten_grey">Mochi Grisa</string>
     <string name="style_kitten_snow">Mochi Elurra</string>
 
-    <string name="settings_styles">Estiloak</string>
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, blokeatuta. %2$s</string>
     <plurals name="style_needs_minutes">
@@ -41,4 +40,11 @@
         <item quantity="one">Minutu lasai %1$d falta da %2$s ezagutzeko</item>
         <item quantity="other">%1$d minutu lasai falta dira %2$s ezagutzeko</item>
     </plurals>
+
+    <string name="nav_characters">Pertsonaiak</string>
+    <string name="characters_title">Pertsonaiak</string>
+    <string name="characters_calm_collected">Bildutako minutu lasaiak</string>
+    <string name="characters_in_use">Erabiltzen</string>
+    <string name="home_next_reward">%1$d min %2$s desblokeatzeko</string>
+    <string name="home_next_reward_friend">%1$d min %2$s ezagutzeko</string>
 </resources>

@@ -17,6 +17,9 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.semantics.Role
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -96,7 +99,7 @@ import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onOpenCharacters: () -> Unit) {
     val palette = LocalPalette.current
     val viewModel: HomeViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -160,6 +163,10 @@ fun HomeScreen() {
                 sub = state.loudestAtMs?.let { formatTime(it) },
                 modifier = Modifier.weight(1f),
             )
+        }
+        state.nextReward?.let { reward ->
+            Spacer(Modifier.height(4.dp))
+            NextRewardRow(reward = reward, minutes = state.minutesToNext, onClick = onOpenCharacters)
         }
         if (state.challenge != ChallengeState.Idle || canStartChallenge) {
             Spacer(Modifier.height(12.dp))
@@ -247,6 +254,36 @@ fun HomeScreen() {
                 details()
             }
         }
+    }
+}
+
+/** A quiet link to the Characters tab showing the next reward; deliberately static and muted. */
+@Composable
+private fun NextRewardRow(reward: CharacterStyle, minutes: Int, onClick: () -> Unit) {
+    val palette = LocalPalette.current
+    val text = if (reward.isCharacterDefault) {
+        stringResource(R.string.home_next_reward_friend, minutes, stringResource(Voices.of(reward.character).name))
+    } else {
+        stringResource(R.string.home_next_reward, minutes, stringResource(reward.nameRes))
+    }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .heightIn(min = 48.dp)
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 4.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = spacedBy(10.dp),
+    ) {
+        CompositionLocalProvider(LocalCharacter provides reward.character, LocalStyle provides reward) {
+            CharacterView(
+                mood = Mood.HAPPY,
+                animated = false,
+                modifier = Modifier.size(28.dp).alpha(0.5f),
+            )
+        }
+        Text(text, style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft, modifier = Modifier.weight(1f))
+        Text(">", style = MaterialTheme.typography.titleMedium, color = palette.inkSoft)
     }
 }
 

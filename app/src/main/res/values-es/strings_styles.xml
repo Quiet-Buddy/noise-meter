@@ -7,7 +7,6 @@
     <string name="style_kitten_grey">Mochi Gris</string>
     <string name="style_kitten_snow">Mochi Nieve</string>
 
-    <string name="settings_styles">Estilos</string>
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, bloqueado. %2$s</string>
     <plurals name="style_needs_minutes">
@@ -46,4 +45,11 @@
         <item quantity="many">Faltan %1$d minutos en calma para conocer a %2$s</item>
         <item quantity="other">Faltan %1$d minutos en calma para conocer a %2$s</item>
     </plurals>
+
+    <string name="nav_characters">Personajes</string>
+    <string name="characters_title">Personajes</string>
+    <string name="characters_calm_collected">Minutos en calma acumulados</string>
+    <string name="characters_in_use">En uso</string>
+    <string name="home_next_reward">%1$d min para desbloquear a %2$s</string>
+    <string name="home_next_reward_friend">%1$d min para conocer a %2$s</string>
 </resources>

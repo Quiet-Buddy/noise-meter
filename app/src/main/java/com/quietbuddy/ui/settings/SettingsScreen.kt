@@ -15,13 +15,11 @@ import androidx.compose.foundation.layout.widthIn
 import com.quietbuddy.ui.SingleColumnMaxWidth
 import com.quietbuddy.ui.TwoPaneMaxWidth
 import com.quietbuddy.ui.isTwoPane
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.rememberScrollState
@@ -38,10 +36,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.ui.platform.LocalContext
 import android.app.Activity
 import com.quietbuddy.core.AppLanguage
@@ -61,26 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quietbuddy.core.AppSettings
-import com.quietbuddy.core.Character
-import com.quietbuddy.core.Mood
 import com.quietbuddy.core.Preset
-import com.quietbuddy.domain.character.Voices
-import com.quietbuddy.ui.character.CharacterView
-import com.quietbuddy.ui.character.LocalCharacter
-import com.quietbuddy.ui.character.LocalStyle
-import com.quietbuddy.ui.character.nameRes
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Lock
-import androidx.compose.material3.Icon
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.res.pluralStringResource
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
-import com.quietbuddy.core.CharacterStyle
-import com.quietbuddy.core.Progress
-import com.quietbuddy.core.Unlocks
 import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 import java.text.SimpleDateFormat
@@ -94,7 +69,6 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
     val palette = LocalPalette.current
     val viewModel: SettingsViewModel = hiltViewModel()
     val settings by viewModel.settings.collectAsStateWithLifecycle()
-    val progress by viewModel.progress.collectAsStateWithLifecycle()
     var showRoomDialog by rememberSaveable { mutableStateOf(false) }
     var roomDraft by rememberSaveable { mutableStateOf("") }
     var showLanguageDialog by rememberSaveable { mutableStateOf(false) }
@@ -110,80 +84,6 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
         Column {
             Text(settings.roomName, style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
             Text(stringResource(R.string.settings_title), style = MaterialTheme.typography.headlineSmall)
-        }
-    }
-
-    // Character card
-    val character: @Composable () -> Unit = {
-        Column(
-            modifier = Modifier.fillMaxWidth().background(palette.card, CardShape).padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-            Text(stringResource(R.string.settings_character), style = MaterialTheme.typography.titleMedium)
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                modifier = Modifier.fillMaxWidth().selectableGroup(),
-            ) {
-                Character.entries.forEach { c ->
-                    val selected = settings.character == c
-                    val shape = RoundedCornerShape(14.dp)
-                    val unlocked = progress.isUnlocked(c, settings)
-                    val friendStyle = CharacterStyle.defaultFor(c)
-                    val friendName = stringResource(Voices.of(c).name)
-                    val lockedDescription = if (unlocked) friendName else stringResource(
-                        R.string.style_locked_desc,
-                        friendName,
-                        pluralStringResource(R.plurals.style_needs_minutes, friendStyle.unlockAtCalmMinutes, friendStyle.unlockAtCalmMinutes),
-                    )
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clip(shape)
-                            .background(if (selected) palette.accentSoft else palette.background, shape)
-                            .border(2.dp, if (selected) palette.accent else palette.line, shape)
-                            .then(
-                                if (unlocked) Modifier.selectable(
-                                    selected = selected,
-                                    role = Role.RadioButton,
-                                    onClick = { viewModel.setCharacter(c) },
-                                ) else Modifier,
-                            )
-                            .semantics(mergeDescendants = true) { if (!unlocked) contentDescription = lockedDescription }
-                            .padding(vertical = 12.dp, horizontal = 4.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(4.dp),
-                    ) {
-                        LockedPreview(unlocked = unlocked, size = 64.dp) {
-                            CompositionLocalProvider(LocalCharacter provides c, LocalStyle provides settings.styleFor(c)) {
-                                CharacterView(mood = Mood.HAPPY, modifier = Modifier.size(64.dp).alpha(if (unlocked) 1f else 0.35f))
-                            }
-                        }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            RadioButton(selected = selected, onClick = null, enabled = unlocked)
-                            Text(
-                                friendName,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = if (selected) palette.accent else palette.ink,
-                            )
-                        }
-                        if (!unlocked) {
-                            Text(
-                                stringResource(R.string.style_progress, progress.calmMinutes.coerceAtMost(friendStyle.unlockAtCalmMinutes.toLong()), friendStyle.unlockAtCalmMinutes),
-                                style = MaterialTheme.typography.labelSmall,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-                    }
-                }
-            }
-            StylesSection(
-                character = settings.character,
-                selected = settings.styleFor(settings.character),
-                unlockAll = settings.unlockAllStyles,
-                progress = progress,
-                onSelect = viewModel::setStyle,
-            )
         }
     }
 
@@ -352,7 +252,6 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                 // Landscape: how Buddy reacts on the left, room, calibration and privacy on the right.
                 Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                     Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                        character()
                         sensitivity()
                         switches()
                     }
@@ -362,7 +261,6 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                     }
                 }
             } else {
-                character()
                 sensitivity()
                 switches()
                 navRows()
@@ -482,105 +380,3 @@ private fun NavRow(title: String, subtitle: String, onClick: () -> Unit) {
 }
 
 
-/** Wraps a character preview; when locked, overlays a lock icon (the preview itself is dimmed by the caller). */
-@Composable
-private fun LockedPreview(unlocked: Boolean, size: androidx.compose.ui.unit.Dp, content: @Composable () -> Unit) {
-    Box(contentAlignment = Alignment.Center) {
-        content()
-        if (!unlocked) {
-            Icon(Icons.Rounded.Lock, contentDescription = null, tint = LocalPalette.current.ink, modifier = Modifier.size(if (size >= 64.dp) 28.dp else 24.dp))
-        }
-    }
-}
-
-/** One tile per style of [character]; locked ones show the calm-minute progress and cannot be picked. */
-@Composable
-private fun StylesSection(
-    character: Character,
-    selected: CharacterStyle,
-    unlockAll: Boolean,
-    progress: Progress,
-    onSelect: (CharacterStyle) -> Unit,
-) {
-    val palette = LocalPalette.current
-    val styles = CharacterStyle.of(character)
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        Text(stringResource(R.string.settings_styles), style = MaterialTheme.typography.bodyLarge)
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            modifier = Modifier.fillMaxWidth().selectableGroup(),
-        ) {
-            styles.forEach { style ->
-                val unlocked = unlockAll || style in progress.unlocked
-                val isSelected = style == selected
-                val shape = RoundedCornerShape(14.dp)
-                val name = stringResource(style.nameRes)
-                val lockedDescription = if (unlocked) name else stringResource(
-                    R.string.style_locked_desc,
-                    name,
-                    pluralStringResource(R.plurals.style_needs_minutes, style.unlockAtCalmMinutes, style.unlockAtCalmMinutes),
-                )
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .clip(shape)
-                        .background(if (isSelected) palette.accentSoft else palette.background, shape)
-                        .border(2.dp, if (isSelected) palette.accent else palette.line, shape)
-                        .then(
-                            if (unlocked) Modifier.selectable(
-                                selected = isSelected,
-                                role = Role.RadioButton,
-                                onClick = { onSelect(style) },
-                            ) else Modifier,
-                        )
-                        .semantics(mergeDescendants = true) { if (!unlocked) contentDescription = lockedDescription }
-                        .padding(vertical = 8.dp, horizontal = 4.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(2.dp),
-                ) {
-                    LockedPreview(unlocked = unlocked, size = 56.dp) {
-                        CompositionLocalProvider(LocalCharacter provides character, LocalStyle provides style) {
-                            CharacterView(
-                                mood = Mood.HAPPY,
-                                animated = false,
-                                modifier = Modifier.size(56.dp).alpha(if (unlocked) 1f else 0.35f),
-                            )
-                        }
-                    }
-                    Text(
-                        name,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.ExtraBold,
-                        color = if (isSelected) palette.accent else palette.ink,
-                        textAlign = TextAlign.Center,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    if (!unlocked) {
-                        Text(
-                            stringResource(R.string.style_progress, progress.calmMinutes.coerceAtMost(style.unlockAtCalmMinutes.toLong()), style.unlockAtCalmMinutes),
-                            style = MaterialTheme.typography.labelSmall,
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-                }
-            }
-        }
-        if (!unlockAll) {
-            val next = Unlocks.next(progress.calmMinutes)
-            Text(
-                if (next == null) {
-                    stringResource(R.string.style_all_unlocked)
-                } else {
-                    val remaining = (next.unlockAtCalmMinutes - progress.calmMinutes).toInt().coerceAtLeast(1)
-                    if (next.isCharacterDefault) {
-                        pluralStringResource(R.plurals.style_next_friend_hint, remaining, remaining, stringResource(Voices.of(next.character).name))
-                    } else {
-                        pluralStringResource(R.plurals.style_next_hint, remaining, remaining, stringResource(next.nameRes))
-                    }
-                },
-                style = MaterialTheme.typography.labelSmall,
-            )
-        }
-    }
-}

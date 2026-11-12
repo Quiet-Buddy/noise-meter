@@ -7,7 +7,6 @@
     <string name="style_kitten_grey">Grey Mochi</string>
     <string name="style_kitten_snow">Snow Mochi</string>
 
-    <string name="settings_styles">Styles</string>
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, locked. %2$s</string>
     <plurals name="style_needs_minutes">
@@ -41,4 +40,11 @@
         <item quantity="one">%1$d more calm minute to meet %2$s</item>
         <item quantity="other">%1$d more calm minutes to meet %2$s</item>
     </plurals>
+
+    <string name="nav_characters">Characters</string>
+    <string name="characters_title">Characters</string>
+    <string name="characters_calm_collected">Calm minutes collected</string>
+    <string name="characters_in_use">In use</string>
+    <string name="home_next_reward">%1$d min to unlock %2$s</string>
+    <string name="home_next_reward_friend">%1$d min to meet %2$s</string>
 </resources>

@@ -51,6 +51,9 @@ data class HomeUiState(
     val challenge: ChallengeState = ChallengeState.Idle,
     /** Newly unlocked styles to celebrate, cheapest first; empty when none or when everything is unlocked anyway. */
     val pendingUnlocks: List<CharacterStyle> = emptyList(),
+    /** The next style to earn; null when everything is unlocked or unlockAllStyles is on. */
+    val nextReward: CharacterStyle? = null,
+    val minutesToNext: Int = 0,
 )
 
 @HiltViewModel
@@ -83,6 +86,7 @@ class HomeViewModel @Inject constructor(
         historyRepository.lastDays(1),
     ) { (settings, progress), latest, mood, listening, days ->
         val today = days.lastOrNull()
+        val next = if (settings.unlockAllStyles) null else Unlocks.next(progress.calmMinutes)
         Snapshot(
             roomName = settings.roomName,
             character = settings.character,
@@ -93,6 +97,8 @@ class HomeViewModel @Inject constructor(
             loudestDb = today?.loudestDb,
             loudestAtMs = today?.loudestAtMs,
             pendingUnlocks = if (settings.unlockAllStyles) emptyList() else progress.pendingCelebration,
+            nextReward = next,
+            minutesToNext = next?.let { (it.unlockAtCalmMinutes - progress.calmMinutes).toInt().coerceAtLeast(1) } ?: 0,
         )
     }
 
@@ -112,6 +118,8 @@ class HomeViewModel @Inject constructor(
             loudestAtMs = s.loudestAtMs,
             challenge = ch,
             pendingUnlocks = s.pendingUnlocks,
+            nextReward = s.nextReward,
+            minutesToNext = s.minutesToNext,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
 
@@ -172,6 +180,8 @@ class HomeViewModel @Inject constructor(
         val loudestDb: Float?,
         val loudestAtMs: Long?,
         val pendingUnlocks: List<CharacterStyle>,
+        val nextReward: CharacterStyle?,
+        val minutesToNext: Int,
     )
 
     private companion object {
