@@ -65,6 +65,7 @@
     <string name="history_challenges_won">%1$d Quiet Challenges won this week</string>
     <string name="settings_title">Settings</string>
     <string name="settings_sensitivity">Noise sensitivity</string>
+    <string name="settings_character">Character</string>
     <string name="preset_quiet_time">Quiet time</string>
     <string name="preset_everyday">Everyday</string>
     <string name="preset_playtime">Playtime</string>

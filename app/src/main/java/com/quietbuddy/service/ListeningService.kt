@@ -223,6 +223,7 @@ class ListeningService : LifecycleService() {
             .setSmallIcon(
                 when (settings.character) {
                     Character.BUDDY -> R.drawable.ic_buddy_notification
+                    Character.KITTEN -> R.drawable.ic_kitten_notification
                 }
             )
             .setContentTitle(getString(Voices.of(settings.character).listeningTitle, settings.roomName))

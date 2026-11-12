@@ -10,7 +10,8 @@ package com.quietbuddy.core
  * [key] is persisted in settings; never change an existing key.
  */
 enum class Character(val key: String) {
-    BUDDY("buddy");
+    BUDDY("buddy"),
+    KITTEN("kitten");
 
     companion object {
         val DEFAULT = BUDDY
