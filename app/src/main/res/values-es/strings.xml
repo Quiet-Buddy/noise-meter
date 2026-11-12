@@ -51,7 +51,7 @@
     <string name="common_save">Guardar</string>
     <string name="common_cancel">Cancelar</string>
     <string name="cal_reset">Restablecer valores</string>
-    <string name="cal_silent_hint">En una habitación en silencio debería marcar menos de 45 dB.</string>
+    <string name="cal_silent_hint">En una habitación en silencio, la lectura debería ser inferior a 45 dB.</string>
     <string name="history_this_week">Esta semana</string>
     <string name="history_day_desc">%1$s, %2$s</string>
     <string name="history_day_desc_selected">%1$s, %2$s, seleccionado</string>
@@ -63,7 +63,7 @@
     <string name="history_calm_time">Tiempo en calma</string>
     <string name="history_challenges_won">%1$d Retos de Silencio ganados esta semana</string>
     <string name="settings_title">Ajustes</string>
-    <string name="settings_sensitivity">¿Cómo de sensible debe ser?</string>
+    <string name="settings_sensitivity">Sensibilidad al ruido</string>
     <string name="preset_quiet_time">Hora de silencio</string>
     <string name="preset_everyday">Cada día</string>
     <string name="preset_playtime">Hora de juego</string>

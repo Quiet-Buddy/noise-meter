@@ -52,7 +52,7 @@
     <string name="common_save">Save</string>
     <string name="common_cancel">Cancel</string>
     <string name="cal_reset">Reset to default</string>
-    <string name="cal_silent_hint">In a silent room it should read below 45 dB.</string>
+    <string name="cal_silent_hint">In a silent room the reading should be below 45 dB.</string>
     <string name="history_this_week">This week</string>
     <string name="history_day_desc">%1$s, %2$s</string>
     <string name="history_day_desc_selected">%1$s, %2$s, selected</string>
@@ -64,7 +64,7 @@
     <string name="history_calm_time">Calm time</string>
     <string name="history_challenges_won">%1$d Quiet Challenges won this week</string>
     <string name="settings_title">Settings</string>
-    <string name="settings_sensitivity">How sensitive should it be?</string>
+    <string name="settings_sensitivity">Noise sensitivity</string>
     <string name="preset_quiet_time">Quiet time</string>
     <string name="preset_everyday">Everyday</string>
     <string name="preset_playtime">Playtime</string>

@@ -51,7 +51,7 @@
     <string name="common_save">Gorde</string>
     <string name="common_cancel">Utzi</string>
     <string name="cal_reset">Berrezarri lehenespena</string>
-    <string name="cal_silent_hint">Gela isil batean, 45 dB baino gutxiago markatu beharko luke.</string>
+    <string name="cal_silent_hint">Gela isil batean, neurketak 45 dB baino gutxiago izan beharko luke.</string>
     <string name="history_this_week">Aste hau</string>
     <string name="history_day_desc">%1$s, %2$s</string>
     <string name="history_day_desc_selected">%1$s, %2$s, hautatuta</string>
@@ -63,7 +63,7 @@
     <string name="history_calm_time">Lasai emandako denbora</string>
     <string name="history_challenges_won">%1$d Isiltasun Erronka irabazi dira aste honetan</string>
     <string name="settings_title">Ezarpenak</string>
-    <string name="settings_sensitivity">Zenbateko sentikorra izan behar du?</string>
+    <string name="settings_sensitivity">Zaratarekiko sentikortasuna</string>
     <string name="preset_quiet_time">Isiltasun ordua</string>
     <string name="preset_everyday">Egunerokoa</string>
     <string name="preset_playtime">Jolasaldia</string>
