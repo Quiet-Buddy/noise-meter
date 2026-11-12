@@ -38,6 +38,10 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class ListeningService : LifecycleService() {
+    override fun attachBaseContext(newBase: android.content.Context) {
+        super.attachBaseContext(com.quietbuddy.core.AppLanguage.wrap(newBase))
+    }
+
     @Inject lateinit var bus: LevelBus
     @Inject lateinit var settingsRepo: SettingsRepository
     @Inject lateinit var history: HistoryRepository

@@ -75,6 +75,8 @@
     <string name="settings_keep_listening">Jarraitu entzuten pantaila itzalita</string>
     <string name="settings_keep_listening_sub">Buddy jakinarazpen-barran erakusten du</string>
     <string name="settings_last_done">, azkenekoz %1$s</string>
+    <string name="settings_language">Hizkuntza</string>
+    <string name="settings_language_system">Sistemaren lehenetsia</string>
     <string name="settings_room_name">Gelaren izena</string>
     <string name="settings_offset">Desplazamendua: %1$s dB%2$s</string>
     <string name="settings_privacy">Buddyk ez du inoiz audiorik grabatzen edo bidaltzen. Dena telefono honetan geratzen da.</string>
