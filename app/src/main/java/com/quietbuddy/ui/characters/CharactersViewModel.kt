@@ -2,6 +2,7 @@ package com.quietbuddy.ui.characters
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Progress
@@ -34,6 +35,14 @@ class CharactersViewModel @Inject constructor(
             settingsRepository.update {
                 it.copy(character = style.character, styles = it.styles + (style.character to style))
             }
+        }
+    }
+
+    /** Puts [accessory] on the character it belongs to, or takes it off; only if it is unlocked. */
+    fun toggle(accessory: Accessory) {
+        viewModelScope.launch {
+            if (!progressRepository.progress.first().isUnlocked(accessory)) return@launch
+            settingsRepository.update { it.toggleAccessory(accessory.character, accessory) }
         }
     }
 }

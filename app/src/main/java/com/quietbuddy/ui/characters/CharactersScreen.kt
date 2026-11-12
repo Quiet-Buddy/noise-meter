@@ -32,6 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quietbuddy.R
+import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Unlocks
@@ -107,6 +108,13 @@ fun CharactersScreen() {
                         progress = progress,
                         onSelect = viewModel::select,
                     )
+                    AccessoryTiles(
+                        character = c,
+                        style = settings.styleFor(c),
+                        worn = settings.accessoriesFor(c),
+                        progress = progress,
+                        onToggle = viewModel::toggle,
+                    )
                 }
             }
         }
@@ -117,7 +125,7 @@ fun CharactersScreen() {
 private fun ProgressCard(calmMinutes: Long) {
     val palette = LocalPalette.current
     val next = Unlocks.next(calmMinutes)
-    val previous = CharacterStyle.entries.filter { it.unlockAtCalmMinutes <= calmMinutes }.maxOfOrNull { it.unlockAtCalmMinutes } ?: 0
+    val previous = Unlocks.previousThreshold(calmMinutes)
     val fraction = if (next == null) 1f else {
         ((calmMinutes - previous).toFloat() / (next.unlockAtCalmMinutes - previous)).coerceIn(0f, 1f)
     }
@@ -138,10 +146,12 @@ private fun ProgressCard(calmMinutes: Long) {
                 stringResource(R.string.style_all_unlocked)
             } else {
                 val remaining = (next.unlockAtCalmMinutes - calmMinutes).toInt().coerceAtLeast(1)
-                if (next.isCharacterDefault) {
-                    pluralStringResource(R.plurals.style_next_friend_hint, remaining, remaining, stringResource(Voices.of(next.character).name))
-                } else {
-                    pluralStringResource(R.plurals.style_next_hint, remaining, remaining, stringResource(next.nameRes))
+                when {
+                    next is CharacterStyle && next.isCharacterDefault ->
+                        pluralStringResource(R.plurals.style_next_friend_hint, remaining, remaining, stringResource(Voices.of(next.character).name))
+                    next is Accessory ->
+                        pluralStringResource(R.plurals.accessory_next_hint, remaining, remaining, stringResource(next.nameRes))
+                    else -> pluralStringResource(R.plurals.style_next_hint, remaining, remaining, stringResource(next.nameRes))
                 }
             },
             style = MaterialTheme.typography.labelSmall,

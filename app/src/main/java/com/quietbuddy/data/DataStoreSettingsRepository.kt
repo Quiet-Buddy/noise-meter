@@ -10,7 +10,9 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.floatPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
@@ -43,6 +45,8 @@ private object Keys {
     val CHARACTER = stringPreferencesKey("character")
     /** CharacterStyle.key of the selected style for [c]; absent or mismatched means the character's default. */
     fun style(c: Character) = stringPreferencesKey("style_${c.key}")
+    /** Accessory.keys worn by [c]; unknown keys and other characters' accessories are dropped. */
+    fun accessories(c: Character) = stringSetPreferencesKey("accessories_${c.key}")
 }
 
 @Singleton
@@ -85,6 +89,12 @@ class DataStoreSettingsRepository @Inject constructor(
             styles = Character.entries.mapNotNull { c ->
                 CharacterStyle.fromKey(this[Keys.style(c)])?.takeIf { it.character == c }?.let { c to it }
             }.toMap(),
+            accessories = Character.entries.mapNotNull { c ->
+                this[Keys.accessories(c)]
+                    ?.mapNotNull { Accessory.fromKey(it)?.takeIf { a -> a.character == c } }
+                    ?.takeIf { it.isNotEmpty() }
+                    ?.let { c to it.toSet() }
+            }.toMap(),
         )
     }
 
@@ -106,6 +116,9 @@ class DataStoreSettingsRepository @Inject constructor(
             val style = s.styles[c]
             if (style != null) this[Keys.style(c)] = style.key
             else remove(Keys.style(c))
+            val worn = s.accessories[c].orEmpty()
+            if (worn.isNotEmpty()) this[Keys.accessories(c)] = worn.map { it.key }.toSet()
+            else remove(Keys.accessories(c))
         }
         remove(booleanPreferencesKey("unlock_all_styles")) // option removed; drop it from old installs
     }
