@@ -152,17 +152,6 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
             modifier = Modifier.fillMaxWidth().background(palette.card, CardShape).padding(vertical = 4.dp),
         ) {
             SwitchRow(
-                title = stringResource(R.string.settings_quiet_hours),
-                subtitle = stringResource(
-                    R.string.settings_quiet_hours_sub,
-                    formatMinutes(settings.quietStartMinutes),
-                    formatMinutes(settings.quietEndMinutes),
-                    AppSettings.QUIET_HOURS_SHIFT_DB.roundToInt(),
-                ),
-                checked = settings.quietHoursEnabled,
-                onCheckedChange = viewModel::setQuietHours,
-            )
-            SwitchRow(
                 title = stringResource(R.string.settings_chime),
                 subtitle = stringResource(R.string.settings_chime_sub),
                 checked = settings.chimeOnSad,
@@ -385,5 +374,3 @@ private fun NavRow(title: String, subtitle: String, onClick: () -> Unit) {
     }
 }
 
-private fun formatMinutes(minuteOfDay: Int): String =
-    String.format(Locale.US, "%02d:%02d", minuteOfDay / 60, minuteOfDay % 60)

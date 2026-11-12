@@ -33,7 +33,6 @@ class SettingsViewModel @Inject constructor(
         it.copy(preset = null, worriedFromDb = worriedFromDb, sadFromDb = sadFromDb)
     }
 
-    fun setQuietHours(enabled: Boolean) = update { it.copy(quietHoursEnabled = enabled) }
 
     fun setChimeOnSad(enabled: Boolean) = update { it.copy(chimeOnSad = enabled) }
 

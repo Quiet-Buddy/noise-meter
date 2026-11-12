@@ -67,8 +67,6 @@
     <string name="preset_quiet_time">Isiltasun ordua</string>
     <string name="preset_everyday">Egunerokoa</string>
     <string name="preset_playtime">Jolasaldia</string>
-    <string name="settings_quiet_hours">Isiltasun orduak</string>
-    <string name="settings_quiet_hours_sub">%1$s - %2$s, %3$d dB zorrotzago</string>
     <string name="settings_chime">Soinu-abisuak zarata handia dagoenean</string>
     <string name="settings_chime_sub">Soinu dibertigarriak jotzen ditu zarata handia dagoenean. Multimediaren bolumena erabiltzen du.</string>
     <string name="settings_keep_listening">Jarraitu entzuten pantaila itzalita</string>

@@ -34,7 +34,6 @@ Buddy doesn't flip moods at every little sound. It waits a moment to be sure the
 ## What you can do with it
 
 - **Pick a noise limit** that suits the place: a quiet-time setting, an everyday setting, or a more relaxed playtime setting.
-- **Use quiet hours.** During set hours, Buddy becomes stricter, which is handy for evenings or nap time.
 - **Look back at history** to see how noisy the day was and when the loudest moments happened.
 - **Take on challenges** to try to keep things quiet.
 - **Keep it running in the background.** A small notification shows Buddy's current mood, and you can pause listening from it at any time.
