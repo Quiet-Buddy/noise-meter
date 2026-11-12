@@ -46,6 +46,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -320,10 +323,6 @@ private fun RewardStrip(
     val palette = LocalPalette.current
     val shape = RoundedCornerShape(20.dp)
     val animatedProgress by animateFloatAsState(progress, tween(600), label = "rewardProgress")
-    val calmLine = buildAnnotatedString {
-        append(stringResource(R.string.home_calm_time_today) + "  ")
-        withStyle(SpanStyle(fontWeight = FontWeight.ExtraBold)) { append(formatMinutes(calmMinutes)) }
-    }
     Row(
         Modifier
             .fillMaxWidth()
@@ -338,16 +337,56 @@ private fun RewardStrip(
             RewardPreview(reward, styles, Modifier.size(44.dp), animated = false)
         }
         Column(Modifier.weight(1f), verticalArrangement = spacedBy(4.dp)) {
-            Text(calmLine, style = MaterialTheme.typography.bodyMedium, color = palette.ink)
+            // Label and value side by side, the value never wrapping: in long languages (Basque) the label wraps
+            // on its own instead of pushing "min" onto a line by itself.
+            Row(verticalAlignment = Alignment.Top, horizontalArrangement = spacedBy(8.dp)) {
+                Text(
+                    stringResource(R.string.home_calm_time_today),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = palette.ink,
+                    modifier = Modifier.weight(1f),
+                )
+                Text(
+                    formatMinutes(calmMinutes),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.ExtraBold),
+                    color = palette.ink,
+                    softWrap = false,
+                )
+            }
             if (reward != null) {
-                Text(nextRewardText(reward, minutesToNext), style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
-                Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(palette.line)) {
-                    Box(Modifier.fillMaxWidth(animatedProgress).fillMaxHeight().background(QB.Calm))
+                // The full "N min to unlock X" sentence wraps in long languages, so it is only the screen-reader
+                // label; on screen the reward's name stands alone and the minutes sit at the end of the bar.
+                val sentence = nextRewardText(reward, minutesToNext)
+                Column(Modifier.clearAndSetSemantics { contentDescription = sentence }, verticalArrangement = spacedBy(4.dp)) {
+                    Text(
+                        rewardName(reward),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = palette.inkSoft,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(8.dp)) {
+                        Box(Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(4.dp)).background(palette.line)) {
+                            Box(Modifier.fillMaxWidth(animatedProgress).fillMaxHeight().background(QB.Calm))
+                        }
+                        Text(
+                            formatMinutes(minutesToNext),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = palette.inkSoft,
+                            softWrap = false,
+                        )
+                    }
                 }
             }
         }
     }
 }
+
+/** What the next reward is called: a new friend by the character's name, anything else by its own name. */
+@Composable
+private fun rewardName(reward: Reward): String =
+    if (reward is CharacterStyle && reward.isCharacterDefault) stringResource(Voices.of(reward.character).name)
+    else stringResource(reward.nameRes)
 
 @Composable
 private fun nextRewardText(reward: Reward, minutes: Int): String = when {
@@ -690,7 +729,8 @@ private fun DarkButton(text: String, onClick: () -> Unit) {
         shape = RoundedCornerShape(20.dp),
         colors = ButtonDefaults.buttonColors(containerColor = palette.ink, contentColor = Color.White),
     ) {
-        Text(text, style = MaterialTheme.typography.titleMedium, color = Color.White)
+        // Centred so a label that wraps in longer languages (Spanish, Basque) stays balanced.
+        Text(text, style = MaterialTheme.typography.titleMedium, color = Color.White, textAlign = TextAlign.Center)
     }
 }
 
