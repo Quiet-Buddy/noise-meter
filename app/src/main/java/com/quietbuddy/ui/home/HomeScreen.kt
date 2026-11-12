@@ -62,6 +62,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import com.quietbuddy.ui.SingleColumnMaxWidth
 import com.quietbuddy.ui.TwoPaneMaxWidth
 import com.quietbuddy.ui.isLargeScreen
@@ -284,6 +285,10 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp)
                     .padding(top = 12.dp, bottom = 16.dp)
+                    // fillMaxSize gives the content a minimum height of the whole screen; drop it before measuring,
+                    // or a short layout reads as screen-tall and Buddy can never grow back after shrinking (e.g. when
+                    // the system bars return after full screen).
+                    .wrapContentHeight(Alignment.Top)
                     .onSizeChanged { otherHeightPx = it.height - with(density) { size.toPx() } },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
