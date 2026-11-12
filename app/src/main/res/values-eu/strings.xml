@@ -14,9 +14,6 @@
     <string name="svc_mood_ears">Belarriak estaltzen</string>
     <string name="svc_text">%1$s · %2$d dB</string>
 
-    <string name="greeting_morning">Egun on</string>
-    <string name="greeting_afternoon">Arratsalde on</string>
-    <string name="greeting_evening">Gabon</string>
     <string name="home_pause_listening">Gelditu entzuketa</string>
     <string name="home_resume_listening">Berrekin entzuketa</string>
     <string name="home_wake_buddy">Hasi entzuten</string>

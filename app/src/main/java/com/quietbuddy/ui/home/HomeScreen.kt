@@ -2,6 +2,23 @@ package com.quietbuddy.ui.home
 
 import androidx.compose.ui.res.stringResource
 import com.quietbuddy.R
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import android.Manifest
 import android.app.Activity
 import android.content.Context
@@ -66,14 +83,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -96,11 +109,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.CompositionLocalProvider
 import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
-import java.text.SimpleDateFormat
-import java.util.Calendar
-import java.util.Date
-import java.util.Locale
-import kotlin.math.roundToInt
 
 @Composable
 fun HomeScreen(onOpenCharacters: () -> Unit) {
@@ -130,7 +138,7 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
     val listening = state.listening == ListeningState.LISTENING
 
     // On tablets the device usually sits on a shelf and is read from across the room, so Buddy and the
-    // number get much bigger there. The cards stay at their normal size.
+    // status chip get much bigger there. The cards stay at their normal size.
     val large = isLargeScreen()
     val canStartChallenge = listening && (state.mood == Mood.SAD || state.mood == Mood.EARS_COVERED)
 
@@ -141,46 +149,40 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
             onToggle = { if (listening) viewModel.pause() else wake() },
         )
     }
-    // Everything below the live reading: speech, wake prompt, band bar, stats and challenge.
+    val chip: @Composable () -> Unit = {
+        StatusChip(mood = state.mood, db = state.db, listening = state.listening, large = large)
+    }
+    // Everything below the status chip: wake prompt, challenge and the reward strip.
     val details: @Composable () -> Unit = {
-        SpeechBubble(text = stringResource(state.speechLine))
-        Spacer(Modifier.height(12.dp))
-
         if (!listening) {
             NotListeningMessage(state.listening)
             Spacer(Modifier.height(12.dp))
             DarkButton(text = stringResource(R.string.home_wake_buddy), onClick = ::wake)
             Spacer(Modifier.height(16.dp))
         }
-
-        BandBar(mood = state.mood)
-        Spacer(Modifier.height(12.dp))
-        Row(horizontalArrangement = spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
-            StatCard(
-                label = stringResource(R.string.home_calm_time_today),
-                value = formatMinutes(state.calmMinutes),
-                modifier = Modifier.weight(1f),
-            )
-            StatCard(
-                label = stringResource(R.string.home_loudest_moment),
-                value = state.loudestDb?.let { "${it.roundToInt()} dB" } ?: "–",
-                sub = state.loudestAtMs?.let { formatTime(it) },
-                modifier = Modifier.weight(1f),
-            )
-        }
-        state.nextReward?.let { reward ->
-            Spacer(Modifier.height(4.dp))
-            NextRewardRow(reward = reward, styles = state.styles, minutes = state.minutesToNext, onClick = onOpenCharacters)
-        }
         if (state.challenge != ChallengeState.Idle || canStartChallenge) {
+            ChallengeSection(
+                challenge = state.challenge,
+                canStart = canStartChallenge,
+                onStart = viewModel::startChallenge,
+            )
             Spacer(Modifier.height(12.dp))
         }
-        ChallengeSection(
-            challenge = state.challenge,
-            canStart = canStartChallenge,
-            onStart = viewModel::startChallenge,
+        RewardStrip(
+            calmMinutes = state.calmMinutes,
+            reward = state.nextReward,
+            styles = state.styles,
+            minutesToNext = state.minutesToNext,
+            progress = state.nextRewardProgress,
+            onClick = onOpenCharacters,
         )
     }
+    val stage: @Composable (Dp) -> Unit = { size ->
+        SpeechBubble(text = stringResource(state.speechLine))
+        Spacer(Modifier.height(4.dp))
+        BuddyStage(mood = state.mood, db = state.db, size = size)
+    }
+    val maxCharacter = if (large) 560.dp else 400.dp
 
     UnlockDialog(
         unlocks = state.pendingUnlocks,
@@ -191,7 +193,7 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
 
     BoxWithConstraints(Modifier.fillMaxSize().background(background).statusBarsPadding()) {
         if (isTwoPane(maxWidth, maxHeight)) {
-            // Landscape: Buddy takes the full height on the left, readings and cards sit on the right.
+            // Landscape: Buddy and his speech bubble take the full height on the left, the rest sits on the right.
             Row(
                 Modifier
                     .align(Alignment.Center)
@@ -202,8 +204,11 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight(), contentAlignment = Alignment.Center) {
-                    val ringSize = minOf(maxWidth, maxHeight).coerceAtMost(if (large) 560.dp else 360.dp)
-                    BuddyRing(mood = state.mood, db = state.db, size = ringSize)
+                    // The bubble (two lines plus tail) sits above the character.
+                    val size = minOf(maxWidth, maxHeight - 110.dp).coerceIn(120.dp, maxCharacter)
+                    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+                        stage(size)
+                    }
                 }
                 BoxWithConstraints(Modifier.weight(1f).fillMaxHeight()) {
                     Column(
@@ -215,29 +220,25 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
                         horizontalAlignment = Alignment.CenterHorizontally,
                     ) {
                         header()
-                        Spacer(Modifier.height(if (large) 24.dp else 8.dp))
-                        // Number and pill side by side to save height on phones in landscape.
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = spacedBy(16.dp, Alignment.CenterHorizontally),
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            DbReadout(db = state.db, large = large)
-                            BandPill(mood = state.mood, listening = state.listening)
-                        }
+                        Spacer(Modifier.height(if (large) 24.dp else 12.dp))
+                        chip()
                         Spacer(Modifier.height(if (large) 24.dp else 12.dp))
                         details()
                     }
                 }
             }
         } else {
-            // Portrait: one column. The ring takes the height left after the rest of the content, so the
-            // listening screen fits without scrolling on typical phones; taller states (challenge, wake button)
-            // scroll. On tablets the column is capped in width and centred.
-            val contentWidth = minOf(maxWidth, SingleColumnMaxWidth)
-            val reserved = if (large) 480.dp else 430.dp
-            val ringSize = minOf(maxHeight - reserved, contentWidth - 48.dp)
-                .coerceIn(160.dp, if (large) 520.dp else 300.dp)
+            // Portrait: one column. Buddy takes the width, or the height left after the rest of the content,
+            // so the listening screen fits without scrolling on typical phones; taller states (challenge,
+            // wake button) scroll. On tablets the column is capped in width and centred.
+            val contentWidth = minOf(maxWidth, SingleColumnMaxWidth) - 48.dp
+            // Buddy absorbs whatever height the rest of the content leaves: the non-Buddy height is measured
+            // (content height minus Buddy's current height), so the result is stable and doesn't loop.
+            val density = LocalDensity.current
+            var otherHeightPx by remember { mutableStateOf(with(density) { 300.dp.toPx() }) }
+            val available = maxHeight - 28.dp
+            val size = minOf(contentWidth, available - with(density) { otherHeightPx.toDp() })
+                .coerceIn(160.dp, maxCharacter)
             Column(
                 Modifier
                     .align(Alignment.TopCenter)
@@ -245,16 +246,15 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
                     .padding(horizontal = 24.dp)
-                    .padding(top = 12.dp, bottom = 16.dp),
+                    .padding(top = 12.dp, bottom = 16.dp)
+                    .onSizeChanged { otherHeightPx = it.height - with(density) { size.toPx() } },
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 header()
                 Spacer(Modifier.height(8.dp))
-                BuddyRing(mood = state.mood, db = state.db, size = ringSize)
-                Spacer(Modifier.height(4.dp))
-                DbReadout(db = state.db, large = large)
-                Spacer(Modifier.height(4.dp))
-                BandPill(mood = state.mood, listening = state.listening)
+                stage(size)
+                Spacer(Modifier.height(16.dp))
+                chip()
                 Spacer(Modifier.height(12.dp))
                 details()
             }
@@ -262,29 +262,57 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
     }
 }
 
-/** A quiet link to the Characters tab showing the next reward; deliberately static and muted. */
+/**
+ * The reward card on Home: today's calm minutes and, while something is left to earn, a preview of the next reward
+ * with a bar showing how close it is. Tapping it opens the Characters tab.
+ */
 @Composable
-private fun NextRewardRow(reward: Reward, styles: Map<Character, CharacterStyle>, minutes: Int, onClick: () -> Unit) {
+private fun RewardStrip(
+    calmMinutes: Int,
+    reward: Reward?,
+    styles: Map<Character, CharacterStyle>,
+    minutesToNext: Int,
+    progress: Float,
+    onClick: () -> Unit,
+) {
     val palette = LocalPalette.current
-    val text = when {
-        reward is CharacterStyle && reward.isCharacterDefault ->
-            stringResource(R.string.home_next_reward_friend, minutes, stringResource(Voices.of(reward.character).name))
-        reward is Accessory -> stringResource(R.string.home_next_reward_accessory, minutes, stringResource(reward.nameRes))
-        else -> stringResource(R.string.home_next_reward, minutes, stringResource(reward.nameRes))
+    val shape = RoundedCornerShape(20.dp)
+    val animatedProgress by animateFloatAsState(progress, tween(600), label = "rewardProgress")
+    val calmLine = buildAnnotatedString {
+        append(stringResource(R.string.home_calm_time_today) + "  ")
+        withStyle(SpanStyle(fontWeight = FontWeight.ExtraBold)) { append(formatMinutes(calmMinutes)) }
     }
     Row(
         Modifier
             .fillMaxWidth()
-            .heightIn(min = 48.dp)
+            .clip(shape)
+            .background(palette.card)
             .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 4.dp, vertical = 4.dp),
+            .padding(14.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = spacedBy(10.dp),
+        horizontalArrangement = spacedBy(14.dp),
     ) {
-        RewardPreview(reward, styles, Modifier.size(28.dp).alpha(0.5f), animated = false)
-        Text(text, style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft, modifier = Modifier.weight(1f))
-        Text(">", style = MaterialTheme.typography.titleMedium, color = palette.inkSoft)
+        if (reward != null) {
+            RewardPreview(reward, styles, Modifier.size(44.dp), animated = false)
+        }
+        Column(Modifier.weight(1f), verticalArrangement = spacedBy(4.dp)) {
+            Text(calmLine, style = MaterialTheme.typography.bodyMedium, color = palette.ink)
+            if (reward != null) {
+                Text(nextRewardText(reward, minutesToNext), style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
+                Box(Modifier.fillMaxWidth().height(8.dp).clip(RoundedCornerShape(4.dp)).background(palette.line)) {
+                    Box(Modifier.fillMaxWidth(animatedProgress).fillMaxHeight().background(QB.Calm))
+                }
+            }
+        }
     }
+}
+
+@Composable
+private fun nextRewardText(reward: Reward, minutes: Int): String = when {
+    reward is CharacterStyle && reward.isCharacterDefault ->
+        stringResource(R.string.home_next_reward_friend, minutes, stringResource(Voices.of(reward.character).name))
+    reward is Accessory -> stringResource(R.string.home_next_reward_accessory, minutes, stringResource(reward.nameRes))
+    else -> stringResource(R.string.home_next_reward, minutes, stringResource(reward.nameRes))
 }
 
 /** A happy character showing off [reward]: a style on its own character, an accessory on its own character in the selected style. */
@@ -304,20 +332,12 @@ private fun RewardPreview(reward: Reward, styles: Map<Character, CharacterStyle>
     }
 }
 
+/** Room name and the mic toggle on one compact row. */
 @Composable
 private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
     val palette = LocalPalette.current
-    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-    val greeting = when (hour) {
-        in 5..11 -> stringResource(R.string.greeting_morning)
-        in 12..16 -> stringResource(R.string.greeting_afternoon)
-        else -> stringResource(R.string.greeting_evening)
-    }
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Column(Modifier.weight(1f)) {
-            Text(greeting, style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
-            Text(roomName, style = MaterialTheme.typography.headlineSmall)
-        }
+        Text(roomName, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
         IconButton(
             onClick = onToggle,
             modifier = Modifier.size(48.dp).background(palette.card, CircleShape),
@@ -331,59 +351,42 @@ private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
     }
 }
 
+/**
+ * Buddy standing on a soft glow in the mood colour. The glow is the loudness meter: it widens and brightens
+ * as the room gets louder, so the mood reads from across the room without a ring or a big number.
+ */
 @Composable
-private fun BuddyRing(mood: Mood?, db: Int?, size: Dp) {
+private fun BuddyStage(mood: Mood?, db: Int?, size: Dp) {
     val palette = LocalPalette.current
     val target = if (mood == null || db == null) 0f else ((db - 30f) / 70f).coerceIn(0f, 1f)
-    val progress by animateFloatAsState(target, tween(600), label = "ringProgress")
-    val arcColor by animateColorAsState(mood?.let { QB.bandColor(it) } ?: palette.line, tween(600), label = "ringColor")
+    val progress by animateFloatAsState(target, tween(600), label = "glowProgress")
+    val glowColor by animateColorAsState(mood?.let { QB.bandColor(it) } ?: palette.line, tween(600), label = "glowColor")
 
     Box(Modifier.size(size), contentAlignment = Alignment.Center) {
         Canvas(Modifier.fillMaxSize()) {
-            val strokePx = (size * 0.053f).coerceAtLeast(10.dp).toPx()
-            val inset = strokePx / 2f
-            val arcSize = Size(this.size.width - 2 * inset, this.size.height - 2 * inset)
-            drawArc(
-                color = palette.line,
-                startAngle = -90f,
-                sweepAngle = 360f,
-                useCenter = false,
-                topLeft = Offset(inset, inset),
-                size = arcSize,
-                style = Stroke(width = strokePx),
-            )
-            if (progress > 0f) {
-                drawArc(
-                    color = arcColor,
-                    startAngle = -90f,
-                    sweepAngle = 360f * progress,
-                    useCenter = false,
-                    topLeft = Offset(inset, inset),
-                    size = arcSize,
-                    style = Stroke(width = strokePx, cap = StrokeCap.Round),
+            val width = this.size.width * (0.7f + 0.4f * progress)
+            val alpha = 0.18f + 0.62f * progress
+            // Centred at Buddy's feet, in the lower third; a circle gradient squashed into a floor ellipse.
+            val center = Offset(this.size.width / 2f, this.size.height * 0.85f)
+            withTransform({ scale(1f, 0.28f, pivot = center) }) {
+                drawCircle(
+                    brush = Brush.radialGradient(
+                        colors = listOf(glowColor.copy(alpha = alpha), glowColor.copy(alpha = 0f)),
+                        center = center,
+                        radius = width / 2f,
+                    ),
+                    radius = width / 2f,
+                    center = center,
                 )
             }
         }
-        CharacterView(mood = mood, modifier = Modifier.size(size * 2 / 3))
+        CharacterView(mood = mood, modifier = Modifier.size(size))
     }
 }
 
+/** One pill with the reading and the band: "34 dB · Nice and calm", or just the paused/sleeping label. */
 @Composable
-private fun DbReadout(db: Int?, large: Boolean = false) {
-    val number = MaterialTheme.typography.displayLarge
-    Row(verticalAlignment = Alignment.Bottom) {
-        Text(db?.toString() ?: "–", style = if (large) number.copy(fontSize = 96.sp) else number)
-        Spacer(Modifier.width(6.dp))
-        Text(
-            "dB",
-            style = MaterialTheme.typography.titleMedium.let { if (large) it.copy(fontSize = 24.sp) else it },
-            modifier = Modifier.padding(bottom = if (large) 22.dp else 12.dp),
-        )
-    }
-}
-
-@Composable
-private fun BandPill(mood: Mood?, listening: ListeningState) {
+private fun StatusChip(mood: Mood?, db: Int?, listening: ListeningState, large: Boolean) {
     val palette = LocalPalette.current
     val label = when (mood) {
         Mood.HAPPY, Mood.FINE -> stringResource(R.string.band_nice_calm)
@@ -394,31 +397,61 @@ private fun BandPill(mood: Mood?, listening: ListeningState) {
     }
     val soft = mood?.let { QB.bandSoft(it) } ?: palette.accentSoft
     val text = mood?.let { QB.bandText(it) } ?: palette.inkSoft
+    val content = buildAnnotatedString {
+        if (mood != null && db != null) {
+            withStyle(SpanStyle(fontWeight = FontWeight.ExtraBold)) { append("$db dB") }
+            append(" · ")
+        }
+        append(label)
+    }
     Box(
         Modifier
             .clip(RoundedCornerShape(50))
             .background(soft)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = if (large) 28.dp else 16.dp, vertical = if (large) 12.dp else 8.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, style = MaterialTheme.typography.titleMedium, color = text)
+        Text(
+            content,
+            style = if (large) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleMedium,
+            color = text,
+        )
     }
 }
 
+/** A comic-style bubble with a tail pointing down at Buddy's head. */
+private class BubbleShape(private val corner: Dp, private val tailWidth: Dp, private val tailHeight: Dp) : Shape {
+    override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+        val c = with(density) { corner.toPx() }
+        val tw = with(density) { tailWidth.toPx() }
+        val th = with(density) { tailHeight.toPx() }
+        val bodyBottom = size.height - th
+        val path = Path().apply {
+            addRoundRect(RoundRect(0f, 0f, size.width, bodyBottom, CornerRadius(c, c)))
+            // Starts a pixel inside the body so the tail joins it without an anti-aliasing seam.
+            moveTo(size.width / 2f - tw / 2f, bodyBottom - 1f)
+            lineTo(size.width / 2f + tw / 2f, bodyBottom - 1f)
+            lineTo(size.width / 2f, size.height)
+            close()
+        }
+        return Outline.Generic(path)
+    }
+}
+
+/** Speech bubble above Buddy. Keeps a two-line minimum height, text centred, so Buddy doesn't bounce when the line changes. */
 @Composable
 private fun SpeechBubble(text: String) {
     val palette = LocalPalette.current
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = palette.card),
+    val tail = 12.dp
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .background(palette.card, BubbleShape(corner = 20.dp, tailWidth = 22.dp, tailHeight = tail))
+            .heightIn(min = 76.dp + tail)
+            .padding(start = 20.dp, end = 20.dp, top = 14.dp, bottom = 14.dp + tail),
+        contentAlignment = Alignment.Center,
     ) {
-        Text(
-            text = text,
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.fillMaxWidth().padding(20.dp),
-        )
+        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = palette.ink, textAlign = TextAlign.Center)
     }
 }
 
@@ -437,63 +470,6 @@ private fun NotListeningMessage(listening: ListeningState) {
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth(),
     )
-}
-
-@Composable
-private fun BandBar(mood: Mood?) {
-    val palette = LocalPalette.current
-    val active = when (mood) {
-        null -> -1
-        Mood.HAPPY, Mood.FINE -> 0
-        Mood.WORRIED -> 1
-        Mood.SAD, Mood.EARS_COVERED -> 2
-    }
-    val segments = listOf(
-        Triple(stringResource(R.string.legend_calm), QB.Calm, 0),
-        Triple(stringResource(R.string.legend_loud), QB.Loud, 1),
-        Triple(stringResource(R.string.legend_too_loud), QB.TooLoud, 2),
-    )
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = spacedBy(6.dp)) {
-        segments.forEach { (_, color, index) ->
-            Box(
-                Modifier
-                    .weight(1f)
-                    .height(10.dp)
-                    .clip(RoundedCornerShape(5.dp))
-                    .background(if (index == active) color else palette.line),
-            )
-        }
-    }
-    Spacer(Modifier.height(6.dp))
-    Row(Modifier.fillMaxWidth(), horizontalArrangement = spacedBy(6.dp)) {
-        segments.forEach { (label, _, _) ->
-            Text(
-                label,
-                style = MaterialTheme.typography.labelSmall,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.weight(1f),
-            )
-        }
-    }
-}
-
-@Composable
-private fun StatCard(label: String, value: String, modifier: Modifier = Modifier, sub: String? = null) {
-    val palette = LocalPalette.current
-    Card(
-        modifier = modifier,
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = palette.card),
-    ) {
-        Column(Modifier.padding(16.dp)) {
-            Text(label, style = MaterialTheme.typography.labelSmall)
-            Spacer(Modifier.height(4.dp))
-            Text(value, style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = palette.ink))
-            if (sub != null) {
-                Text(sub, style = MaterialTheme.typography.labelSmall)
-            }
-        }
-    }
 }
 
 @Composable
@@ -550,9 +526,6 @@ private fun formatMinutes(minutes: Int): String {
     val m = minutes % 60
     return if (h > 0) "$h h $m min" else "$m min"
 }
-
-private fun formatTime(ms: Long): String =
-    SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(ms))
 
 private fun hasMicPermission(context: Context): Boolean =
     ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED

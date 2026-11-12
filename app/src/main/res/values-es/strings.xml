@@ -14,9 +14,6 @@
     <string name="svc_mood_sad">Triste</string>
     <string name="svc_mood_ears">Tapándose los oídos</string>
 
-    <string name="greeting_morning">Buenos días</string>
-    <string name="greeting_afternoon">Buenas tardes</string>
-    <string name="greeting_evening">Buenas noches</string>
     <string name="home_pause_listening">Pausar la escucha</string>
     <string name="home_resume_listening">Reanudar la escucha</string>
     <string name="home_wake_buddy">Empezar a escuchar</string>
