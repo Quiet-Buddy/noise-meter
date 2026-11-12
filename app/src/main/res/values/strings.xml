@@ -110,4 +110,6 @@
     <string name="speech_tap_4">I love calm pats. Thank you!</string>
     <string name="speech_tap_5">Ooh, so cozy when it\'s quiet.</string>
     <string name="home_pat_character">Pat the character</string>
+    <string name="home_full_screen">Full screen</string>
+    <string name="home_full_screen_exit_hint">Tap to exit</string>
 </resources>

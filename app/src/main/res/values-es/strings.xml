@@ -110,4 +110,6 @@
     <string name="speech_tap_4">Me encantan las caricias tranquilas. ¡Gracias!</string>
     <string name="speech_tap_5">Ooh, qué acogedor es el silencio.</string>
     <string name="home_pat_character">Acariciar al personaje</string>
+    <string name="home_full_screen">Pantalla completa</string>
+    <string name="home_full_screen_exit_hint">Toca para salir</string>
 </resources>

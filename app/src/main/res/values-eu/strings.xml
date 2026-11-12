@@ -110,4 +110,6 @@
     <string name="speech_tap_4">Laztan lasaiak maite ditut. Eskerrik asko!</string>
     <string name="speech_tap_5">Ooh, zein goxoa den isiltasuna.</string>
     <string name="home_pat_character">Pertsonaia laztandu</string>
+    <string name="home_full_screen">Pantaila osoa</string>
+    <string name="home_full_screen_exit_hint">Ukitu irteteko</string>
 </resources>

@@ -73,6 +73,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Fullscreen
 import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicOff
 import androidx.compose.material3.Button
@@ -83,7 +84,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.platform.LocalView
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
+import kotlinx.coroutines.delay
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -120,7 +129,7 @@ import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 
 @Composable
-fun HomeScreen(onOpenCharacters: () -> Unit) {
+fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Unit) {
     val palette = LocalPalette.current
     val viewModel: HomeViewModel = hiltViewModel()
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -144,6 +153,9 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
     }
 
     val background by animateColorAsState(palette.screenBackground(state.mood), tween(600), label = "background")
+    // Kept here (not in MainActivity) so it survives rotation; MainActivity only needs it to hide the tabs.
+    var fullScreen by rememberSaveable { mutableStateOf(false) }
+    FullScreenEffect(fullScreen, onFullScreenChange)
     val listening = state.listening == ListeningState.LISTENING
 
     // On tablets the device usually sits on a shelf and is read from across the room, so Buddy and the
@@ -156,6 +168,7 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
             roomName = state.roomName,
             listening = listening,
             onToggle = { if (listening) viewModel.pause() else wake() },
+            onFullScreen = { fullScreen = true },
         )
     }
     val chip: @Composable () -> Unit = {
@@ -199,6 +212,19 @@ fun HomeScreen(onOpenCharacters: () -> Unit) {
         onTry = { viewModel.dismissUnlocks(it) },
         onLater = { viewModel.dismissUnlocks(null) },
     )
+
+    if (fullScreen) {
+        FullScreenStage(
+            speech = stringResource(state.speechLine),
+            mood = state.mood,
+            db = state.db,
+            tapCount = state.tapCount,
+            onTap = viewModel::onCharacterTapped,
+            onExit = { fullScreen = false },
+            modifier = Modifier.background(background),
+        )
+        return
+    }
 
     BoxWithConstraints(Modifier.fillMaxSize().background(background).statusBarsPadding()) {
         if (isTwoPane(maxWidth, maxHeight)) {
@@ -341,12 +367,92 @@ private fun RewardPreview(reward: Reward, styles: Map<Character, CharacterStyle>
     }
 }
 
-/** Room name and the mic toggle on one compact row. */
+/**
+ * Tells MainActivity about the full-screen flag (so it can hide the tabs) and hides the system bars while it is on.
+ * Everything is undone when the flag turns off or Home leaves composition, so no other tab ever inherits the mode.
+ */
 @Composable
-private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit) {
+private fun FullScreenEffect(fullScreen: Boolean, onFullScreenChange: (Boolean) -> Unit) {
+    val view = LocalView.current
+    val context = LocalContext.current
+    DisposableEffect(fullScreen) {
+        onFullScreenChange(fullScreen)
+        val window = context.findActivity()?.window
+        val controller = window?.let { WindowCompat.getInsetsController(it, view) }
+        if (fullScreen && controller != null) {
+            controller.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            controller.hide(WindowInsetsCompat.Type.systemBars())
+        }
+        onDispose {
+            controller?.show(WindowInsetsCompat.Type.systemBars())
+            if (fullScreen) onFullScreenChange(false)
+        }
+    }
+}
+
+/**
+ * Full-screen "stage" mode for a device left on a shelf: just the speech bubble and the biggest character that fits.
+ * Pats still work on the character; a tap anywhere else, or Back, leaves. A faint hint explains this for a few seconds.
+ */
+@Composable
+private fun FullScreenStage(
+    speech: String,
+    mood: Mood?,
+    db: Int?,
+    tapCount: Int,
+    onTap: () -> Unit,
+    onExit: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val palette = LocalPalette.current
+    BackHandler(onBack = onExit)
+    var hintShown by remember { mutableStateOf(true) }
+    LaunchedEffect(Unit) {
+        delay(3000)
+        hintShown = false
+    }
+    val hintAlpha by animateFloatAsState(if (hintShown) 1f else 0f, tween(600), label = "exitHint")
+    BoxWithConstraints(
+        modifier
+            .fillMaxSize()
+            .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null, onClick = onExit)
+            .statusBarsPadding(),
+        contentAlignment = Alignment.Center,
+    ) {
+        // The bubble (two lines plus tail) and some breathing room sit above the character, in both orientations.
+        // 160dp leaves room for the bubble above and the exit hint below the feet.
+        val size = minOf(maxWidth * 0.9f, maxHeight - 160.dp).coerceAtLeast(120.dp)
+        Column(Modifier.widthIn(max = size.coerceAtLeast(320.dp)), horizontalAlignment = Alignment.CenterHorizontally) {
+            SpeechBubble(text = speech)
+            Spacer(Modifier.height(4.dp))
+            BuddyStage(mood = mood, db = db, size = size, tapCount = tapCount, onTap = onTap)
+        }
+        Text(
+            stringResource(R.string.home_full_screen_exit_hint),
+            style = MaterialTheme.typography.bodyMedium,
+            color = palette.inkSoft,
+            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 16.dp).alpha(hintAlpha),
+        )
+    }
+}
+
+/** Room name, the full-screen button and the mic toggle on one compact row. */
+@Composable
+private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit, onFullScreen: () -> Unit) {
     val palette = LocalPalette.current
     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Text(roomName, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
+        IconButton(
+            onClick = onFullScreen,
+            modifier = Modifier.size(48.dp).background(palette.card, CircleShape),
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Fullscreen,
+                contentDescription = stringResource(R.string.home_full_screen),
+                tint = palette.ink,
+            )
+        }
+        Spacer(Modifier.width(8.dp))
         IconButton(
             onClick = onToggle,
             modifier = Modifier.size(48.dp).background(palette.card, CircleShape),
