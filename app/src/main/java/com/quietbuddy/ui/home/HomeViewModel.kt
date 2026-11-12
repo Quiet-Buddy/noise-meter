@@ -8,8 +8,11 @@ import com.quietbuddy.core.LevelSource
 import com.quietbuddy.core.ListeningController
 import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.Mood
+import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.SettingsRepository
+import com.quietbuddy.core.Unlocks
 import com.quietbuddy.core.Character
+import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.domain.character.BuddyVoice
 import com.quietbuddy.domain.character.Voices
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,6 +49,11 @@ data class HomeUiState(
     val loudestDb: Float? = null,
     val loudestAtMs: Long? = null,
     val challenge: ChallengeState = ChallengeState.Idle,
+    /** Newly unlocked styles to celebrate, cheapest first; empty when none. */
+    val pendingUnlocks: List<CharacterStyle> = emptyList(),
+    /** The next style to earn; null when everything is unlocked. */
+    val nextReward: CharacterStyle? = null,
+    val minutesToNext: Int = 0,
 )
 
 @HiltViewModel
@@ -54,6 +62,7 @@ class HomeViewModel @Inject constructor(
     private val controller: ListeningController,
     private val settingsRepository: SettingsRepository,
     private val historyRepository: HistoryRepository,
+    private val progressRepository: ProgressRepository,
 ) : ViewModel() {
 
     private val speechIndex = MutableStateFlow(0)
@@ -70,13 +79,14 @@ class HomeViewModel @Inject constructor(
     }
 
     private val snapshot = combine(
-        settingsRepository.settings,
+        combine(settingsRepository.settings, progressRepository.progress) { settings, progress -> settings to progress },
         levelSource.latest,
         levelSource.mood,
         levelSource.state,
         historyRepository.lastDays(1),
-    ) { settings, latest, mood, listening, days ->
+    ) { (settings, progress), latest, mood, listening, days ->
         val today = days.lastOrNull()
+        val next = Unlocks.next(progress.calmMinutes)
         Snapshot(
             roomName = settings.roomName,
             character = settings.character,
@@ -86,6 +96,9 @@ class HomeViewModel @Inject constructor(
             calmMinutes = today?.calmMinutes ?: 0,
             loudestDb = today?.loudestDb,
             loudestAtMs = today?.loudestAtMs,
+            pendingUnlocks = progress.pendingCelebration,
+            nextReward = next,
+            minutesToNext = next?.let { (it.unlockAtCalmMinutes - progress.calmMinutes).toInt().coerceAtLeast(1) } ?: 0,
         )
     }
 
@@ -104,8 +117,24 @@ class HomeViewModel @Inject constructor(
             loudestDb = s.loudestDb,
             loudestAtMs = s.loudestAtMs,
             challenge = ch,
+            pendingUnlocks = s.pendingUnlocks,
+            nextReward = s.nextReward,
+            minutesToNext = s.minutesToNext,
         )
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState())
+
+    /** Closes the unlock celebration; with [tryStyle] also switches to that character and style. */
+    fun dismissUnlocks(tryStyle: CharacterStyle?) {
+        viewModelScope.launch {
+            val pending = uiState.value.pendingUnlocks
+            if (tryStyle != null) {
+                settingsRepository.update {
+                    it.copy(character = tryStyle.character, styles = it.styles + (tryStyle.character to tryStyle))
+                }
+            }
+            progressRepository.markCelebrated(pending)
+        }
+    }
 
     fun start() = controller.start()
 
@@ -134,6 +163,7 @@ class HomeViewModel @Inject constructor(
             }
             val won = !lost
             historyRepository.recordChallenge(startedAt, won, if (peak.isInfinite()) 0f else peak)
+            if (won) progressRepository.addCalmMinutes(Unlocks.CHALLENGE_BONUS_MINUTES)
             challenge.value = ChallengeState.Finished(won)
             delay(RESULT_MS)
             challenge.value = ChallengeState.Idle
@@ -149,6 +179,9 @@ class HomeViewModel @Inject constructor(
         val calmMinutes: Int,
         val loudestDb: Float?,
         val loudestAtMs: Long?,
+        val pendingUnlocks: List<CharacterStyle>,
+        val nextReward: CharacterStyle?,
+        val minutesToNext: Int,
     )
 
     private companion object {

@@ -22,6 +22,13 @@ interface HistoryDao {
     @Query("SELECT * FROM challenge WHERE startedAtMs >= :fromMs AND startedAtMs < :toMs ORDER BY startedAtMs ASC")
     fun challengesBetween(fromMs: Long, toMs: Long): Flow<List<ChallengeEntity>>
 
+    /** Minutes that count as calm under [Unlocks.isCalmMinute]'s rules; used once to backfill rewards. */
+    @Query("SELECT COUNT(*) FROM level_minute WHERE laeqDb < :belowDb AND listeningSeconds >= :minSeconds")
+    suspend fun countCalmMinutes(belowDb: Float, minSeconds: Int): Int
+
+    @Query("SELECT COUNT(*) FROM challenge WHERE won = 1")
+    suspend fun countWonChallenges(): Int
+
     @Query("DELETE FROM level_minute WHERE minuteStartMs < :beforeMs")
     suspend fun deleteMinutesBefore(beforeMs: Long): Int
 

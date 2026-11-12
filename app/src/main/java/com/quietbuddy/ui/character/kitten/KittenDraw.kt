@@ -17,9 +17,7 @@ import kotlin.math.hypot
 import kotlin.math.max
 import kotlin.math.sin
 
-// Kitten-only colours; the shared ones (outline, body, cheek, ...) come from the palette.
-private val Cream = Color(0xFFFFF3E2)
-private val Stripe = Color(0xFFE48A3A)
+// Kitten-only colours that never change with the style; the rest (outline, body, stripes, ...) come from the palette.
 private val InnerEar = Color(0xFFFFB3BE)
 private val Nose = Color(0xFFF47C93)
 private val Eye = Color(0xFF3B2418)
@@ -234,7 +232,7 @@ private fun DrawScope.tail(pal: Palette, pts: List<Float>, poof: Float, swayDeg:
         stripes.moveTo(sx[i] + nx * rs, sy[i] + ny * rs)
         stripes.lineTo(sx[i] - nx * rs, sy[i] - ny * rs)
     }
-    ink(stripes, Stripe, 3.5f)
+    ink(stripes, pal.stripe, 3.5f)
 }
 
 private fun DrawScope.ear(pal: Palette, p: KittenPose, left: Boolean, twitchDeg: Float) {
@@ -252,7 +250,7 @@ private fun DrawScope.ear(pal: Palette, p: KittenPose, left: Boolean, twitchDeg:
     withTransform({ rotate(angle, Offset(pivotX, 60f)) }) {
         outlined(pal, quadChain(outer, close = true), pal.body)
         fill(quadChain(inner, close = true), InnerEar)
-        ink(if (left) TuftsL else TuftsR, Cream, 2f, clamp01(1f - fold * 1.4f))
+        ink(if (left) TuftsL else TuftsR, pal.cream, 2f, clamp01(1f - fold * 1.4f))
     }
 }
 
@@ -335,15 +333,15 @@ private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette) {
             6f * zone(a, BodyZones, 20f, 8f) + poof * 8f * vary(i)
         }
         outlined(pal, body, pal.body)
-        fill(Belly, Cream)
+        fill(Belly, pal.cream)
         val belly = Path().apply {
             moveTo(70f - 4f * poof, 152f); lineTo(76f - 2f * poof, 150f)
             moveTo(130f + 4f * poof, 152f); lineTo(124f + 2f * poof, 150f)
         }
-        ink(belly, Stripe, 2.5f)
+        ink(belly, pal.stripe, 2.5f)
         if (!tailBehind) tail(pal, p.tail, poof, sway)
         for (cx in listOf(84f, 116f)) {
-            oval(cx, 184f, 16f, 10f, Cream, outline = pal.outline)
+            oval(cx, 184f, 16f, 10f, pal.cream, outline = pal.outline)
             val toes = Path().apply {
                 moveTo(cx - 5f, 178f); lineTo(cx - 5f, 184f)
                 moveTo(cx + 5f, 178f); lineTo(cx + 5f, 184f)
@@ -384,11 +382,11 @@ private fun DrawScope.drawHead(p: KittenPose, fx: KittenFx, pal: Palette, poof: 
     }
     outlined(pal, head, pal.body)
     // markings
-    fill(ForeheadStripes, Stripe)
-    fill(CheekStripes, Stripe)
-    oval(89f, 112f, 15f, 11f, Cream)
-    oval(111f, 112f, 15f, 11f, Cream)
-    oval(100f, 120f, 14f, 8f, Cream)
+    fill(ForeheadStripes, pal.stripe)
+    fill(CheekStripes, pal.stripe)
+    oval(89f, 112f, 15f, 11f, pal.cream)
+    oval(111f, 112f, 15f, 11f, pal.cream)
+    oval(100f, 120f, 14f, 8f, pal.cream)
     // whiskers
     withTransform({ rotate(-p.whisker, Offset(60f, 112f)) }) { ink(WhiskersL, pal.outline, 2f, 0.75f) }
     withTransform({ rotate(p.whisker, Offset(140f, 112f)) }) { ink(WhiskersR, pal.outline, 2f, 0.75f) }

@@ -64,7 +64,6 @@
     <string name="history_challenges_won">%1$d Retos de Silencio ganados esta semana</string>
     <string name="settings_title">Ajustes</string>
     <string name="settings_sensitivity">Sensibilidad al ruido</string>
-    <string name="settings_character">Personaje</string>
     <string name="preset_quiet_time">Hora de silencio</string>
     <string name="preset_everyday">Cada día</string>
     <string name="preset_playtime">Hora de juego</string>

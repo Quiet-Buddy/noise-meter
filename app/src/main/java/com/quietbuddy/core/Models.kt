@@ -69,8 +69,13 @@ data class AppSettings(
     val calibratedAtMs: Long? = null,
     val onboardingDone: Boolean = false,
     val character: Character = Character.DEFAULT,
+    /** Selected style per character; a missing entry means [CharacterStyle.defaultFor]. */
+    val styles: Map<Character, CharacterStyle> = emptyMap(),
 ) {
     val baseThresholds: Thresholds get() = Thresholds(worriedFromDb, sadFromDb)
+
+    fun styleFor(c: Character): CharacterStyle =
+        styles[c]?.takeIf { it.character == c } ?: CharacterStyle.defaultFor(c)
 
     companion object {
         /** Offset added to dBFS to get approximate dB SPL before the user calibrates. */

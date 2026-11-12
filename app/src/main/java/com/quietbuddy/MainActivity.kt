@@ -19,7 +19,9 @@ import androidx.navigation.NavHostController
 import com.quietbuddy.ui.useNavigationRail
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.EmojiEmotions
 import androidx.compose.material.icons.rounded.Home
+import com.quietbuddy.ui.characters.CharactersScreen
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
@@ -53,6 +55,7 @@ import com.quietbuddy.core.SettingsRepository
 import com.quietbuddy.ui.Routes
 import com.quietbuddy.ui.character.CharacterLooks
 import com.quietbuddy.ui.character.LocalCharacter
+import com.quietbuddy.ui.character.LocalStyle
 import com.quietbuddy.ui.history.HistoryScreen
 import com.quietbuddy.ui.home.HomeScreen
 import com.quietbuddy.ui.onboarding.OnboardingScreen
@@ -96,6 +99,7 @@ private data class Tab(val route: String, val labelRes: Int, val icon: ImageVect
 private val tabs = listOf(
     Tab(Routes.HOME, R.string.nav_home, Icons.Rounded.Home),
     Tab(Routes.HISTORY, R.string.nav_history, Icons.Rounded.BarChart),
+    Tab(Routes.CHARACTERS, R.string.nav_characters, Icons.Rounded.EmojiEmotions),
     Tab(Routes.SETTINGS, R.string.nav_settings, Icons.Rounded.Settings),
 )
 
@@ -103,8 +107,9 @@ private val tabs = listOf(
 private fun Root(vm: MainViewModel = hiltViewModel()) {
     val settings by vm.settings.collectAsStateWithLifecycle()
     val loaded = settings ?: return
-    val look = CharacterLooks.of(loaded.character)
-    CompositionLocalProvider(LocalCharacter provides loaded.character) {
+    val style = loaded.styleFor(loaded.character)
+    val look = CharacterLooks.of(style)
+    CompositionLocalProvider(LocalCharacter provides loaded.character, LocalStyle provides style) {
         QuietBuddyTheme(look.palette) { AppContent(loaded, vm.controller) }
     }
 }
@@ -180,13 +185,13 @@ private fun AppContent(loaded: AppSettings, controller: ListeningController) {
                     Spacer(Modifier.weight(1f))
                 }
             }
-            AppNavHost(nav, start, Modifier.weight(1f))
+            AppNavHost(nav, start, Modifier.weight(1f), onOpenCharacters = { select(tabs.first { it.route == Routes.CHARACTERS }) })
         }
     }
 }
 
 @Composable
-private fun AppNavHost(nav: NavHostController, start: String, modifier: Modifier) {
+private fun AppNavHost(nav: NavHostController, start: String, modifier: Modifier, onOpenCharacters: () -> Unit) {
     // consumeWindowInsets in the caller stops screens that also apply statusBarsPadding() from adding the inset twice.
     NavHost(nav, startDestination = start, modifier = modifier) {
         composable(Routes.ONBOARDING) {
@@ -197,7 +202,8 @@ private fun AppNavHost(nav: NavHostController, start: String, modifier: Modifier
                 }
             })
         }
-        composable(Routes.HOME) { HomeScreen() }
+        composable(Routes.HOME) { HomeScreen(onOpenCharacters = onOpenCharacters) }
+        composable(Routes.CHARACTERS) { CharactersScreen() }
         composable(Routes.HISTORY) { HistoryScreen() }
         composable(Routes.SETTINGS) {
             SettingsScreen(onOpenCalibration = { nav.navigate(Routes.CALIBRATION) })

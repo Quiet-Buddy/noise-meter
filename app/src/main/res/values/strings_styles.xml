@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="style_buddy_sunny">Sunny Buddy</string>
+    <string name="style_buddy_mint">Mint Buddy</string>
+    <string name="style_buddy_berry">Berry Buddy</string>
+    <string name="style_kitten_ginger">Ginger Mochi</string>
+    <string name="style_kitten_grey">Grey Mochi</string>
+    <string name="style_kitten_snow">Snow Mochi</string>
+
+    <string name="style_progress">%1$d / %2$d min</string>
+    <string name="style_locked_desc">%1$s, locked. %2$s</string>
+    <plurals name="style_needs_minutes">
+        <item quantity="one">Needs %1$d calm minute</item>
+        <item quantity="other">Needs %1$d calm minutes</item>
+    </plurals>
+    <plurals name="style_next_hint">
+        <item quantity="one">%1$d more calm minute to unlock %2$s</item>
+        <item quantity="other">%1$d more calm minutes to unlock %2$s</item>
+    </plurals>
+    <string name="style_all_unlocked">You\'ve unlocked every style!</string>
+
+    <string name="unlock_title">New style unlocked!</string>
+    <string name="unlock_body">All that calm paid off! You unlocked %1$s.</string>
+    <plurals name="unlock_body_more">
+        <item quantity="one">All that calm paid off! You unlocked %1$s and %2$d more.</item>
+        <item quantity="other">All that calm paid off! You unlocked %1$s and %2$d more.</item>
+    </plurals>
+    <string name="unlock_try">Try it</string>
+    <string name="unlock_later">Later</string>
+
+    <string name="unlock_friend_title">A new friend!</string>
+    <string name="unlock_friend_body">All that calm paid off! %1$s wants to stay with you.</string>
+    <plurals name="unlock_friend_body_more">
+        <item quantity="one">All that calm paid off! %1$s wants to stay with you, and you unlocked %2$d more style.</item>
+        <item quantity="other">All that calm paid off! %1$s wants to stay with you, and you unlocked %2$d more styles.</item>
+    </plurals>
+    <plurals name="style_next_friend_hint">
+        <item quantity="one">%1$d more calm minute to meet %2$s</item>
+        <item quantity="other">%1$d more calm minutes to meet %2$s</item>
+    </plurals>
+
+    <string name="nav_characters">Characters</string>
+    <string name="characters_title">Characters</string>
+    <string name="characters_calm_collected">Calm minutes collected</string>
+    <string name="characters_in_use">In use</string>
+    <string name="home_next_reward">%1$d min to unlock %2$s</string>
+    <string name="home_next_reward_friend">%1$d min to meet %2$s</string>
+</resources>

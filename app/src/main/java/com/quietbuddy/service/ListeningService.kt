@@ -25,7 +25,9 @@ import com.quietbuddy.core.HistoryRepository
 import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.MinuteAggregate
 import com.quietbuddy.core.Mood
+import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.SettingsRepository
+import com.quietbuddy.core.Unlocks
 import com.quietbuddy.domain.AlertPolicy
 import com.quietbuddy.domain.MoodEngine
 import com.quietbuddy.domain.character.Voices
@@ -46,6 +48,7 @@ class ListeningService : LifecycleService() {
     @Inject lateinit var bus: LevelBus
     @Inject lateinit var settingsRepo: SettingsRepository
     @Inject lateinit var history: HistoryRepository
+    @Inject lateinit var progress: ProgressRepository
 
     @Volatile private var settings = AppSettings()
     private var capture: AudioCapture? = null
@@ -167,7 +170,11 @@ class ListeningService : LifecycleService() {
         for (i in moodCounts.indices) if (moodCounts[i] > moodCounts[best]) best = i
         val dominant = Mood.values()[best]
         moodCounts.fill(0)
-        lifecycleScope.launch(Dispatchers.IO + NonCancellable) { history.recordMinute(m, dominant) }
+        val calm = Unlocks.isCalmMinute(m, settings)
+        lifecycleScope.launch(Dispatchers.IO + NonCancellable) {
+            history.recordMinute(m, dominant)
+            if (calm) progress.addCalmMinutes(1)
+        }
     }
 
     private fun onCaptureFailure() {

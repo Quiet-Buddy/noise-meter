@@ -3,7 +3,6 @@ package com.quietbuddy.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.quietbuddy.core.AppSettings
-import com.quietbuddy.core.Character
 import com.quietbuddy.core.Preset
 import com.quietbuddy.core.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -41,7 +40,6 @@ class SettingsViewModel @Inject constructor(
 
     fun setKeepScreenOn(enabled: Boolean) = update { it.copy(keepScreenOn = enabled) }
 
-    fun setCharacter(character: Character) = update { it.copy(character = character) }
 
     fun setRoomName(name: String) = update {
         val trimmed = name.trim()

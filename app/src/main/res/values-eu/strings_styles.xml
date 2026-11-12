@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="style_buddy_sunny">Buddy Eguzkitsua</string>
+    <string name="style_buddy_mint">Buddy Menta</string>
+    <string name="style_buddy_berry">Buddy Mugurdia</string>
+    <string name="style_kitten_ginger">Mochi Laranja</string>
+    <string name="style_kitten_grey">Mochi Grisa</string>
+    <string name="style_kitten_snow">Mochi Elurra</string>
+
+    <string name="style_progress">%1$d / %2$d min</string>
+    <string name="style_locked_desc">%1$s, blokeatuta. %2$s</string>
+    <plurals name="style_needs_minutes">
+        <item quantity="one">Minutu lasai %1$d behar du</item>
+        <item quantity="other">%1$d minutu lasai behar ditu</item>
+    </plurals>
+    <plurals name="style_next_hint">
+        <item quantity="one">Minutu lasai %1$d falta da %2$s desblokeatzeko</item>
+        <item quantity="other">%1$d minutu lasai falta dira %2$s desblokeatzeko</item>
+    </plurals>
+    <string name="style_all_unlocked">Estilo guztiak desblokeatu dituzu!</string>
+
+    <string name="unlock_title">Estilo berria desblokeatu da!</string>
+    <string name="unlock_body">Lasaitasunak saria du! %1$s lortu duzu.</string>
+    <plurals name="unlock_body_more">
+        <item quantity="one">Lasaitasunak saria du! %1$s eta beste %2$d lortu dituzu.</item>
+        <item quantity="other">Lasaitasunak saria du! %1$s eta beste %2$d lortu dituzu.</item>
+    </plurals>
+    <string name="unlock_try">Probatu</string>
+    <string name="unlock_later">Geroago</string>
+
+    <string name="unlock_friend_title">Lagun berri bat!</string>
+    <string name="unlock_friend_body">Lasaitasunak saria du! %1$s zurekin geratu nahi du.</string>
+    <plurals name="unlock_friend_body_more">
+        <item quantity="one">Lasaitasunak saria du! %1$s zurekin geratu nahi du, eta beste estilo %2$d desblokeatu duzu.</item>
+        <item quantity="other">Lasaitasunak saria du! %1$s zurekin geratu nahi du, eta beste %2$d estilo desblokeatu dituzu.</item>
+    </plurals>
+    <plurals name="style_next_friend_hint">
+        <item quantity="one">Minutu lasai %1$d falta da %2$s ezagutzeko</item>
+        <item quantity="other">%1$d minutu lasai falta dira %2$s ezagutzeko</item>
+    </plurals>
+
+    <string name="nav_characters">Pertsonaiak</string>
+    <string name="characters_title">Pertsonaiak</string>
+    <string name="characters_calm_collected">Bildutako minutu lasaiak</string>
+    <string name="characters_in_use">Erabiltzen</string>
+    <string name="home_next_reward">%1$d min %2$s desblokeatzeko</string>
+    <string name="home_next_reward_friend">%1$d min %2$s ezagutzeko</string>
+</resources>
