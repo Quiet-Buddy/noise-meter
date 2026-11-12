@@ -2,6 +2,10 @@
 
 Draft answers for the Google Play Console forms. Owner to review before submitting.
 
+## Privacy policy URL
+
+https://quiet-buddy.github.io/en/privacy.html
+
 ## Data safety
 
 - Does the app collect or share any user data? **No** (no data collected, no data shared).
