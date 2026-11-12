@@ -62,10 +62,6 @@ data class AppSettings(
     val preset: Preset? = Preset.EVERYDAY,
     val worriedFromDb: Float = Preset.EVERYDAY.worriedFromDb,
     val sadFromDb: Float = Preset.EVERYDAY.sadFromDb,
-    val quietHoursEnabled: Boolean = true,
-    /** Minutes after midnight, local time. */
-    val quietStartMinutes: Int = 21 * 60,
-    val quietEndMinutes: Int = 8 * 60,
     val chimeOnSad: Boolean = false,
     val keepListening: Boolean = false,
     val keepScreenOn: Boolean = true,
@@ -76,23 +72,9 @@ data class AppSettings(
 ) {
     val baseThresholds: Thresholds get() = Thresholds(worriedFromDb, sadFromDb)
 
-    fun isQuietHours(minuteOfDay: Int): Boolean {
-        if (!quietHoursEnabled) return false
-        return if (quietStartMinutes <= quietEndMinutes) {
-            minuteOfDay in quietStartMinutes until quietEndMinutes
-        } else {
-            minuteOfDay >= quietStartMinutes || minuteOfDay < quietEndMinutes
-        }
-    }
-
-    /** Thresholds in force right now: 10 dB stricter during quiet hours. */
-    fun effectiveThresholds(minuteOfDay: Int): Thresholds =
-        if (isQuietHours(minuteOfDay)) baseThresholds.shiftedBy(-QUIET_HOURS_SHIFT_DB) else baseThresholds
-
     companion object {
         /** Offset added to dBFS to get approximate dB SPL before the user calibrates. */
         const val DEFAULT_CALIBRATION_OFFSET_DB = 90f
-        const val QUIET_HOURS_SHIFT_DB = 10f
     }
 }
 

@@ -68,8 +68,6 @@
     <string name="preset_quiet_time">Quiet time</string>
     <string name="preset_everyday">Everyday</string>
     <string name="preset_playtime">Playtime</string>
-    <string name="settings_quiet_hours">Quiet hours</string>
-    <string name="settings_quiet_hours_sub">%1$s to %2$s, %3$d dB stricter</string>
     <string name="settings_chime">Sound alerts when it gets loud</string>
     <string name="settings_chime_sub">Plays funny sounds when it gets loud. Uses media volume.</string>
     <string name="settings_keep_listening">Keep listening with screen off</string>

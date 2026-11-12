@@ -8,7 +8,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.floatPreferencesKey
-import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -32,9 +31,6 @@ private object Keys {
     val PRESET = stringPreferencesKey("preset")
     val WORRIED_FROM_DB = floatPreferencesKey("worried_from_db")
     val SAD_FROM_DB = floatPreferencesKey("sad_from_db")
-    val QUIET_HOURS_ENABLED = booleanPreferencesKey("quiet_hours_enabled")
-    val QUIET_START_MINUTES = intPreferencesKey("quiet_start_minutes")
-    val QUIET_END_MINUTES = intPreferencesKey("quiet_end_minutes")
     val CHIME_ON_SAD = booleanPreferencesKey("chime_on_sad")
     val KEEP_LISTENING = booleanPreferencesKey("keep_listening")
     val KEEP_SCREEN_ON = booleanPreferencesKey("keep_screen_on")
@@ -76,9 +72,6 @@ class DataStoreSettingsRepository @Inject constructor(
             preset = preset,
             worriedFromDb = this[Keys.WORRIED_FROM_DB] ?: d.worriedFromDb,
             sadFromDb = this[Keys.SAD_FROM_DB] ?: d.sadFromDb,
-            quietHoursEnabled = this[Keys.QUIET_HOURS_ENABLED] ?: d.quietHoursEnabled,
-            quietStartMinutes = this[Keys.QUIET_START_MINUTES] ?: d.quietStartMinutes,
-            quietEndMinutes = this[Keys.QUIET_END_MINUTES] ?: d.quietEndMinutes,
             chimeOnSad = this[Keys.CHIME_ON_SAD] ?: d.chimeOnSad,
             keepListening = this[Keys.KEEP_LISTENING] ?: d.keepListening,
             keepScreenOn = this[Keys.KEEP_SCREEN_ON] ?: d.keepScreenOn,
@@ -94,9 +87,6 @@ class DataStoreSettingsRepository @Inject constructor(
         this[Keys.PRESET] = s.preset?.name ?: ""
         this[Keys.WORRIED_FROM_DB] = s.worriedFromDb
         this[Keys.SAD_FROM_DB] = s.sadFromDb
-        this[Keys.QUIET_HOURS_ENABLED] = s.quietHoursEnabled
-        this[Keys.QUIET_START_MINUTES] = s.quietStartMinutes
-        this[Keys.QUIET_END_MINUTES] = s.quietEndMinutes
         this[Keys.CHIME_ON_SAD] = s.chimeOnSad
         this[Keys.KEEP_LISTENING] = s.keepListening
         this[Keys.KEEP_SCREEN_ON] = s.keepScreenOn

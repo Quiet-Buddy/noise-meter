@@ -35,7 +35,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Calendar
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -132,10 +131,8 @@ class ListeningService : LifecycleService() {
         val s = settings
         val r = p.process(frame, count, ts)
         bus.emitSample(r.sample)
-        val cal = Calendar.getInstance().apply { timeInMillis = ts }
-        val minuteOfDay = cal.get(Calendar.HOUR_OF_DAY) * 60 + cal.get(Calendar.MINUTE)
         val mood = if (ts < holdMoodUntilMs) engine.current
-        else engine.update(r.sample.laeq2sDb, s.effectiveThresholds(minuteOfDay), ts)
+        else engine.update(r.sample.laeq2sDb, s.baseThresholds, ts)
         bus.setMood(mood)
         moodCounts[mood.ordinal]++
 
