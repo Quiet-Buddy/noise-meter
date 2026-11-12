@@ -299,13 +299,13 @@ private fun DrawScope.eye(cx: Float, cy: Float, p: KittenPose, open: Float) {
 }
 
 /**
- * Draws the kitten at 200x200 design-space scale. The prototype's content spans -10..210 (sparkles, shock marks and
- * the tail poke outside 0..200), so that box is mapped into the design space first.
+ * Draws the kitten at 200x200 design-space scale. It's drawn full size and nudged up 4 units so it fills the space
+ * like Buddy does; only the wrapped sleeping tail and the shock marks reach a few units past the edges, and the
+ * canvas doesn't clip.
  */
 fun DrawScope.drawKitten(pose: KittenPose, fx: KittenFx, pal: Palette) {
     withTransform({
-        scale(200f / 220f, 200f / 220f, Offset.Zero)
-        translate(10f, 10f)
+        translate(0f, -4f)
     }) {
         drawRig(pose, fx, pal)
     }
