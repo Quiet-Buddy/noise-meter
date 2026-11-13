@@ -34,7 +34,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.flow.updateAndGet
 import kotlinx.coroutines.launch
 
 sealed interface ChallengeState {
@@ -84,7 +83,10 @@ class HomeViewModel @Inject constructor(
     private val tapReply = MutableStateFlow<Int?>(null)
     private val tapCount = MutableStateFlow(0)
     private var tapReplyJob: Job? = null
-    private var lastTapAtMs: Long? = null
+    /** Counts tap lines shown so far; each new line takes the next index so lines never repeat back to back. */
+    private var tapLineCounter = 0
+    /** When the current tap reply line was first shown (per [clockMs]); null when no reply is showing. */
+    private var tapLineShownAtMs: Long? = null
 
     /** Wall clock, replaceable in tests so the cooldown needs no real waiting. */
     internal var clockMs: () -> Long = System::currentTimeMillis
@@ -178,26 +180,32 @@ class HomeViewModel @Inject constructor(
 
     /**
      * A child patted the character. Only a calm, listening room is answered (with a rotating line for a few
-     * seconds), so the reward is for being quiet and never for making noise. Rapid taps are ignored.
+     * seconds), so the reward is for being quiet and never for making noise. Rapid pats all count for the
+     * bounce animation, but the line only changes at a readable pace ([TAP_LINE_MIN_MS]); tapping itself is
+     * silent, so this never rewards noise.
      */
     fun onCharacterTapped() {
         if (levelSource.state.value != ListeningState.LISTENING || !levelSource.mood.value.isCalm()) return
         val now = clockMs()
-        if (lastTapAtMs?.let { now - it < TAP_COOLDOWN_MS } == true) return
-        lastTapAtMs = now
-        val count = tapCount.updateAndGet { it + 1 }
-        // Taps are numbered from 1 and each picks the next line, so a line never repeats back to back.
-        tapReply.value = count
+        tapCount.update { it + 1 }
+        val shownAt = tapLineShownAtMs
+        if (tapReply.value == null || shownAt == null || now - shownAt >= TAP_LINE_MIN_MS) {
+            tapLineCounter++
+            tapReply.value = tapLineCounter
+            tapLineShownAtMs = now
+        }
         tapReplyJob?.cancel()
         tapReplyJob = viewModelScope.launch {
             delay(TAP_REPLY_MS)
             tapReply.value = null
+            tapLineShownAtMs = null
         }
     }
 
     private fun clearTapReply() {
         tapReplyJob?.cancel()
         tapReply.value = null
+        tapLineShownAtMs = null
     }
 
     private fun Mood.isCalm() = this == Mood.HAPPY || this == Mood.FINE
@@ -254,7 +262,7 @@ class HomeViewModel @Inject constructor(
     private companion object {
         const val CHALLENGE_SECONDS = 30
         const val RESULT_MS = 5_000L
-        const val TAP_COOLDOWN_MS = 1_500L
+        const val TAP_LINE_MIN_MS = 1_200L
         const val TAP_REPLY_MS = 4_000L
     }
 }

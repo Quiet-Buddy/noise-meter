@@ -78,19 +78,46 @@ class HomeViewModelTapTest {
         backgroundScope.launch { it.uiState.collect {} }
     }
 
-    @Test fun calmTapsAreAcceptedOnlyOutsideTheCooldown() = runTest {
+    @Test fun rapidCalmTapsAllCount() = runTest {
+        val vm = viewModel()
+        runCurrent()
+        repeat(5) { vm.onCharacterTapped(); now += 100 }
+        runCurrent()
+        assertEquals(5, vm.uiState.value.tapCount)
+        assertTrue(vm.uiState.value.speechLine in BuddyVoice.tapLines())
+    }
+
+    @Test fun lineHoldsForRapidTapsThenAdvances() = runTest {
         val vm = viewModel()
         runCurrent()
         vm.onCharacterTapped()
-        vm.onCharacterTapped()
         runCurrent()
-        assertEquals(1, vm.uiState.value.tapCount)
-        assertTrue(vm.uiState.value.speechLine in BuddyVoice.tapLines())
+        val first = vm.uiState.value.speechLine
+        repeat(3) { now += 300; vm.onCharacterTapped() }
+        runCurrent()
+        assertEquals(first, vm.uiState.value.speechLine)
 
-        now += 1_600
+        now += 400 // 1.3 s since the first line appeared
         vm.onCharacterTapped()
         runCurrent()
-        assertEquals(2, vm.uiState.value.tapCount)
+        val second = vm.uiState.value.speechLine
+        assertTrue(second in BuddyVoice.tapLines())
+        assertTrue(first != second)
+    }
+
+    @Test fun replyFadesFourSecondsAfterTheLastTap() = runTest {
+        val vm = viewModel()
+        runCurrent()
+        vm.onCharacterTapped()
+        advanceTimeBy(3_000)
+        now += 3_000
+        vm.onCharacterTapped()
+        advanceTimeBy(3_000)
+        runCurrent()
+        assertTrue(vm.uiState.value.speechLine in BuddyVoice.tapLines())
+        advanceTimeBy(1_100)
+        runCurrent()
+        assertFalse(vm.uiState.value.speechLine in BuddyVoice.tapLines())
     }
 
     @Test fun replyFadesBackToTheMoodLineAfterAFewSeconds() = runTest {
