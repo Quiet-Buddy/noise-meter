@@ -9,6 +9,9 @@
     <string name="style_duck_lemon">Lemon Pip</string>
     <string name="style_duck_cloud">Cloud Pip</string>
     <string name="style_duck_hazel">Hazel Pip</string>
+    <string name="style_robot_pearl">Pearl Astro</string>
+    <string name="style_robot_lilac">Lilac Astro</string>
+    <string name="style_robot_sky">Sky Astro</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, locked. %2$s</string>
@@ -61,6 +64,10 @@
     <string name="acc_goggles">Swim goggles</string>
     <string name="acc_bandana">Bandana</string>
     <string name="acc_swim_ring">Swim ring</string>
+    <string name="acc_propeller_cap">Propeller cap</string>
+    <string name="acc_star_glasses">Star glasses</string>
+    <string name="acc_bow_tie">Bow tie</string>
+    <string name="acc_planet_ring">Planet ring</string>
 
     <plurals name="accessory_next_hint">
         <item quantity="one">%1$d more calm minute to unlock the %2$s</item>

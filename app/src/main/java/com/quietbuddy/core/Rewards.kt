@@ -18,7 +18,7 @@ sealed interface Reward {
 }
 
 /**
- * A colour style for a character. Buddy's default is free; Mochi's and Pip's defaults are earned, and the others unlock
+ * A colour style for a character. Buddy's default is free; Mochi's, Pip's and Astro's defaults are earned, and the others unlock
  * as the room collects calm minutes (see [Unlocks]).
  *
  * [key] is persisted (selected style and unlocked set); never change an existing key.
@@ -36,7 +36,10 @@ enum class CharacterStyle(
     KITTEN_SNOW("kitten_snow", Character.KITTEN, 600),
     DUCK_LEMON("duck_lemon", Character.DUCK, 800),
     DUCK_CLOUD("duck_cloud", Character.DUCK, 1050),
-    DUCK_HAZEL("duck_hazel", Character.DUCK, 1500);
+    DUCK_HAZEL("duck_hazel", Character.DUCK, 1500),
+    ROBOT_PEARL("robot_pearl", Character.ROBOT, 1700),
+    ROBOT_LILAC("robot_lilac", Character.ROBOT, 2000),
+    ROBOT_SKY("robot_sky", Character.ROBOT, 2400);
 
     val isFree: Boolean get() = unlockAtCalmMinutes == 0
 
@@ -48,6 +51,7 @@ enum class CharacterStyle(
             Character.BUDDY -> BUDDY_SUNNY
             Character.KITTEN -> KITTEN_GINGER
             Character.DUCK -> DUCK_LEMON
+            Character.ROBOT -> ROBOT_PEARL
         }
 
         fun of(character: Character): List<CharacterStyle> = entries.filter { it.character == character }
@@ -82,7 +86,11 @@ enum class Accessory(
     CAP("acc_cap", Character.DUCK, AccessorySlot.HEAD, 900),
     GOGGLES("acc_goggles", Character.DUCK, AccessorySlot.FACE, 1200),
     BANDANA("acc_bandana", Character.DUCK, AccessorySlot.NECK, 1350),
-    SWIM_RING("acc_swim_ring", Character.DUCK, AccessorySlot.BODY, 1400);
+    SWIM_RING("acc_swim_ring", Character.DUCK, AccessorySlot.BODY, 1400),
+    PROPELLER_CAP("acc_propeller_cap", Character.ROBOT, AccessorySlot.HEAD, 1800),
+    STAR_GLASSES("acc_star_glasses", Character.ROBOT, AccessorySlot.FACE, 2100),
+    BOW_TIE("acc_bow_tie", Character.ROBOT, AccessorySlot.NECK, 2250),
+    PLANET_RING("acc_planet_ring", Character.ROBOT, AccessorySlot.BODY, 2300);
 
     companion object {
         fun fromKey(key: String?): Accessory? = entries.firstOrNull { it.key == key }

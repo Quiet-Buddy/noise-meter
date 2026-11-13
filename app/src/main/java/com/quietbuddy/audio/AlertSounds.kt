@@ -31,6 +31,11 @@ import kotlin.random.Random
  * - Sad: a long drooping "quaaaack", a whimpering "quack... quack", a quack that sags step by step.
  * - Too loud (flustered): three sharp "quack! quack! quack!", a raucous rasping "quaaaack", a startled double "QUACK! QUACK!".
  *
+ * Astro the robot's set is made of square-ish beeps and boops (odd harmonics, bright and buzzy):
+ * - Worried: a questioning "beep-boop?" rising at the end, a soft "bip? bip?", a "hmm" warble of quick alternating tones.
+ * - Sad: a slow falling "boop... boop... booop", a power-down slide with a slowing wobble, a sad three-note falling bleep.
+ * - Too loud: a rapid alarm-ish "beep-beep-beep!", a frantic warbling bleep-bloop run, a glitchy stutter of short beeps.
+ *
  * Timbres are rich in harmonics in the 1–4 kHz range, where phone speakers and ears are most
  * sensitive, and are gently saturated so they sound loud and cut through a noisy room.
  * Pure Kotlin so it can be unit-tested off-device.
@@ -54,6 +59,7 @@ object AlertSounds {
         Character.BUDDY -> buddySounds
         Character.KITTEN -> kittenSounds
         Character.DUCK -> duckSounds
+        Character.ROBOT -> robotSounds
     }
 
     private class Recipe(val seconds: Double, val gain: Double, val drive: Double, val draw: Buf.() -> Unit)
@@ -242,6 +248,85 @@ object AlertSounds {
                 for (i in 0..1) {
                     tone(i * 0.5, 0.45, { t -> meow(t / 0.45, 600.0, 800.0 - 60.0 * i, 330.0, peakAt = 0.15) },
                         harmonics = 14, oddOnly = true, attack = 0.012, release = 0.1, vibratoHz = 48.0, vibratoDepth = 0.04)
+                }
+            },
+        ),
+    )
+
+    private val robotSounds: Map<Mood, List<Recipe>> = mapOf(
+        Mood.WORRIED to listOf(
+            // "Beep-boop?": two notes, the last one rising into a question.
+            Recipe(0.8, gain = 0.75, drive = 1.5) {
+                tone(0.0, 0.18, { 880.0 }, harmonics = 9, oddOnly = true, attack = 0.008, release = 0.04)
+                tone(0.22, 0.18, { 660.0 }, harmonics = 9, oddOnly = true, attack = 0.008, release = 0.04)
+                tone(0.45, 0.32, { t -> glide(660.0, 1_100.0, t / 0.25) }, harmonics = 9, oddOnly = true, attack = 0.01,
+                    release = 0.08)
+            },
+            // "Bip? bip?": a soft pair of short blips.
+            Recipe(0.65, gain = 0.75, drive = 1.5) {
+                for (i in 0..1) {
+                    tone(i * 0.3, 0.16, { t -> glide(900.0 + 150.0 * i, 1_200.0 + 200.0 * i, t / 0.16) }, harmonics = 8,
+                        oddOnly = true, attack = 0.008, release = 0.05)
+                }
+            },
+            // "Hmm": a little warble of quick alternating tones.
+            Recipe(0.7, gain = 0.75, drive = 1.5) {
+                for (i in 0 until 6) {
+                    tone(i * 0.09, 0.08, { if (i % 2 == 0) 740.0 else 988.0 }, harmonics = 9, oddOnly = true,
+                        attack = 0.006, release = 0.02)
+                }
+                tone(0.58, 0.1, { 1_100.0 }, harmonics = 8, oddOnly = true, attack = 0.008, release = 0.04)
+            },
+        ),
+        Mood.SAD to listOf(
+            // "Boop... boop... booop": slow, each lower and longer.
+            Recipe(1.7, gain = 0.9, drive = 2.0) {
+                val hz = doubleArrayOf(660.0, 560.0, 470.0)
+                val len = doubleArrayOf(0.25, 0.3, 0.6)
+                val at = doubleArrayOf(0.0, 0.5, 1.05)
+                for (i in 0..2) {
+                    tone(at[i], len[i], { t -> hz[i] * (1 - 0.04 * t / len[i]) }, harmonics = 9, oddOnly = true,
+                        attack = 0.01, release = 0.08)
+                }
+            },
+            // Power-down: a falling slide whose wobble slows.
+            Recipe(1.5, gain = 0.9, drive = 2.0) {
+                tone(0.0, 1.4, { t ->
+                    val x = t / 1.4
+                    glide(1_200.0, 180.0, x * x) * (1 + 0.06 * sin(2 * PI * (14.0 * t - 5.0 * t * t)))
+                }, harmonics = 9, oddOnly = true, attack = 0.02, release = 0.3)
+            },
+            // A sad three-note falling bleep.
+            Recipe(1.2, gain = 0.9, drive = 2.0) {
+                val hz = doubleArrayOf(1_047.0, 831.0, 622.0)
+                for (i in 0..2) {
+                    tone(i * 0.36, 0.3, { hz[i] }, harmonics = 8, oddOnly = true, attack = 0.01,
+                        release = 0.1, vibratoHz = 6.0, vibratoDepth = 0.015)
+                }
+            },
+        ),
+        Mood.EARS_COVERED to listOf(
+            // "Beep-beep-beep!": a rapid, bright alarm.
+            Recipe(0.85, gain = 1.0, drive = 3.0) {
+                for (i in 0..2) {
+                    tone(i * 0.26, 0.18, { 1_400.0 }, harmonics = 7, oddOnly = true, attack = 0.006, release = 0.03)
+                }
+            },
+            // A frantic warbling bleep-bloop run.
+            Recipe(1.2, gain = 1.0, drive = 3.0) {
+                for (i in 0 until 8) {
+                    val up = i % 2 == 0
+                    tone(i * 0.13, 0.12, { t -> if (up) glide(700.0, 1_500.0, t / 0.1) else glide(1_500.0, 600.0, t / 0.1) },
+                        harmonics = 8, oddOnly = true, attack = 0.006, release = 0.03)
+                }
+            },
+            // A glitchy stutter of short beeps.
+            Recipe(1.1, gain = 1.0, drive = 3.0) {
+                val at = doubleArrayOf(0.0, 0.07, 0.14, 0.31, 0.38, 0.55, 0.60, 0.65, 0.8)
+                val hz = doubleArrayOf(1_200.0, 1_200.0, 1_800.0, 900.0, 900.0, 1_500.0, 2_000.0, 1_100.0, 1_300.0)
+                for (i in at.indices) {
+                    tone(at[i], if (i == at.lastIndex) 0.22 else 0.05, { hz[i] }, harmonics = 7, oddOnly = true,
+                        attack = 0.004, release = 0.02)
                 }
             },
         ),

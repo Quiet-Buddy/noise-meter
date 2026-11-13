@@ -11,6 +11,7 @@ import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.duck.DuckArt
 import com.quietbuddy.ui.character.kitten.KittenArt
+import com.quietbuddy.ui.character.robot.RobotArt
 import com.quietbuddy.ui.theme.BuddyBerryPalette
 import com.quietbuddy.ui.theme.BuddyMintPalette
 import com.quietbuddy.ui.theme.BuddyPalette
@@ -21,6 +22,9 @@ import com.quietbuddy.ui.theme.KittenGreyPalette
 import com.quietbuddy.ui.theme.KittenSnowPalette
 import com.quietbuddy.ui.theme.KittenPalette
 import com.quietbuddy.ui.theme.Palette
+import com.quietbuddy.ui.theme.RobotLilacPalette
+import com.quietbuddy.ui.theme.RobotPalette
+import com.quietbuddy.ui.theme.RobotSkyPalette
 
 /** Which shared motions [CharacterView] applies to a character. */
 data class Motion(
@@ -118,12 +122,16 @@ object CharacterLooks {
             CharacterStyle.DUCK_LEMON -> DuckPalette
             CharacterStyle.DUCK_CLOUD -> DuckCloudPalette
             CharacterStyle.DUCK_HAZEL -> DuckHazelPalette
+            CharacterStyle.ROBOT_PEARL -> RobotPalette
+            CharacterStyle.ROBOT_LILAC -> RobotLilacPalette
+            CharacterStyle.ROBOT_SKY -> RobotSkyPalette
         }
         CharacterLook(
             art = when (style.character) {
                 Character.BUDDY -> BuddyArt
                 Character.KITTEN -> KittenArt
                 Character.DUCK -> DuckArt
+                Character.ROBOT -> RobotArt
             },
             palette = palette,
         )
