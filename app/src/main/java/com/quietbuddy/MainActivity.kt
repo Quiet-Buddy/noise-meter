@@ -58,7 +58,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.quietbuddy.core.AppSettings
+import com.quietbuddy.core.LevelSource
 import com.quietbuddy.core.ListeningController
+import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.SettingsRepository
 import com.quietbuddy.ui.Routes
 import com.quietbuddy.ui.character.CharacterLooks
@@ -81,11 +83,30 @@ import javax.inject.Inject
 @HiltViewModel
 class MainViewModel @Inject constructor(
     settingsRepository: SettingsRepository,
-    val controller: ListeningController,
+    private val controller: ListeningController,
+    private val levelSource: LevelSource,
 ) : ViewModel() {
     /** Null until the first settings emission. */
     val settings: StateFlow<AppSettings?> =
         settingsRepository.settings.stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    /** True when [onUiStopped] paused a live session, so [onUiStarted] should pick it back up. */
+    private var resumeOnStart = false
+
+    /** The UI left the screen. Without "keep listening" we pause, remembering whether we cut a session short. */
+    fun onUiStopped(keepListening: Boolean) {
+        if (keepListening) return
+        val state = levelSource.state.value
+        resumeOnStart = state == ListeningState.LISTENING || state == ListeningState.MIC_BUSY
+        if (resumeOnStart) controller.pause()
+    }
+
+    /** The UI is back in front: resume only a session we paused ourselves, never one the user paused. */
+    fun onUiStarted() {
+        if (!resumeOnStart) return
+        resumeOnStart = false
+        controller.start()
+    }
 }
 
 @AndroidEntryPoint
@@ -128,19 +149,23 @@ private fun Root(vm: MainViewModel = hiltViewModel()) {
         LocalStyle provides style,
         LocalWardrobe provides loaded.accessories,
     ) {
-        QuietBuddyTheme(look.palette) { AppContent(loaded, vm.controller) }
+        QuietBuddyTheme(look.palette) { AppContent(loaded, vm) }
     }
 }
 
 @Composable
-private fun AppContent(loaded: AppSettings, controller: ListeningController) {
+private fun AppContent(loaded: AppSettings, vm: MainViewModel) {
 
-    // Stop listening when the UI goes away, unless the user asked to keep listening.
+    // Stop listening when the UI goes away, unless the user asked to keep listening; resume when it comes back.
     val keep by rememberUpdatedState(loaded.keepListening)
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val obs = LifecycleEventObserver { _, e ->
-            if (e == Lifecycle.Event.ON_STOP && !keep) controller.pause()
+            when (e) {
+                Lifecycle.Event.ON_STOP -> vm.onUiStopped(keep)
+                Lifecycle.Event.ON_START -> vm.onUiStarted()
+                else -> Unit
+            }
         }
         lifecycleOwner.lifecycle.addObserver(obs)
         onDispose { lifecycleOwner.lifecycle.removeObserver(obs) }
