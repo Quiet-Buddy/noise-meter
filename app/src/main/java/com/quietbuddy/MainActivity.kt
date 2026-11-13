@@ -5,7 +5,12 @@ import androidx.compose.ui.platform.LocalView
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.SystemBarStyle
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.calculateEndPadding
+import androidx.compose.foundation.layout.calculateStartPadding
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -91,7 +96,12 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+        // The app is always light, so the bar icons are always dark. The default follows the system theme and gave
+        // white icons on our light screens when the phone was in dark mode.
+        enableEdgeToEdge(
+            statusBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+            navigationBarStyle = SystemBarStyle.light(android.graphics.Color.TRANSPARENT, android.graphics.Color.TRANSPARENT),
+        )
         setContent {
             Root()
         }
@@ -182,7 +192,19 @@ private fun AppContent(loaded: AppSettings, controller: ListeningController) {
         // Full-screen Home hides the system bars; skip the inset padding too so the mood background reaches every
         // edge instead of leaving a strip where the display cutout sits.
         val fullScreenHome = route == Routes.HOME && homeFullScreen
-        Row(if (fullScreenHome) Modifier else Modifier.padding(padding).consumeWindowInsets(padding)) {
+        // Home also draws under the status bar, so its noise colour fills the top bar; it pads its own content with
+        // statusBarsPadding(), which still sees the top inset because it is left out of what is consumed here.
+        val layoutDirection = LocalLayoutDirection.current
+        val inset = if (route == Routes.HOME) {
+            PaddingValues(
+                start = padding.calculateStartPadding(layoutDirection),
+                end = padding.calculateEndPadding(layoutDirection),
+                bottom = padding.calculateBottomPadding(),
+            )
+        } else {
+            padding
+        }
+        Row(if (fullScreenHome) Modifier else Modifier.padding(inset).consumeWindowInsets(inset)) {
             if (showTabs && rail) {
                 // Insets are already applied by the Scaffold padding above.
                 NavigationRail(windowInsets = WindowInsets(0)) {
