@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="robot_name">Astro</string>
+    <string name="robot_listening_title">Astro está escuchando · %1$s</string>
+    <string name="robot_greeting">¡Bip bop! Soy Astro.</string>
+
+    <string name="robot_sleeping">Recargando… toca el micrófono para despertarme.</string>
+
+    <string name="robot_happy_1">Bip… mis sensores dicen que todo está tranquilo.</string>
+    <string name="robot_happy_2">Todo está en calma. Hora de flotar suavecito.</string>
+    <string name="robot_happy_3">Bop… oigo zumbar mis circuitos. Qué paz.</string>
+    <string name="robot_fine_1">Qué bien. Todos charlan bajito.</string>
+    <string name="robot_fine_2">¡Bip! Justo la cantidad de ruido adecuada.</string>
+    <string name="robot_fine_3">Hablar bien, escuchar bien. Bop.</string>
+    <string name="robot_worried_1">¿Bip? Se está poniendo algo ruidoso aquí.</string>
+    <string name="robot_worried_2">Me vibra la antena. ¿Bajamos un poco el volumen?</string>
+    <string name="robot_worried_3">¿Podemos jugar un poco más bajito?</string>
+    <string name="robot_sad_1">Bip… ¿podemos hablar más bajito?</string>
+    <string name="robot_sad_2">Hay mucho ruido. Me tiemblan los circuitos.</string>
+    <string name="robot_sad_3">Por favor, ayúdame a encontrar algo de calma.</string>
+    <string name="robot_ears_1">¡Bip! ¡Qué ruido! ¡Me tapo los oídos!</string>
+    <string name="robot_ears_2">¡Uy! ¡Manos sobre mis orejas! ¿Hacemos silencio?</string>
+    <string name="robot_ears_3">¡Qué ruidazo! ¡Hagamos una pausa tranquila!</string>
+
+    <string name="robot_asleep">Astro está dormido, recargando su batería</string>
+    <string name="robot_happy">Astro está contento</string>
+    <string name="robot_fine">Astro está bien</string>
+    <string name="robot_worried">Astro está preocupado</string>
+    <string name="robot_sad">Astro está triste</string>
+    <string name="robot_ears">Astro se tapa los sensores de las orejas con las manos</string>
+
+    <string name="robot_tap_1">¡Jiji! Me haces cosquillas en la antena.</string>
+    <string name="robot_tap_2">Bip bop… las caricias suaves me encantan.</string>
+    <string name="robot_tap_3">¡Jiji! ¡Mueve que mueve la antena!</string>
+    <string name="robot_tap_4">Shh, flotemos juntos, bajito.</string>
+    <string name="robot_tap_5">Caricias suaves, voces suaves. Bop.</string>
+</resources>
