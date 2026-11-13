@@ -1,5 +1,15 @@
 package com.quietbuddy.ui.home
 
+import kotlinx.coroutines.flow.collectLatest
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.text.TextStyle
+import com.quietbuddy.core.Thresholds
+import androidx.compose.runtime.withFrameMillis
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.animation.core.snap
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.res.stringResource
 import com.quietbuddy.R
 import androidx.compose.ui.platform.LocalDensity
@@ -176,7 +186,7 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
         )
     }
     val chip: @Composable () -> Unit = {
-        StatusChip(mood = state.mood, db = state.db, listening = state.listening, large = large)
+        NoiseMeter(mood = state.mood, db = state.db, thresholds = state.thresholds, listening = state.listening, large = large)
     }
     // Everything below the status chip: wake prompt, challenge and the reward strip.
     val details: @Composable () -> Unit = {
@@ -194,7 +204,7 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
             )
             Spacer(Modifier.height(12.dp))
         }
-        RewardStrip(
+        ProgressTiles(
             calmMinutes = state.calmMinutes,
             reward = state.nextReward,
             styles = state.styles,
@@ -226,7 +236,7 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
             onTap = viewModel::onCharacterTapped,
             onExit = { fullScreen = false },
             // Always the large chip: full screen is for reading the room from across it.
-            chip = { StatusChip(mood = state.mood, db = state.db, listening = state.listening, large = true) },
+            chip = { NoiseMeter(mood = state.mood, db = state.db, thresholds = state.thresholds, listening = state.listening, large = true) },
             modifier = Modifier.background(background),
         )
         return
@@ -308,11 +318,12 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
 }
 
 /**
- * The reward card on Home: today's calm minutes and, while something is left to earn, a preview of the next reward
- * with a bar showing how close it is. Tapping it opens the Characters tab.
+ * Today's calm time and the next reward, as two separate tiles side by side: one is what the room has done, the
+ * other what it is working towards. The reward tile opens the Characters tab. With everything unlocked the calm
+ * tile takes the whole row.
  */
 @Composable
-private fun RewardStrip(
+private fun ProgressTiles(
     calmMinutes: Int,
     reward: Reward?,
     styles: Map<Character, CharacterStyle>,
@@ -320,64 +331,84 @@ private fun RewardStrip(
     progress: Float,
     onClick: () -> Unit,
 ) {
+    // Equal heights, so the two tiles read as a pair even when one label wraps.
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min), horizontalArrangement = spacedBy(12.dp)) {
+        CalmTile(calmMinutes, Modifier.weight(1f).fillMaxHeight())
+        if (reward != null) {
+            RewardTile(reward, styles, minutesToNext, progress, onClick, Modifier.weight(1f).fillMaxHeight())
+        }
+    }
+}
+
+private val TileShape = RoundedCornerShape(20.dp)
+
+@Composable
+private fun CalmTile(calmMinutes: Int, modifier: Modifier) {
     val palette = LocalPalette.current
-    val shape = RoundedCornerShape(20.dp)
+    Column(modifier.clip(TileShape).background(palette.card).padding(14.dp)) {
+        Text(stringResource(R.string.home_calm_time_today), style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
+        Spacer(Modifier.weight(1f).heightIn(min = 6.dp))
+        Text(
+            formatMinutes(calmMinutes),
+            style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.ExtraBold),
+            color = QB.CalmText,
+            softWrap = false,
+        )
+    }
+}
+
+@Composable
+private fun RewardTile(
+    reward: Reward,
+    styles: Map<Character, CharacterStyle>,
+    minutesToNext: Int,
+    progress: Float,
+    onClick: () -> Unit,
+    modifier: Modifier,
+) {
+    val palette = LocalPalette.current
     val animatedProgress by animateFloatAsState(progress, tween(600), label = "rewardProgress")
-    Row(
-        Modifier
-            .fillMaxWidth()
-            .clip(shape)
+    // The full "N min to unlock X" sentence is too long for a tile in some languages, so it is only the
+    // screen-reader label; on screen the reward's name stands alone and the minutes sit at the end of the bar.
+    val sentence = nextRewardText(reward, minutesToNext)
+    Column(
+        modifier
+            .clip(TileShape)
             .background(palette.card)
             .clickable(role = Role.Button, onClick = onClick)
+            .clearAndSetSemantics { contentDescription = sentence }
             .padding(14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = spacedBy(14.dp),
     ) {
-        if (reward != null) {
-            RewardPreview(reward, styles, Modifier.size(44.dp), animated = false)
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(10.dp)) {
+            RewardPreview(reward, styles, Modifier.size(40.dp), animated = false)
+            Column(Modifier.weight(1f)) {
+                Text(
+                    stringResource(R.string.home_next_reward_label),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = palette.inkSoft,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+                Text(
+                    rewardName(reward),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                    color = palette.ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
+            }
         }
-        Column(Modifier.weight(1f), verticalArrangement = spacedBy(4.dp)) {
-            // Label and value side by side, the value never wrapping: in long languages (Basque) the label wraps
-            // on its own instead of pushing "min" onto a line by itself.
-            Row(verticalAlignment = Alignment.Top, horizontalArrangement = spacedBy(8.dp)) {
-                Text(
-                    stringResource(R.string.home_calm_time_today),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = palette.ink,
-                    modifier = Modifier.weight(1f),
-                )
-                Text(
-                    formatMinutes(calmMinutes),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.ExtraBold),
-                    color = palette.ink,
-                    softWrap = false,
-                )
+        Spacer(Modifier.weight(1f).heightIn(min = 8.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(8.dp)) {
+            Box(Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(4.dp)).background(palette.line)) {
+                Box(Modifier.fillMaxWidth(animatedProgress).fillMaxHeight().background(QB.Calm))
             }
-            if (reward != null) {
-                // The full "N min to unlock X" sentence wraps in long languages, so it is only the screen-reader
-                // label; on screen the reward's name stands alone and the minutes sit at the end of the bar.
-                val sentence = nextRewardText(reward, minutesToNext)
-                Column(Modifier.clearAndSetSemantics { contentDescription = sentence }, verticalArrangement = spacedBy(4.dp)) {
-                    Text(
-                        rewardName(reward),
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = palette.inkSoft,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(8.dp)) {
-                        Box(Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(4.dp)).background(palette.line)) {
-                            Box(Modifier.fillMaxWidth(animatedProgress).fillMaxHeight().background(QB.Calm))
-                        }
-                        Text(
-                            formatMinutes(minutesToNext),
-                            style = MaterialTheme.typography.labelSmall,
-                            color = palette.inkSoft,
-                            softWrap = false,
-                        )
-                    }
-                }
-            }
+            Text(
+                formatMinutes(minutesToNext),
+                style = MaterialTheme.typography.labelSmall,
+                color = palette.inkSoft,
+                softWrap = false,
+            )
         }
     }
 }
@@ -597,8 +628,13 @@ private fun BuddyStage(mood: Mood?, db: Int?, size: Dp, tapCount: Int, onTap: ()
 }
 
 /** One pill with the reading and the band: "34 dB · Nice and calm", or just the paused/sleeping label. */
+/**
+ * The live noise level: the dB number and band name over a gauge whose track is split into the room's calm, loud
+ * and too-loud zones. A bar follows the level and a tick holds the recent peak for a moment before sinking back,
+ * so the room can see the noise rise and fall, not just which band it is in.
+ */
 @Composable
-private fun StatusChip(mood: Mood?, db: Int?, listening: ListeningState, large: Boolean) {
+private fun NoiseMeter(mood: Mood?, db: Int?, thresholds: Thresholds, listening: ListeningState, large: Boolean) {
     val palette = LocalPalette.current
     val label = when (mood) {
         Mood.HAPPY, Mood.FINE -> stringResource(R.string.band_nice_calm)
@@ -607,29 +643,85 @@ private fun StatusChip(mood: Mood?, db: Int?, listening: ListeningState, large: 
         Mood.EARS_COVERED -> stringResource(R.string.band_way_too_loud)
         null -> stringResource(if (listening == ListeningState.PAUSED) R.string.band_paused else R.string.band_sleeping)
     }
-    val soft = mood?.let { QB.bandSoft(it) } ?: palette.accentSoft
-    val text = mood?.let { QB.bandText(it) } ?: palette.inkSoft
-    val content = buildAnnotatedString {
-        if (mood != null && db != null) {
+    val active = mood != null && db != null
+    val textColor = mood?.let { QB.bandText(it) } ?: palette.inkSoft
+    // The scale: a stretch of quiet below the loud zone, and some room above the too-loud edge.
+    val low = thresholds.worriedFromDb - 25f
+    val high = thresholds.sadFromDb + 15f
+    fun fraction(level: Float) = ((level - low) / (high - low)).coerceIn(0f, 1f)
+
+    val target = if (active) fraction(db!!.toFloat()) else 0f
+    val animationsOff = rememberAnimationsOff()
+    val level by animateFloatAsState(target, if (animationsOff) snap() else tween(250), label = "meterLevel")
+    val currentTarget by rememberUpdatedState(target)
+    var peak by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(Unit) {
+        var heldSinceMs = 0L
+        // Restarts on every new level; once the tick has sunk to the level it waits, drawing no frames.
+        snapshotFlow { currentTarget }.collectLatest { t ->
+            if (t >= peak) {
+                peak = t
+                heldSinceMs = System.currentTimeMillis()
+            }
+            delay(heldSinceMs + PEAK_HOLD_MS - System.currentTimeMillis())
+            var lastMs = withFrameMillis { it }
+            while (peak > t) {
+                withFrameMillis { now ->
+                    peak = maxOf(t, peak - (now - lastMs).coerceAtMost(100) * PEAK_FALL_PER_MS)
+                    lastMs = now
+                }
+            }
+        }
+    }
+
+    val zones = listOf(
+        fraction(thresholds.worriedFromDb) to QB.CalmSoft,
+        fraction(thresholds.sadFromDb) to QB.LoudSoft,
+        1f to QB.TooLoudSoft,
+    )
+    val barColor = mood?.let { QB.bandColor(it) } ?: palette.line
+    val trackHeight = if (large) 20.dp else 14.dp
+    val text = buildAnnotatedString {
+        if (active) {
             withStyle(SpanStyle(fontWeight = FontWeight.ExtraBold)) { append("$db dB") }
             append(" · ")
         }
         append(label)
     }
-    Box(
+    Column(
         Modifier
-            .clip(RoundedCornerShape(50))
-            .background(soft)
-            .padding(horizontal = if (large) 28.dp else 16.dp, vertical = if (large) 12.dp else 8.dp),
-        contentAlignment = Alignment.Center,
+            .fillMaxWidth()
+            .clip(TileShape)
+            .background(palette.card)
+            .padding(horizontal = 16.dp, vertical = if (large) 16.dp else 12.dp),
     ) {
         Text(
-            content,
+            text,
             style = if (large) MaterialTheme.typography.headlineSmall else MaterialTheme.typography.titleMedium,
-            color = text,
+            color = textColor,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.fillMaxWidth(),
         )
+        Spacer(Modifier.height(if (large) 12.dp else 8.dp))
+        Canvas(Modifier.fillMaxWidth().height(trackHeight).clip(RoundedCornerShape(50))) {
+            var from = 0f
+            zones.forEach { (to, color) ->
+                drawRect(color, topLeft = Offset(from * size.width, 0f), size = Size((to - from) * size.width, size.height))
+                from = to
+            }
+            if (active) {
+                val r = size.height / 2f
+                drawRoundRect(barColor, size = Size(maxOf(level * size.width, size.height), size.height), cornerRadius = CornerRadius(r, r))
+                val tick = 3.dp.toPx()
+                val x = (peak * size.width).coerceIn(tick, size.width - tick)
+                drawRect(palette.ink, topLeft = Offset(x - tick / 2f, 0f), size = Size(tick, size.height))
+            }
+        }
     }
 }
+
+private const val PEAK_HOLD_MS = 1_500L
+private const val PEAK_FALL_PER_MS = 0.0002f
 
 /** A comic-style bubble with a tail pointing down at Buddy's head. */
 private class BubbleShape(private val corner: Dp, private val tailWidth: Dp, private val tailHeight: Dp) : Shape {

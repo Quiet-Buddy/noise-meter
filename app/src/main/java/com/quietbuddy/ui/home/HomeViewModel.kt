@@ -8,6 +8,8 @@ import com.quietbuddy.core.LevelSource
 import com.quietbuddy.core.ListeningController
 import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.Mood
+import com.quietbuddy.core.AppSettings
+import com.quietbuddy.core.Thresholds
 import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.Reward
 import com.quietbuddy.core.SettingsRepository
@@ -47,6 +49,8 @@ data class HomeUiState(
     /** Null whenever Buddy is asleep (not LISTENING). */
     val mood: Mood? = null,
     val db: Int? = null,
+    /** The room's band edges, for drawing the noise meter's zones. */
+    val thresholds: Thresholds = AppSettings().baseThresholds,
     @StringRes val speechLine: Int = BuddyVoice.sleeping,
     val calmMinutes: Int = 0,
     val challenge: ChallengeState = ChallengeState.Idle,
@@ -111,6 +115,7 @@ class HomeViewModel @Inject constructor(
             listening = listening,
             mood = mood,
             db = latest?.laeq2sDb?.roundToInt(),
+            thresholds = settings.baseThresholds,
             calmMinutes = today?.calmMinutes ?: 0,
             pendingUnlocks = progress.pendingCelebration,
             nextReward = next,
@@ -130,6 +135,7 @@ class HomeViewModel @Inject constructor(
             listening = s.listening,
             mood = mood,
             db = if (active) s.db else null,
+            thresholds = s.thresholds,
             speechLine = Voices.of(s.character).let { voice ->
                 when {
                     mood == null -> voice.sleeping
@@ -237,6 +243,7 @@ class HomeViewModel @Inject constructor(
         val listening: ListeningState,
         val mood: Mood,
         val db: Int?,
+        val thresholds: Thresholds,
         val calmMinutes: Int,
         val pendingUnlocks: List<Reward>,
         val nextReward: Reward?,

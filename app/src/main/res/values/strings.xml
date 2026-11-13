@@ -19,6 +19,7 @@
     <string name="home_resume_listening">Resume listening</string>
     <string name="home_wake_buddy">Start listening</string>
     <string name="home_calm_time_today">Calm time today</string>
+    <string name="home_next_reward_label">Next reward</string>
     <string name="home_loudest_moment">Loudest moment</string>
     <string name="band_nice_calm">Nice and calm</string>
     <string name="band_getting_loud">Getting loud</string>
