@@ -108,7 +108,8 @@ fun DrawScope.drawAccessories(
             Accessory.CAP -> placed(anchors.hatAt, anchors.hatScale, anchors.hatTilt) { backwardsCap(outline) }
             // Drawn in two halves around the body by the art itself, see drawSwimRing.
             Accessory.SWIM_RING -> Unit
-            // TODO(robot): placeholder until Astro's own accessory drawings exist
+            // Astro's four turn with it when it spins, so RobotArt draws them itself, see drawPropellerCap,
+            // drawStarGlasses, drawBowTie and drawPlanetRing.
             Accessory.PROPELLER_CAP, Accessory.STAR_GLASSES, Accessory.BOW_TIE, Accessory.PLANET_RING -> Unit
         }
     }
@@ -418,5 +419,134 @@ private fun DrawScope.bandana(outline: Color) {
     outlined(point, BandanaRed, outline, 3.2f)
     for (dot in listOf(Offset(4f, 6f), Offset(14f, 5f), Offset(12f, 13f), Offset(-10f, 2.5f), Offset(-18f, 0f))) {
         drawCircle(Color.White, 1.7f, dot)
+    }
+}
+
+// Astro's accessories. Unlike the others they are not placed from anchors: the robot spins on its vertical axis, so
+// RobotArt draws them in its own order (the cap and the ring by front/back) and in the prototype's coordinates.
+private val PropCap = Color(0xFFFFD43B)
+private val PropCapRed = Color(0xFFE8473F)
+private val PropCapBlue = Color(0xFF4E8FE0)
+private val PropBlade = Color(0xFFE8473F)
+private val StarPink = Color(0xFFFF5FA2)
+private val StarLens = Color(0xFFFFD6EA)
+private val BowTieRed = Color(0xFFE2453C)
+private val PlanetRing = Color(0xFFFFB547)
+private val PlanetBand = Color(0xFFFF8A3D)
+
+private fun DrawScope.ovalOutlined(cx: Float, cy: Float, rx: Float, ry: Float, fill: Color, outline: Color, w: Float) {
+    val tl = Offset(cx - rx, cy - ry)
+    val sz = Size(rx * 2f, ry * 2f)
+    drawOval(fill, tl, sz)
+    drawOval(outline, tl, sz, style = stroke(w))
+}
+
+/**
+ * A propeller beanie sitting at [at], leaning [angle] degrees, its propeller turned [spin] radians: each blade's
+ * width follows the cosine of the angle, so it seems to spin.
+ */
+fun DrawScope.drawPropellerCap(outline: Color, at: Offset, angle: Float, spin: Float) {
+    withTransform({
+        translate(at.x, at.y)
+        rotate(angle, Offset.Zero)
+    }) {
+        val dome = Path().apply {
+            moveTo(-24f, 8f)
+            quadraticTo(-23f, -17f, 0f, -18f)
+            quadraticTo(23f, -17f, 24f, 8f)
+            quadraticTo(0f, 2f, -24f, 8f)
+            close()
+        }
+        outlined(dome, PropCap, outline, 3.4f)
+        drawPath(
+            Path().apply {
+                moveTo(-8f, -16.5f); quadraticTo(0f, -18f, 8f, -16.5f); lineTo(6f, 4f); quadraticTo(0f, 3.6f, -6f, 4f); close()
+            },
+            PropCapRed,
+        )
+        for (side in listOf(-1f, 1f)) {
+            drawPath(
+                Path().apply {
+                    moveTo(side * 22f, -2f); quadraticTo(side * 20f, -12f, side * 12f, -15.6f)
+                    lineTo(side * 14f, 5f); quadraticTo(side * 19f, 6f, side * 22f, 6.6f); close()
+                },
+                PropCapBlue,
+            )
+        }
+        drawPath(Path().apply { moveTo(-24f, 8f); quadraticTo(0f, 2f, 24f, 8f) }, outline, style = stroke(3.4f))
+        drawPath(
+            Path().apply { moveTo(-16f, -8f); quadraticTo(-11f, -13f, -5f, -14f) },
+            Color.White, alpha = 0.8f, style = stroke(2.2f),
+        )
+        drawPath(Path().apply { moveTo(0f, -18f); lineTo(0f, -25f) }, outline, style = stroke(3f))
+        val w = 16f * kotlin.math.abs(kotlin.math.cos(spin))
+        ovalOutlined(-w / 2f, -26f, w / 2f, 3.6f, PropBlade, outline, 2.6f)
+        ovalOutlined(w / 2f, -26f, w / 2f, 3.6f, PropCapBlue, outline, 2.6f)
+        ovalOutlined(0f, -26f, 3f, 3f, PropCap, outline, 2.4f)
+    }
+}
+
+/** Pink star-shaped glasses over the screen eyes at [eyes]: a bridge, tinted lenses and a glint on each. */
+fun DrawScope.drawStarGlasses(outline: Color, eyes: List<Offset>) {
+    val bridge = Path().apply { moveTo(92f, 84f); quadraticTo(100f, 80f, 108f, 84f) }
+    drawPath(bridge, outline, style = stroke(4.5f))
+    drawPath(bridge, StarPink, style = stroke(2.2f))
+    for (e in eyes) {
+        val star = Path().apply {
+            for (i in 0 until 10) {
+                val a = -Math.PI.toFloat() / 2f + i * Math.PI.toFloat() / 5f
+                val r = if (i % 2 == 1) 8.5f else 16f
+                val x = e.x + r * kotlin.math.cos(a)
+                val y = e.y + r * kotlin.math.sin(a)
+                if (i == 0) moveTo(x, y) else lineTo(x, y)
+            }
+            close()
+        }
+        drawPath(star, StarLens, alpha = 0.28f)
+        drawPath(star, outline, style = stroke(6.5f))
+        drawPath(star, StarPink, style = stroke(3.2f))
+    }
+    drawPath(Path().apply { moveTo(74f, 76f); lineTo(78f, 72f) }, Color.White, alpha = 0.85f, style = stroke(2f))
+    drawPath(Path().apply { moveTo(112f, 76f); lineTo(116f, 72f) }, Color.White, alpha = 0.85f, style = stroke(2f))
+}
+
+/** A red polka-dot bow tie on the shell under the screen, where a chin would be. */
+fun DrawScope.drawBowTie(outline: Color) {
+    val x = 100f
+    val y = 128f
+    for (side in listOf(-1f, 1f)) {
+        val wing = Path().apply {
+            moveTo(x, y)
+            lineTo(x + side * 15f, y - 8f)
+            quadraticTo(x + side * 18f, y, x + side * 15f, y + 8f)
+            close()
+        }
+        outlined(wing, BowTieRed, outline, 3f)
+    }
+    ovalOutlined(x, y, 4.2f, 5f, BowTieRed, outline, 3f)
+    for ((dx, dy) in listOf(-10f to -2f, -8f to 4f, 10f to -2f, 8f to 4f)) drawCircle(Color.White, 1.5f, Offset(x + dx, y + dy))
+}
+
+/**
+ * A planet ring around the orb's lower half, centred at [at], so it never crosses the face. Arts draw it twice:
+ * the back half ([front] false) behind the orb and the front half after it.
+ */
+fun DrawScope.drawPlanetRing(outline: Color, front: Boolean, at: Offset) {
+    val rx = 76f
+    val ry = 13f
+    val oval = Rect(at.x - rx, at.y - ry, at.x + rx, at.y + ry)
+    withTransform({ rotate(-8f, at) }) {
+        // The front half runs through the bottom of the oval (0..180 degrees), the back half through the top.
+        val half = Path().apply { arcTo(oval, if (front) 0f else 180f, 180f, forceMoveTo = true) }
+        drawPath(half, outline, style = stroke(13f))
+        drawPath(half, PlanetRing, style = stroke(8f))
+        drawPath(half, PlanetBand, style = stroke(2.4f))
+        if (front) {
+            val glint = Path().apply {
+                moveTo(at.x - rx * 0.7f, at.y + ry * 0.62f)
+                quadraticTo(at.x - rx * 0.45f, at.y + ry * 0.99f, at.x - rx * 0.2f, at.y + ry * 0.96f)
+            }
+            drawPath(glint, Color.White, alpha = 0.75f, style = stroke(2f))
+        }
     }
 }
