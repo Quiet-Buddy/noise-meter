@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="kitten_name">Mochi</string>
-    <string name="kitten_listening_title">Mochi entzuten ari da · %1$s</string>
-    <string name="kitten_greeting">Miau! Ni Mochi naiz.</string>
-    <string name="kitten_challenge_won">Mochi kurruka ari da ozen! Lortu duzu.</string>
+    <string name="kitten_name">Mixi</string>
+    <string name="kitten_listening_title">Mixi entzuten ari da · %1$s</string>
+    <string name="kitten_greeting">Miau! Ni Mixi naiz.</string>
+    <string name="kitten_challenge_won">Mixi kurruka ari da ozen! Lortu duzu.</string>
     <string name="kitten_sleeping">Zzz… sakatu mikrofonoa ni esnatzeko.</string>
 
     <string name="kitten_happy_1">Prrr, prrr… kanpoko txoriak entzuten ditut.</string>
@@ -22,12 +22,12 @@
     <string name="kitten_ears_2">Ene! Ilea harrotuta dut! Isilik egongo gara?</string>
     <string name="kitten_ears_3">Zarata handia! Egin dezagun atsedenaldi isil bat!</string>
 
-    <string name="kitten_asleep">Mochi lo dago</string>
-    <string name="kitten_happy">Mochi pozik dago</string>
-    <string name="kitten_fine">Mochi ondo dago</string>
-    <string name="kitten_worried">Mochi kezkatuta dago</string>
-    <string name="kitten_sad">Mochi triste dago</string>
-    <string name="kitten_ears">Mochi izututa dago, ilea harrotuta</string>
+    <string name="kitten_asleep">Mixi lo dago</string>
+    <string name="kitten_happy">Mixi pozik dago</string>
+    <string name="kitten_fine">Mixi ondo dago</string>
+    <string name="kitten_worried">Mixi kezkatuta dago</string>
+    <string name="kitten_sad">Mixi triste dago</string>
+    <string name="kitten_ears">Mixi izututa dago, ilea harrotuta</string>
     <!-- TODO review translation -->
     <string name="kitten_tap_1">Prrr, prrr… zein gustura.</string>
     <string name="kitten_tap_2">Prrr… laztan leunak dira nire gogokoenak.</string>

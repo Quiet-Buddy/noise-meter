@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="kitten_name">Mochi</string>
-    <string name="kitten_listening_title">Mochi está escuchando · %1$s</string>
-    <string name="kitten_greeting">¡Miau! Soy Mochi.</string>
-    <string name="kitten_challenge_won">¡Mochi ronronea a todo volumen! Lo has conseguido.</string>
+    <string name="kitten_name">Michi</string>
+    <string name="kitten_listening_title">Michi está escuchando · %1$s</string>
+    <string name="kitten_greeting">¡Miau! Soy Michi.</string>
+    <string name="kitten_challenge_won">¡Michi ronronea a todo volumen! Lo has conseguido.</string>
     <string name="kitten_sleeping">Zzz… toca el micrófono para despertarme.</string>
 
     <string name="kitten_happy_1">Prrr, prrr… oigo los pájaros de fuera.</string>
@@ -22,12 +22,12 @@
     <string name="kitten_ears_2">¡Uy! ¡Estoy todo esponjado! ¿Hacemos silencio?</string>
     <string name="kitten_ears_3">¡Qué ruidazo! ¡Hagamos una pausa tranquila!</string>
 
-    <string name="kitten_asleep">Mochi está dormido</string>
-    <string name="kitten_happy">Mochi está feliz</string>
-    <string name="kitten_fine">Mochi está bien</string>
-    <string name="kitten_worried">Mochi está preocupado</string>
-    <string name="kitten_sad">Mochi está triste</string>
-    <string name="kitten_ears">Mochi está asustado, con el pelo erizado</string>
+    <string name="kitten_asleep">Michi está dormido</string>
+    <string name="kitten_happy">Michi está feliz</string>
+    <string name="kitten_fine">Michi está bien</string>
+    <string name="kitten_worried">Michi está preocupado</string>
+    <string name="kitten_sad">Michi está triste</string>
+    <string name="kitten_ears">Michi está asustado, con el pelo erizado</string>
     <!-- TODO review translation -->
     <string name="kitten_tap_1">Prrr, prrr… qué agradable.</string>
     <string name="kitten_tap_2">Prrr… las caricias suaves son mis favoritas.</string>

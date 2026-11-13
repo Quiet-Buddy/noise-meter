@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="style_buddy_sunny">Buddy Soleado</string>
-    <string name="style_buddy_mint">Buddy Menta</string>
-    <string name="style_buddy_berry">Buddy Frambuesa</string>
-    <string name="style_kitten_ginger">Mochi Naranja</string>
-    <string name="style_kitten_grey">Mochi Gris</string>
-    <string name="style_kitten_snow">Mochi Nieve</string>
+    <string name="style_buddy_sunny">Compi Soleado</string>
+    <string name="style_buddy_mint">Compi Menta</string>
+    <string name="style_buddy_berry">Compi Frambuesa</string>
+    <string name="style_kitten_ginger">Michi Naranja</string>
+    <string name="style_kitten_grey">Michi Gris</string>
+    <string name="style_kitten_snow">Michi Nieve</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, bloqueado. %2$s</string>
