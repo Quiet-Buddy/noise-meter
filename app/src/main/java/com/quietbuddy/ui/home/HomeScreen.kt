@@ -192,20 +192,30 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
     }
     // Everything below the status chip: wake prompt and the reward strip.
     val details: @Composable () -> Unit = {
-        if (!listening) {
-            NotListeningMessage(state.listening)
-            Spacer(Modifier.height(12.dp))
-            DarkButton(text = stringResource(R.string.home_wake_buddy), onClick = ::wake)
-            Spacer(Modifier.height(16.dp))
+        // The wake prompt takes the tiles' place instead of sitting above them, so the layout (and Buddy's
+        // size) is identical whether or not we're listening. The tiles stay in the layout, invisible, to keep the height.
+        Box(Modifier.fillMaxWidth()) {
+            val hidden = if (listening) Modifier else Modifier.alpha(0f).clearAndSetSemantics {}
+            Box(hidden) {
+                ProgressTiles(
+                    calmMinutes = state.calmMinutes,
+                    reward = state.nextReward,
+                    styles = state.styles,
+                    minutesToNext = state.minutesToNext,
+                    progress = state.nextRewardProgress,
+                    onClick = onOpenCharacters,
+                )
+            }
+            if (!listening) {
+                Column(
+                    Modifier.matchParentSize().pointerInput(Unit) {},
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    NotListeningMessage(state.listening)
+                    DarkButton(text = stringResource(R.string.home_wake_buddy), onClick = ::wake)
+                }
+            }
         }
-        ProgressTiles(
-            calmMinutes = state.calmMinutes,
-            reward = state.nextReward,
-            styles = state.styles,
-            minutesToNext = state.minutesToNext,
-            progress = state.nextRewardProgress,
-            onClick = onOpenCharacters,
-        )
     }
     val stage: @Composable (Dp) -> Unit = { size ->
         SpeechBubble(text = stringResource(state.speechLine))
