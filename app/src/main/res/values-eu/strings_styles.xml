@@ -6,6 +6,9 @@
     <string name="style_kitten_ginger">Mixi Laranja</string>
     <string name="style_kitten_grey">Mixi Grisa</string>
     <string name="style_kitten_snow">Mixi Elurra</string>
+    <string name="style_duck_lemon">Txito Limoia</string>
+    <string name="style_duck_cloud">Txito Hodeia</string>
+    <string name="style_duck_hazel">Txito Hurra</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, blokeatuta. %2$s</string>
@@ -54,6 +57,10 @@
     <string name="acc_top_hat">Kapela altua</string>
     <string name="acc_boots">Katiuskak</string>
     <string name="acc_crown">Koroa</string>
+    <string name="acc_cap">Bisera</string>
+    <string name="acc_goggles">Igerilari-betaurrekoak</string>
+    <string name="acc_bandana">Zapia</string>
+    <string name="acc_swim_ring">Flotagailua</string>
 
     <plurals name="accessory_next_hint">
         <item quantity="one">Minutu lasai %1$d falta da %2$s desblokeatzeko</item>

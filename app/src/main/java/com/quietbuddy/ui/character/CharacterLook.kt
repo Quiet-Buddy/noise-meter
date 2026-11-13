@@ -9,10 +9,14 @@ import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.character.duck.DuckArt
 import com.quietbuddy.ui.character.kitten.KittenArt
 import com.quietbuddy.ui.theme.BuddyBerryPalette
 import com.quietbuddy.ui.theme.BuddyMintPalette
 import com.quietbuddy.ui.theme.BuddyPalette
+import com.quietbuddy.ui.theme.DuckCloudPalette
+import com.quietbuddy.ui.theme.DuckHazelPalette
+import com.quietbuddy.ui.theme.DuckPalette
 import com.quietbuddy.ui.theme.KittenGreyPalette
 import com.quietbuddy.ui.theme.KittenSnowPalette
 import com.quietbuddy.ui.theme.KittenPalette
@@ -111,11 +115,15 @@ object CharacterLooks {
             CharacterStyle.KITTEN_GINGER -> KittenPalette
             CharacterStyle.KITTEN_GREY -> KittenGreyPalette
             CharacterStyle.KITTEN_SNOW -> KittenSnowPalette
+            CharacterStyle.DUCK_LEMON -> DuckPalette
+            CharacterStyle.DUCK_CLOUD -> DuckCloudPalette
+            CharacterStyle.DUCK_HAZEL -> DuckHazelPalette
         }
         CharacterLook(
             art = when (style.character) {
                 Character.BUDDY -> BuddyArt
                 Character.KITTEN -> KittenArt
+                Character.DUCK -> DuckArt
             },
             palette = palette,
         )

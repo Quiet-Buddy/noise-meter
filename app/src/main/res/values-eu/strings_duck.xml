@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="duck_name">Txito</string>
+    <string name="duck_listening_title">Txito entzuten ari da · %1$s</string>
+    <string name="duck_greeting">Kua! Ni Txito naiz.</string>
+    <string name="duck_challenge_won">Txito zipriztinka ari da! Lortu duzu.</string>
+
+    <string name="duck_sleeping">Zzz… sakatu mikrofonoa ni esnatzeko.</string>
+
+    <string name="duck_happy_1">Kua-kua… urmaela lasai eta geldi dago.</string>
+    <string name="duck_happy_2">Dena lasai dago. Flotatzeko ordua.</string>
+    <string name="duck_happy_3">Ixo, uhinak entzuten ditut. Zer bakea.</string>
+    <string name="duck_fine_1">Ederki. Denak ahopeka berriketan ari dira.</string>
+    <string name="duck_fine_2">Zarata kopuru egokia.</string>
+    <string name="duck_fine_3">Ondo hitz egin, ondo entzun. Kua-kua.</string>
+    <string name="duck_worried_1">Kua? Zarata handitzen ari da hemen.</string>
+    <string name="duck_worried_2">Lumak harrotzen zaizkit. Jaitsi dezakegu bolumena?</string>
+    <string name="duck_worried_3">Jolas dezakegu pixka bat isilago?</string>
+    <string name="duck_sad_1">Kua-kua… ahots baxuan hitz egin dezakegu?</string>
+    <string name="duck_sad_2">Zarata asko da. Hegoak dardarka ditut.</string>
+    <string name="duck_sad_3">Mesedez, lagundu iezadazu isiltasuna aurkitzen.</string>
+    <string name="duck_ears_1">Kua! Zarata handia! Burua estaltzen dut!</string>
+    <string name="duck_ears_2">Ene! Hegoak buru gainean! Isilik egongo gara?</string>
+    <string name="duck_ears_3">Zarata handia! Egin dezagun atsedenaldi isil bat!</string>
+
+    <string name="duck_asleep">Txito lo dago, burua ezkutatuta</string>
+    <string name="duck_happy">Txito pozik dago</string>
+    <string name="duck_fine">Txito ondo dago</string>
+    <string name="duck_worried">Txito kezkatuta dago</string>
+    <string name="duck_sad">Txito triste dago</string>
+    <string name="duck_ears">Txito hegoekin burua estaltzen ari da</string>
+
+    <string name="duck_tap_1">Hihi! Isatsa kilikatzen didazu.</string>
+    <string name="duck_tap_2">Kua-kua… laztan leunak dira nire gogokoenak.</string>
+    <string name="duck_tap_3">Hihi! Mugi, mugi, isatsa!</string>
+    <string name="duck_tap_4">Ixo, flotatu dezagun elkarrekin, ahopeka.</string>
+    <string name="duck_tap_5">Laztan leunak, ahots leunak. Kua-kua.</string>
+</resources>

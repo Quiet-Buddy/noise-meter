@@ -45,5 +45,6 @@ object Voices {
     fun of(character: Character): Voice = when (character) {
         Character.BUDDY -> BuddyVoice
         Character.KITTEN -> KittenVoice
+        Character.DUCK -> DuckVoice
     }
 }

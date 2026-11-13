@@ -1,0 +1,860 @@
+<title>Duck Mood Motion</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@500;700;800&display=swap">
+<style>
+/* Layout: a big stage for the live duckling, mood buttons under it, controls beside it (stacked on phones). */
+:root {
+  --bg: #F4F8FB;
+  --card: #FFFFFF;
+  --ink: #1F2A37;
+  --ink-soft: #5B6B7A;
+  --line: #E3EBF2;
+  --accent: #2E6FBF;
+  --accent-soft: #E7F0FA;
+  --calm: #2E9F6E;   --calm-soft: #DDF3E8;
+  --loud: #C98512;   --loud-soft: #FDE8C4;
+  --too: #D9513F;    --too-soft: #FAD6CF;
+  --sleep: #5A6C8C;  --sleep-soft: #E4E9F3;
+  --font-display: "Baloo 2", "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-body: "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10161D; --card: #18212B; --ink: #E8EEF4; --ink-soft: #9DAEBF; --line: #2A3643;
+    --accent: #86B4EE; --accent-soft: #1F2E40;
+    --calm: #5CC79A; --calm-soft: #CFE7DB; --loud: #E6B04F; --loud-soft: #F3DDB6;
+    --too: #F07D6C; --too-soft: #F1CBC3; --sleep: #9FB0CF; --sleep-soft: #D7DEEA;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10161D; --card: #18212B; --ink: #E8EEF4; --ink-soft: #9DAEBF; --line: #2A3643;
+  --accent: #86B4EE; --accent-soft: #1F2E40;
+  --calm: #5CC79A; --calm-soft: #CFE7DB; --loud: #E6B04F; --loud-soft: #F3DDB6;
+  --too: #F07D6C; --too-soft: #F1CBC3; --sleep: #9FB0CF; --sleep-soft: #D7DEEA;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 32px; margin: 0;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 20px; }
+header { display: grid; gap: 4px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-height: 1.1; margin: 0; text-wrap: balance; }
+.lede { margin: 0; color: var(--ink-soft); max-width: 62ch; }
+.main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 820px) { .main { grid-template-columns: minmax(0, 1fr); } }
+
+.stage {
+  position: relative; border-radius: 28px; background: var(--calm-soft);
+  transition: background-color 500ms ease; aspect-ratio: 1 / 1; max-width: 100%;
+  display: grid; place-items: center; overflow: hidden; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.stage.no-pat { cursor: default; }
+.stage svg { width: 92%; height: 92%; display: block; }
+.stage-tag {
+  position: absolute; left: 16px; top: 14px; font-weight: 800; font-size: 13px; letter-spacing: 0.06em;
+  text-transform: uppercase; color: #3B4A5A; background: rgba(255,255,255,0.7); padding: 4px 10px; border-radius: 999px;
+}
+.stage-caption {
+  position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); max-width: calc(100% - 32px);
+  font-weight: 800; font-size: 15px; color: #2B3846; background: rgba(255,255,255,0.82);
+  padding: 6px 14px; border-radius: 999px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+.moods { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }
+@media (max-width: 560px) { .moods { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.mood {
+  appearance: none; border: 2px solid var(--line); background: var(--card); color: var(--ink);
+  border-radius: 18px; padding: 6px 4px 8px; display: grid; justify-items: center; gap: 0; cursor: pointer;
+  font: 800 13px/1.2 var(--font-body); transition: border-color 150ms, transform 150ms;
+}
+.mood:hover { transform: translateY(-2px); }
+.mood:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.mood[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.mood svg { width: 100%; max-width: 76px; aspect-ratio: 1 / 1; height: auto; }
+.mood .band { font-weight: 700; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+.band.calm { color: var(--calm); } .band.loud { color: var(--loud); } .band.too { color: var(--too); } .band.sleep { color: var(--sleep); }
+.key { color: var(--ink-soft); font-weight: 700; font-size: 11px; }
+
+.panel { background: var(--card); border: 1px solid var(--line); border-radius: 22px; padding: 18px; display: grid; gap: 18px; }
+.panel h2 { font-family: var(--font-display); font-weight: 800; font-size: 19px; margin: 0; line-height: 1.2; }
+.group { display: grid; gap: 10px; }
+.group-title { font-weight: 800; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-soft); }
+.toggle { display: flex; align-items: flex-start; gap: 10px; cursor: pointer; }
+.toggle input { width: 20px; height: 20px; margin: 2px 0 0; accent-color: var(--accent); flex: none; }
+.toggle b { display: block; font-weight: 800; }
+.toggle span { color: var(--ink-soft); font-size: 13.5px; }
+.slider { display: grid; gap: 2px; }
+.slider-head { display: flex; justify-content: space-between; gap: 8px; font-weight: 800; }
+.slider-head output { font-variant-numeric: tabular-nums; color: var(--accent); }
+.slider input { width: 100%; accent-color: var(--accent); }
+.slider small { color: var(--ink-soft); font-size: 13px; }
+.btn {
+  appearance: none; border: 0; border-radius: 14px; padding: 11px 16px; font: 800 15px var(--font-body);
+  background: var(--accent); color: var(--card); cursor: pointer;
+}
+.btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+.btn.secondary { background: var(--accent-soft); color: var(--accent); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.hint { color: var(--ink-soft); font-size: 13.5px; }
+.styles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.style {
+  appearance: none; border: 2px solid var(--line); background: var(--card); color: var(--ink); border-radius: 14px;
+  padding: 8px 6px; display: grid; justify-items: center; gap: 4px; cursor: pointer; font: 800 13px/1.2 var(--font-body);
+}
+.style:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+.style[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+.swatch { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #4A3312; }
+.style small { color: var(--ink-soft); font-weight: 700; font-size: 11px; }
+.notes { display: grid; gap: 6px; margin: 0; padding-left: 18px; color: var(--ink-soft); font-size: 14px; }
+.notes b { color: var(--ink); }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Duck mood motion</h1>
+    <p class="lede">Meet Pip the duck (Pío in Spanish, Txito in Basque), floating on her pond. Tap a mood and watch her move into it, in any order. When the room is calm, tap Pip (or press P) to pat her. Number keys 1–6 switch moods.</p>
+  </header>
+
+  <div class="main">
+    <div class="group">
+      <div class="stage" id="stage">
+        <span class="stage-tag" id="stageTag">Calm</span>
+        <svg id="duck" viewBox="-10 -14 220 220" role="img" aria-label="Duckling"></svg>
+        <span class="stage-caption" id="caption" hidden></span>
+      </div>
+      <div class="moods" id="moods"></div>
+    </div>
+
+    <aside class="panel">
+      <div class="group">
+        <h2>Pat Pip</h2>
+        <div class="row">
+          <button class="btn" id="patBtn" type="button">Pat</button>
+          <span class="hint" id="patHint">Pat quickly for a combo.</span>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Noisy room demo</h2>
+        <p class="lede" style="font-size:14px">Plays a made-up classroom hour: quiet, chatter, a sudden bang, settling down, and lights out.</p>
+        <div class="row">
+          <button class="btn" id="playBtn" type="button">Play demo</button>
+          <button class="btn secondary" id="stopBtn" type="button" hidden>Stop</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Style</div>
+        <div class="styles" id="styles"></div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Accessories</div>
+        <label class="toggle"><input type="checkbox" class="acc" value="cap"><div><b>Backwards cap</b><span>Head · 900 calm minutes</span></div></label>
+        <label class="toggle"><input type="checkbox" class="acc" value="goggles"><div><b>Swim goggles</b><span>Face · 1,200 calm minutes</span></div></label>
+        <label class="toggle"><input type="checkbox" class="acc" value="bandana"><div><b>Bandana</b><span>Neck · 1,350 calm minutes</span></div></label>
+        <label class="toggle"><input type="checkbox" class="acc" value="ring"><div><b>Swim ring</b><span>Body · 1,400 calm minutes</span></div></label>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Motion</div>
+        <label class="toggle"><input type="checkbox" id="blend" checked><div><b>Blend between moods</b><span>Turn off to see an instant swap with a bounce.</span></div></label>
+        <label class="toggle"><input type="checkbox" id="idle" checked><div><b>Idle movement</b><span>Blinking, floating, paddling, head bobs, tail wags, wing flaps, shivering.</span></div></label>
+        <label class="toggle"><input type="checkbox" id="slow"><div><b>Slow motion</b><span>Everything at ¼ speed, to inspect a transition.</span></div></label>
+      </div>
+
+      <div class="group">
+        <div class="group-title">Transition speed</div>
+        <div class="slider">
+          <div class="slider-head"><label for="upMs">Getting louder</label><output id="upOut" for="upMs">180 ms</output></div>
+          <input type="range" id="upMs" min="60" max="800" step="10" value="180">
+          <small>Fast: the wings snap up over the sides of her head.</small>
+        </div>
+        <div class="slider">
+          <div class="slider-head"><label for="downMs">Calming down</label><output id="downOut" for="downMs">900 ms</output></div>
+          <input type="range" id="downMs" min="200" max="2500" step="50" value="900">
+          <small>Feathers settle slowly; the face recovers first, the head last.</small>
+        </div>
+        <div class="slider">
+          <div class="slider-head"><label for="sleepMs">Falling asleep / waking</label><output id="sleepOut" for="sleepMs">1400 ms</output></div>
+          <input type="range" id="sleepMs" min="300" max="3000" step="50" value="1400">
+          <small>Eyes close last when falling asleep, open first when waking.</small>
+        </div>
+      </div>
+
+      <div class="group">
+        <div class="group-title">What changes</div>
+        <ul class="notes">
+          <li><b>Head</b> tilts up and bobs when happy, stretches up when worried, droops when sad and tucks in to sleep.</li>
+          <li><b>Wings</b> flap when happy, hang when sad, and clamp over both sides of her head when too loud.</li>
+          <li><b>Feathers</b> ruffle and shiver when it gets too loud.</li>
+          <li><b>Tail</b> perks up and wags when happy or patted, droops when sad.</li>
+          <li><b>Bill</b> opens in a smile or a quack and droops when she’s unhappy; tears, sweat, sparkles and Z’s fade in.</li>
+          <li><b>Water</b>: she bobs on the pond, ripples spread out and her feet paddle underneath, faster when she’s upset.</li>
+        </ul>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+(() => {
+'use strict';
+
+// ---------- palette (character art stays the same in both themes) ----------
+// Pip is lemon by default; Cloud (white) and Hazel (a mallard hen) are the two unlockable styles.
+// Optional parts: head, headShade, headShine (a different head colour), crown, eyeStripe, mottle, billSaddle,
+// speculum (the blue wing feather), tail, tailLine, bill, billLow, billTip, feet, cheek (cheek blush strength).
+const STYLES = {
+  lemon:     { name: 'Lemon',     body: '#FFD43B', wing: '#F9C21F', shade: '#E2A400', belly: '#FFF1A6', unlock: 'Free with Pip' },
+  cloud:     { name: 'Cloud',     body: '#FBF8EF', wing: '#ECE5D3', shade: '#CDC3AA', belly: '#FFFFFF', unlock: '1,050 calm minutes' },
+  hazel:     { name: 'Hazel',     body: '#C9A57A', wing: '#A9845A', shade: '#8C6A45', belly: '#E6CDA8',
+               head: '#C29D70', headShade: '#9C774C', headShine: '#EBD6B4', crown: '#7A5A38', eyeStripe: '#5A4128',
+               mottle: '#8A6540', billSaddle: '#4A3A2A', speculum: '#3F6FD8', tail: '#B89468', tailLine: '#8A6540',
+               bill: '#EE8F30', billLow: '#CF7621', billTip: '#3D2B10', feet: '#F28C28', cheek: 0.7, unlock: '1,500 calm minutes' },
+};
+let S = STYLES.lemon;
+const BILL = { bill: '#FF9A1F', billLow: '#F07A12', billTip: '#E8780E' };
+const C = {
+  outline: '#3D2B10', ...BILL, nostril: '#9A4A0A',
+  cheek: '#FF9AA8', blush: '#F07A8C', tear: '#8FC8FF', mouth: '#7A3240', tongue: '#FF7A8A', eye: '#2B1E10', eyeLow: '#6B4A2C',
+  loud: '#D9513F', spark: '#FFE36B', bubble: '#DFF1FF', heart: '#FF6B8B', water: '#5E9BD1',
+};
+
+const f = n => (Math.round(n * 10) / 10).toString();
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const smooth = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+const rot = (x, y, deg, cx, cy) => {
+  const r = deg * Math.PI / 180, c = Math.cos(r), s = Math.sin(r);
+  return [cx + (x - cx) * c - (y - cy) * s, cy + (x - cx) * s + (y - cy) * c];
+};
+const pt = p => `${f(p[0])} ${f(p[1])}`;
+
+// ---------- geometry ----------
+// Three-quarter view, facing right. The body is drawn in its own units and scaled about the waterline (100,174);
+// the head is drawn around (112,64) with radius 38 and then scaled, tilted and moved into place.
+const DUCK = { headR: 43, headC: [114, 68], body: 1.0, bill: 1.0 };
+const HK = DUCK.headR / 38;
+// Folded wing (body units) and the same wing raised over the near side of the head (head units, first and last
+// points in body units). Equal point counts, so one blends into the other.
+const WING_REST = [[128,132], [108,112], [78,122], [60,128], [46,134], [54,138], [58,139], [52,144], [49,149], [58,150], [63,149], [59,154], [58,160], [70,162], [80,162], [110,166], [128,136]];
+const WING_COVER = [['b',126,132], [68,112], [60,80], [56,60], [56,42], [62,44], [64,42], [62,34], [66,30], [72,34], [74,32], [74,26], [78,22], [86,26], [86,36], [88,80], ['b',130,136]];
+// Far wing: hidden behind the body until it rises behind the head.
+const FAR_REST = [[140,126], [130,118], [110,122], [90,128], [100,140], [120,146], [140,134]];
+const FAR_COVER = [['b',150,124], [162,100], [168,70], [170,40], [152,22], [140,36], [146,96]];
+// Closed-eye strokes relative to each eye: x in eye half-widths, y in units. The far eye mirrors x.
+const CLOSED = {
+  happy:   [-1,3, 0,-9, 1,3],
+  sleep:   [-1,0, 0,8, 1,0],
+  squeeze: [-0.85,-7, 1.4,0, -0.85,7],
+};
+const EYES = [{ cx: 98, cy: 58, rx: 9.5, ry: 12.5, dir: 1 }, { cx: 136, cy: 55, rx: 7.4, ry: 12, dir: -1 }];
+const BROWS = {
+  none:    { n: [88,38, 98,34, 108,36], f: [128,35, 136,33, 144,35] },
+  worried: { n: [88,40, 98,36, 108,30], f: [128,30, 136,34, 144,38] },
+  sad:     { n: [88,44, 98,37, 108,29], f: [128,29, 136,35, 144,42] },
+};
+
+// ---------- poses: every mood is just numbers ----------
+const FINE = {
+  // body group
+  poof: 0, sway: 1.5, swayHz: 0.3, shake: 0, tailDroop: 0, tailWag: 2, tailHz: 0.8,
+  wing: 0, cover: 0, flap: 0, flapHz: 1, float: 1.5, floatHz: 0.4, paddle: 0.6, breathe: 0,
+  // head group
+  headDx: 0, headDy: 0, tilt: 0, twitch: 0.12, nod: 1.2, nodHz: 0.5,
+  // face group
+  open: 1, eyeScale: 1, closed: CLOSED.sleep, closedW: 3.4, lashes: 0, blink: 1,
+  browA: 0, browN: BROWS.none.n, browF: BROWS.none.f, smile: 0.35, mouthOpen: 0, cheek: 0.6,
+  sparkle: 0, sweat: 0, well: 0, tearDrop: 0, zzz: 0, bubble: 0, shock: 0,
+};
+const P = o => Object.assign({}, FINE, o);
+const POSES = {
+  happy: P({ sway: 3, swayHz: 0.6, tailDroop: -6, tailWag: 4, tailHz: 2.4, wing: 6, flap: 14, flapHz: 1.6,
+             float: 2.2, floatHz: 0.8, paddle: 1.5, headDy: -3, tilt: -6, nod: 2.5, nodHz: 1.4,
+             open: 0, closed: CLOSED.happy, closedW: 3.6, blink: 0, smile: 1, mouthOpen: 0.7, cheek: 0.9, sparkle: 1 }),
+  fine: P({}),
+  worried: P({ sway: 1.5, swayHz: 1.4, tailWag: 1, tailHz: 3, wing: -2, float: 1, floatHz: 0.9, paddle: 1,
+               headDx: -2, headDy: -5, twitch: 0.6, nod: 0.8, nodHz: 1.2,
+               eyeScale: 0.88, browA: 1, browN: BROWS.worried.n, browF: BROWS.worried.f,
+               smile: -0.45, mouthOpen: 0.1, cheek: 0.35, sweat: 1 }),
+  sad: P({ sway: 0.8, swayHz: 0.2, tailDroop: 13, tailWag: 0.3, tailHz: 0.4, wing: -8, float: 0.8, floatHz: 0.25, paddle: 0.2,
+           headDx: 4, headDy: 7, tilt: 10, twitch: 0.03, nod: 0.5, nodHz: 0.3,
+           browA: 1, browN: BROWS.sad.n, browF: BROWS.sad.f, smile: -1, cheek: 0.35, well: 1, tearDrop: 1 }),
+  covered: P({ poof: 1, sway: 0, shake: 1, tailWag: 0, cover: 1, float: 0.5, floatHz: 2, paddle: 2.2,
+               headDy: 6, tilt: 3, twitch: 0, nod: 0,
+               open: 0, closed: CLOSED.squeeze, closedW: 3.6, blink: 0, smile: -0.6, mouthOpen: 0.3,
+               cheek: 0.5, sweat: 1, shock: 1 }),
+  asleep: P({ sway: 0.8, swayHz: 0.15, tailDroop: 8, tailWag: 0, wing: -2, float: 1, floatHz: 0.25, paddle: 0, breathe: 1,
+              headDx: -2, headDy: 10, tilt: 14, twitch: 0.03, nod: 0.6, nodHz: 0.25,
+              open: 0, closed: CLOSED.sleep, closedW: 3.4, lashes: 1, blink: 0, smile: 0.2,
+              cheek: 0.5, bubble: 1, zzz: 1 }),
+};
+// The face a pat puts on, blended over the calm moods.
+const PAT_FACE = { open: 0, closed: CLOSED.happy, closedW: 3.6, blink: 0, smile: 1, mouthOpen: 1, cheek: 1 };
+
+const MOODS = [
+  { key: 'happy',   label: 'Happy',    band: 'calm',  bandLabel: 'Calm',     level: 0 },
+  { key: 'fine',    label: 'Fine',     band: 'calm',  bandLabel: 'Calm',     level: 1 },
+  { key: 'worried', label: 'Worried',  band: 'loud',  bandLabel: 'Loud',     level: 2 },
+  { key: 'sad',     label: 'Sad',      band: 'too',   bandLabel: 'Too loud', level: 3 },
+  { key: 'covered', label: 'Too loud', band: 'too',   bandLabel: 'Too loud', level: 4 },
+  { key: 'asleep',  label: 'Asleep',   band: 'sleep', bandLabel: 'Paused',   level: -1 },
+];
+const BY_KEY = Object.fromEntries(MOODS.map(m => [m.key, m]));
+
+// Which part of the body each number belongs to, so parts can move at different moments.
+const BODY_KEYS = ['poof', 'sway', 'swayHz', 'shake', 'tailDroop', 'tailWag', 'tailHz', 'wing', 'cover', 'flap', 'flapHz', 'float', 'floatHz', 'paddle', 'breathe'];
+const HEAD_KEYS = ['headDx', 'headDy', 'tilt', 'twitch', 'nod', 'nodHz'];
+const groupOf = k => (BODY_KEYS.includes(k) ? 'body' : HEAD_KEYS.includes(k) ? 'head' : 'face');
+// [start, end] of each part's movement, as a fraction of the transition.
+const WINDOWS = {
+  louder: { body: [0, 1],    head: [0, 0.7],   face: [0, 0.6] },
+  calmer: { body: [0, 1],    head: [0.2, 1],   face: [0, 0.55] },
+  sleep:  { body: [0, 0.9],  head: [0.1, 0.8], face: [0.35, 1] },
+  wake:   { body: [0.25, 1], head: [0.15, 0.8], face: [0, 0.45] },
+};
+const EASE = {
+  louder: t => 1 - Math.pow(1 - t, 3),
+  calmer: t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2),
+  sleep:  t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2),
+  wake:   t => 1 - Math.pow(1 - t, 2),
+};
+
+function lerpPose(a, b, tFor) {
+  const out = Object.assign({}, a);
+  for (const k in b) {
+    const t = tFor(k);
+    if (Array.isArray(b[k])) out[k] = b[k].map((v, i) => lerp(a[k][i], v, t));
+    else out[k] = lerp(a[k], b[k], t);
+  }
+  return out;
+}
+const clonePose = p => JSON.parse(JSON.stringify(p));
+
+// ---------- drawing helpers ----------
+let SW = 1;   // stroke scale, so outlines keep one width inside scaled groups
+const path = (d, fill, w = 4, extra = '') =>
+  `<path d="${d}" fill="${fill}" stroke="${C.outline}" stroke-width="${f(w * SW)}" stroke-linejoin="round" stroke-linecap="round" ${extra}/>`;
+const fillPath = (d, fill, extra = '') => `<path d="${d}" fill="${fill}" ${extra}/>`;
+const ink = (d, w = 4, color = C.outline, extra = '') =>
+  `<path d="${d}" fill="none" stroke="${color}" stroke-width="${f(w * SW)}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+const ell = (cx, cy, rx, ry, fill, stroke = false, w = 4, extra = '') =>
+  `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(Math.max(0, rx))}" ry="${f(Math.max(0, ry))}" fill="${fill}" ${stroke ? `stroke="${C.outline}" stroke-width="${f(w * SW)}"` : ''} ${extra}/>`;
+const op = a => `opacity="${f(clamp(a) * 100) / 100}"`;
+const q1 = p => `M ${f(p[0])} ${f(p[1])} Q ${f(p[2])} ${f(p[3])} ${f(p[4])} ${f(p[5])}`;
+// closed shape through points p0, (control, point)…
+const qPath = pts => `M ${pt(pts[0])}` + Array.from({ length: (pts.length - 1) / 2 }, (_, i) => ` Q ${pt(pts[1 + i * 2])} ${pt(pts[2 + i * 2])}`).join('') + ' Z';
+
+function sparkle(x, y, s, a) {
+  const d = `M ${f(x)} ${f(y - s)} Q ${f(x + s * .18)} ${f(y - s * .18)} ${f(x + s)} ${f(y)} Q ${f(x + s * .18)} ${f(y + s * .18)} ${f(x)} ${f(y + s)} Q ${f(x - s * .18)} ${f(y + s * .18)} ${f(x - s)} ${f(y)} Q ${f(x - s * .18)} ${f(y - s * .18)} ${f(x)} ${f(y - s)} Z`;
+  return path(d, C.spark, 2, op(a));
+}
+function drop(x, y, h, a) {
+  return path(`M ${f(x)} ${f(y)} Q ${f(x + h * .35)} ${f(y + h * .7)} ${f(x)} ${f(y + h)} Q ${f(x - h * .35)} ${f(y + h * .7)} ${f(x)} ${f(y)} Z`, C.tear, 2.2, op(a));
+}
+function heart(x, y, s, a) {
+  const d = `M ${f(x)} ${f(y + s * 0.9)} C ${f(x - s * 1.3)} ${f(y + s * 0.1)} ${f(x - s * 0.6)} ${f(y - s * 0.8)} ${f(x)} ${f(y - s * 0.25)} C ${f(x + s * 0.6)} ${f(y - s * 0.8)} ${f(x + s * 1.3)} ${f(y + s * 0.1)} ${f(x)} ${f(y + s * 0.9)} Z`;
+  return path(d, C.heart, 2.5, op(a));
+}
+function foot(cx, cy, flip, angle) {
+  const s = flip ? -1 : 1;
+  const d = `M ${cx} ${cy - 6} Q ${cx - 4 * s} ${cy + 2} ${cx - 16 * s} ${cy + 6} Q ${cx - 12 * s} ${cy + 10} ${cx - 8 * s} ${cy + 8} Q ${cx - 6 * s} ${cy + 12} ${cx - s} ${cy + 9} Q ${cx + 3 * s} ${cy + 12} ${cx + 5 * s} ${cy + 7} Q ${cx + 4 * s} ${cy} ${cx} ${cy - 6} Z`;
+  return `<g transform="rotate(${f(angle)} ${cx} ${cy - 6})">` + path(d, C.feet, 2.6, 'opacity="0.9"') + '</g>';
+}
+
+// ---------- accessories ----------
+// Each is drawn around an anchor the art supplies (the app's AccessoryAnchors): the top of the head (with the head's
+// tilt and scale), the two eye centres, and the middle of the neck ring.
+const ACC = { cap: '#FFFFFF', capPink: '#F28B8B', capBlue: '#7FB8E8', goggles: '#22A6B3', lens: '#BFE8F2', bandana: '#E2453C', ring: '#E8473F', ringWhite: '#FFFFFF' };
+let WORN = new Set();
+function cap(at, tilt, sc) {
+  // a backwards cap: the crown hugs the top of the head, the peak points back over the nape
+  let o = path('M -36 17 Q -32 -13 0 -15 Q 32 -15 36 13 Q 0 3 -36 17 Z', ACC.cap, 3.4);
+  o += fillPath('M -28 3 Q -22 -9 -8 -12 L -4 7 Q -18 9 -28 11 Z', ACC.capPink);
+  o += fillPath('M 8 -13 Q 26 -9 32 5 L 14 4 Z', ACC.capBlue);
+  o += ink('M -36 17 Q 0 3 36 13', 3.4);
+  o += path('M -32 15 Q -52 17 -62 27 Q -46 29 -28 23 Z', ACC.capBlue, 3.2);
+  o += ell(0, -14, 3.5, 2.5, ACC.capPink, true, 2);
+  o += ink('M -20 -4 Q -14 -10 -6 -11', 2.2, '#FFFFFF', 'opacity="0.8"');
+  return `<g transform="translate(${f(at[0])} ${f(at[1])}) rotate(${f(tilt)}) scale(${f(sc)})">${o}</g>`;
+}
+function goggles(near, far, r, tilt, sc) {
+  // swim goggles: a strap back to the nape, a bridge between the lenses, the far lens narrower (three-quarter view)
+  const band = (d, w) => ink(d, w + 4, C.outline) + ink(d, w, ACC.goggles);
+  const back = [near[0] - 27 * sc, near[1] + 3 * sc], side = [far[0] + 15 * sc, far[1] - 1 * sc];
+  let o = band(`M ${pt(back)} Q ${f(near[0] - r - 6)} ${f(near[1] - 2)} ${f(near[0] - r)} ${f(near[1])}`, 5);
+  o += band(`M ${f(far[0] + r * 0.72)} ${f(far[1])} L ${pt(side)}`, 5);
+  o += band(`M ${f(near[0] + r)} ${f(near[1] - 1)} Q ${f((near[0] + far[0]) / 2)} ${f(near[1] - 5)} ${f(far[0] - r * 0.72)} ${f(far[1] - 1)}`, 3.5);
+  for (const [c, rx] of [[far, r * 0.72], [near, r]]) {
+    // the rim is a ring, so the eyes show through the tinted lens
+    o += ell(c[0], c[1], rx + 1.5, r + 1.5, ACC.lens, false, 0, 'opacity="0.3"');
+    o += ell(c[0], c[1], rx + 1.5, r + 1.5, 'none', false, 0, `stroke="${C.outline}" stroke-width="7.5"`);
+    o += ell(c[0], c[1], rx + 1.5, r + 1.5, 'none', false, 0, `stroke="${ACC.goggles}" stroke-width="4"`);
+    o += ink(`M ${f(c[0] - rx * 0.45)} ${f(c[1] + r * 0.1)} Q ${f(c[0] - rx * 0.4)} ${f(c[1] - r * 0.45)} ${f(c[0])} ${f(c[1] - r * 0.55)}`, 2.6, '#FFFFFF', 'opacity="0.85"');
+  }
+  return o;
+}
+// a striped swim ring floating at the waterline: its back half goes behind the body, its front half in front
+function ringHalf(front) {
+  // a fat tube hugging the body: its middle line runs just outside the body's sides
+  const cx = 99, cy = 166, rx = 70, ry = 14;
+  const d = front ? `M ${cx - rx} ${cy} A ${rx} ${ry} 0 0 0 ${cx + rx} ${cy}` : `M ${cx - rx} ${cy} A ${rx} ${ry} 0 0 1 ${cx + rx} ${cy}`;
+  let o = ink(d, 25, C.outline) + ink(d, 19.5, ACC.ringWhite) + ink(d, 19.5, ACC.ring, 'stroke-dasharray="22 22" stroke-linecap="butt"');
+  if (front) o += ink(`M ${cx - rx * 0.72} ${cy + ry * 0.35} A ${rx} ${ry} 0 0 0 ${cx - rx * 0.12} ${cy + ry * 0.62}`, 3, '#FFFFFF', 'opacity="0.75"');
+  return o;
+}
+function bandana(c) {
+  // a red polka-dot bandana knotted at the back, its point hanging over the chest
+  let o = ink(`M ${f(c[0] - 24)} ${f(c[1] - 4)} Q ${f(c[0])} ${f(c[1] + 6)} ${f(c[0] + 24)} ${f(c[1] - 4)}`, 11, C.outline)
+    + ink(`M ${f(c[0] - 24)} ${f(c[1] - 4)} Q ${f(c[0])} ${f(c[1] + 6)} ${f(c[0] + 24)} ${f(c[1] - 4)}`, 6.5, ACC.bandana);
+  o += path(`M ${f(c[0] - 26)} ${f(c[1] - 3)} L ${f(c[0] - 36)} ${f(c[1] + 4)} L ${f(c[0] - 27)} ${f(c[1] + 7)} Z M ${f(c[0] - 25)} ${f(c[1] - 2)} L ${f(c[0] - 31)} ${f(c[1] + 11)} L ${f(c[0] - 22)} ${f(c[1] + 8)} Z`, ACC.bandana, 2.8);
+  o += path(`M ${f(c[0] - 4)} ${f(c[1] + 1)} Q ${f(c[0] + 10)} ${f(c[1] + 5)} ${f(c[0] + 24)} ${f(c[1] - 3)} L ${f(c[0] + 14)} ${f(c[1] + 22)} Z`, ACC.bandana, 3.2);
+  for (const [dx, dy] of [[4, 6], [14, 5], [12, 13], [-10, 2.5], [-18, 0]]) o += ell(c[0] + dx, c[1] + dy, 1.7, 1.7, '#FFFFFF');
+  return o;
+}
+
+// ---------- one full frame ----------
+function render(p, fx) {
+  const t = fx.time, idle = fx.idle;
+  const tremble = idle ? p.shake : 0;
+  const rock = idle ? p.sway * Math.sin(t * Math.PI * 2 * p.swayHz) : 0;
+  const floatY = idle ? p.float * Math.sin(t * Math.PI * 2 * p.floatHz) : 0;
+  const wagHz = p.tailHz + fx.patWag * 3;
+  const wag = idle ? (p.tailWag + fx.patWag * 6) * Math.sin(t * Math.PI * 2 * wagHz) : 0;
+  const flap = idle ? p.flap * (0.5 + 0.5 * Math.sin(t * Math.PI * 2 * p.flapHz)) : 0;
+  const nod = idle ? p.nod * Math.sin(t * Math.PI * 2 * p.nodHz) : 0;
+  const kick = idle ? 16 * Math.sin(t * Math.PI * 2 * p.paddle) * clamp(p.paddle) : 0;
+  const cover = smooth(0, 1, p.cover);
+  const head = S.head || S.body, headShade = S.headShade || S.shade, headShine = S.headShine || S.belly;
+  Object.assign(C, BILL, S.bill ? { bill: S.bill, billLow: S.billLow, billTip: S.billTip } : {});
+  C.feet = S.feet || C.bill;
+  const s = DUCK.body, k = HK, L = DUCK.bill;
+  const B = (x, y) => [100 + (x - 100) * s, 174 + (y - 174) * s];
+  const hc = [DUCK.headC[0] + p.headDx, DUCK.headC[1] + p.headDy + nod * 0.8];
+  const tilt = p.tilt + fx.twitch;
+  const Hm = (x, y) => { const r = rot((x - 112) * k, (y - 64) * k, tilt, 0, 0); return [hc[0] + r[0], hc[1] + r[1]]; };
+  const at = q => (q[0] === 'b' ? B(q[1], q[2]) : Hm(q[0], q[1]));
+  const headT = `translate(${f(hc[0])} ${f(hc[1])}) rotate(${f(tilt)}) scale(${k.toFixed(4)}) translate(-112 -64)`;
+  const bodyT = `translate(100 174) scale(${s}) translate(-100 -174)`;
+  const bx = x => 114 + (x - 114) * L;
+  let o = '';
+
+  // water behind: ripples spreading out, and webbed feet paddling below the surface
+  let water = '';
+  for (const ph0 of [0, 0.5]) {
+    const ph = idle ? (t * 0.3 + ph0) % 1 : 0.3 + ph0;
+    water += ell(100, 176, 76 + 22 * ph, 6 + 3.5 * ph, 'none', false, 0, `stroke="${C.water}" stroke-width="2.5" ${op((1 - ph) * 0.7)}`);
+  }
+  water += foot(76, 186, false, kick) + foot(126, 188, true, -kick);
+  water += ell(100, 184, 76, 12, C.water, false, 0, 'opacity="0.16"');
+
+  if (WORN.has('ring')) o += ringHalf(false);
+  // far wing: tucked behind the body, rising behind the head when it gets too loud
+  if (cover > 0.02) {
+    const fw = FAR_REST.map((q, i) => { const a = B(q[0], q[1]), b = at(FAR_COVER[i]); return [lerp(a[0], b[0], cover), lerp(a[1], b[1], cover)]; });
+    o += path(qPath(fw), S.wing, 3.5);
+  }
+
+  // body with the pointed rubber-duck tail
+  SW = 1 / s;
+  const td = p.tailDroop + wag;
+  const bodyD = `M 84 118 Q 64 124 48 116 Q 34 ${f(108 + td * 0.5)} ${f(24 - td * 0.25)} ${f(96 + td)} Q 22 ${f(118 + td * 0.5)} 32 140 C 36 166 56 174 76 174 L 126 174 C 168 174 178 134 148 116 Q 118 108 84 118 Z`;
+  let b = path(bodyD, S.body, 3.5);
+  b += fillPath('M 40 162 Q 100 184 162 160 Q 100 172 40 162 Z', S.shade, 'opacity="0.45"');
+  if (S.tail) {
+    // the tail fill; the body outline is drawn again on top below
+    b += fillPath(`M 52 117 Q 34 ${f(108 + td * 0.5)} ${f(24 - td * 0.25)} ${f(96 + td)} Q 22 ${f(118 + td * 0.5)} 32 140 Q 38 126 52 117 Z`, S.tail);
+  }
+  b += ell(70, 128, 18, 4.5, S.belly, false, 0, 'opacity="0.6" transform="rotate(-12 70 128)"');
+  b += ell(142, 148, 17, 13, S.belly, false, 0, 'opacity="0.8"');
+  if (S.mottle) b += ink('M 60 140 l 4 4 l 4 -4 M 76 148 l 4 4 l 4 -4 M 96 154 l 4 4 l 4 -4 M 66 160 l 4 4 l 4 -4 M 86 164 l 4 4 l 4 -4 M 112 162 l 4 4 l 4 -4 M 126 150 l 4 4 l 4 -4 M 50 128 l 3 3 l 3 -3 M 138 160 l 3 3 l 3 -3', 2, S.mottle, 'opacity="0.8"');
+  b += ink(`M 46 122 Q 36 ${f(112 + td * 0.6)} ${f(30 - td * 0.15)} ${f(102 + td * 0.9)} M 40 132 Q 32 ${f(122 + td * 0.4)} ${f(28 - td * 0.1)} ${f(114 + td * 0.6)}`, 2.2, S.tailLine || S.shade);
+  b += ink('M 140 136 q 4 4 8 0 M 150 146 q 4 4 8 0 M 138 150 q 4 4 8 0 M 150 160 q 4 3 8 -1', 2, S.shade, 'opacity="0.8"');
+  if (S.tail) b += ink(bodyD, 3.5);
+  b += ell(118, 122, 30, 6, S.shade, false, 0, 'opacity="0.35"');
+  if (p.poof > 0.02) b += ink('M 52 116 L 46 106 M 66 120 L 63 109 M 40 112 L 32 104', 3, C.outline, op(p.poof));
+  o += `<g transform="${bodyT}">${b}</g>`;
+  SW = 1;
+
+  // head: nape feathers peek out behind the round head; a short neck joins it to the body
+  SW = 1 / k;
+  o += `<g transform="${headT}">` + path('M 78 72 Q 70 72 67 77 Q 72 79 76 80 Q 71 84 71 89 Q 77 87 80 84 Z', head, 3)
+    + ell(112, 64, 38, 38, head, true, 3.5) + '</g>';
+  SW = 1;
+  const nb = B(88, 118), nf = B(144, 115);
+  const onH = (deg, r) => Hm(112 + r * Math.cos(deg), 64 + r * Math.sin(deg));
+  const hb = onH(2.09, 38), hf = onH(1.05, 38), hbi = onH(2.09, 26), hfi = onH(1.05, 26);
+  if (hb[1] < nb[1] - 4) {
+    const cb = [(nb[0] + hb[0]) / 2 - 2, (nb[1] + hb[1]) / 2], cf = [(nf[0] + hf[0]) / 2 + 2, (nf[1] + hf[1]) / 2 + 2];
+    // the fill reaches a little into the body to hide the body's outline under the neck
+    // the part inside the body takes the body colour; the neck itself takes the head colour
+    o += fillPath(`M ${f(nb[0])} ${f(nb[1] + 8)} L ${pt(nb)} L ${pt(nf)} L ${f(nf[0])} ${f(nf[1] + 8)} Z`, S.body);
+    o += fillPath(`M ${pt(nb)} Q ${pt(cb)} ${pt(hb)} L ${pt(hbi)} L ${pt(hfi)} L ${pt(hf)} Q ${pt(cf)} ${pt(nf)} Q ${pt(B(118, 109))} ${pt(nb)} Z`, head);
+    o += ink(`M ${pt(nb)} Q ${pt(cb)} ${pt(hb)} M ${pt(hf)} Q ${pt(cf)} ${pt(nf)}`, 3.5);
+  }
+  const ringMid = B(118, 109), collar = [0.25 * nb[0] + 0.5 * ringMid[0] + 0.25 * nf[0], 0.25 * nb[1] + 0.5 * ringMid[1] + 0.25 * nf[1]];
+  if (WORN.has('bandana')) o += bandana(collar);
+
+  // face, in head units
+  SW = 1 / k;
+  let h = '';
+  h += fillPath('M 75.5 70 Q 78 97 106 101.5 Q 86 94 81 70 Z', headShade, 'opacity="0.3"');
+  if (S.crown) h += fillPath('M 80 44 Q 92 26 114 26 Q 138 27 148 46 Q 118 34 80 44 Z', S.crown, 'opacity="0.85"');
+  if (S.eyeStripe) h += ink('M 75 60 Q 84 58 89 58 M 107 60 Q 111 66 113 74', 4, S.eyeStripe, 'opacity="0.9"');
+  h += ell(92, 36, 9, 4.5, headShine, false, 0, 'opacity="0.85" transform="rotate(-35 92 36)"') + ell(81, 46, 2.4, 2.4, headShine, false, 0, 'opacity="0.8"');
+  const cheekA = p.cheek * (S.cheek ?? 1);
+  h += ell(90, 80, 8.5, 5.5, C.cheek, false, 0, op(cheekA));
+  h += ink('M 86 78.5 L 84 82 M 90.5 78.5 L 88.5 82 M 95 78.5 L 93 82', 1.5, C.blush, op(cheekA));
+  if (p.browA > 0.02) h += ink(q1(p.browN), 3.2, C.outline, op(p.browA)) + ink(q1(p.browF), 3, C.outline, op(p.browA));
+  // eyes: the open eye, then the closed stroke for blinks and closed-eye moods
+  const effOpen = p.open * (1 - p.blink * fx.blink);
+  const ca = 1 - smooth(0.08, 0.4, effOpen);
+  const shape = p.open > 0.5 ? CLOSED.sleep : p.closed;
+  EYES.forEach((e, i) => {
+    const rx = e.rx * p.eyeScale, ry = e.ry * p.eyeScale, w = rx + 1;
+    if (effOpen > 0.03) {
+      const oy = ry * effOpen, ha = smooth(0.45, 0.8, effOpen);
+      h += ell(e.cx, e.cy, rx, oy, C.eye);
+      h += fillPath(`M ${f(e.cx - rx + 1.2)} ${f(e.cy + 2 * effOpen)} Q ${f(e.cx)} ${f(e.cy + oy + 2.5)} ${f(e.cx + rx - 1.2)} ${f(e.cy + 2 * effOpen)} Q ${f(e.cx)} ${f(e.cy + oy - 3 * effOpen)} ${f(e.cx - rx + 1.2)} ${f(e.cy + 2 * effOpen)} Z`, C.eyeLow);
+      h += ell(e.cx + rx * 0.3, e.cy - oy * 0.35, rx * 0.42, oy * 0.32, '#FFFFFF', false, 0, op(ha));
+      h += ell(e.cx - rx * 0.35, e.cy + oy * 0.4, rx * 0.2, oy * 0.15, '#FFFFFF', false, 0, op(ha));
+      h += ell(e.cx - rx * 0.45, e.cy - oy * 0.45, rx * 0.12, rx * 0.12 * effOpen, '#FFFFFF', false, 0, op(ha * 0.8));
+    }
+    if (ca > 0.02) {
+      const c = shape.map((v, j) => (j % 2 === 0 ? e.cx + v * w * e.dir : e.cy + v));
+      h += ink(q1(c), p.closedW, C.outline, op(ca));
+    }
+    if (p.lashes > 0.02) {
+      const x0 = e.cx - w * e.dir;
+      h += ink(`M ${f(x0 + 2 * e.dir)} ${f(e.cy + 3)} L ${f(x0 - 2 * e.dir)} ${f(e.cy + 7)}`, 2.2, C.outline, op(p.lashes));
+    }
+  });
+  if (p.well > 0.02) h += fillPath('M 89 70 Q 98 79 107 70 Q 98 74 89 70 Z', C.tear, op(0.9 * p.well * smooth(0.3, 0.8, effOpen)));
+  if (p.tearDrop > 0.02) {
+    const ph = idle ? (t * 0.55) % 1 : 0.3;
+    h += drop(103, 74 + ph * 14, 12, p.tearDrop * (1 - smooth(0.75, 1, ph)) * smooth(0.3, 0.8, effOpen));
+  }
+  // bill: the lower half swings open under the wide flat upper half; the whole bill droops when unhappy
+  const ang = p.mouthOpen * 20, droop = Math.max(0, -p.smile) * 7;
+  const tip = rot(bx(164), 92, ang, 116, 86);
+  h += `<g transform="rotate(${f(droop)} 113 82)">`;
+  if (p.mouthOpen > 0.02) {
+    h += fillPath(`M 116 86 L ${f(bx(166))} 88 L ${pt(tip)} Z`, C.mouth);
+    h += ell(bx(132), 90 + 3 * p.mouthOpen, 9 * L, 3 * p.mouthOpen, C.tongue, false, 0, `transform="rotate(${f(ang * 0.5)} 116 86)"`);
+  }
+  h += `<g transform="rotate(${f(ang)} 116 86)">` + path(`M 116 86 Q ${f(bx(140))} 91 ${f(bx(164))} 88 Q ${f(bx(165))} 94 ${f(bx(146))} 95.5 Q ${f(bx(126))} 96 116 90 Z`, C.billLow, 3) + '</g>';
+  h += path(`M 112 78 Q ${f(bx(124))} 72 ${f(bx(140))} 74.5 Q ${f(bx(158))} 77 ${f(bx(170))} 74 Q ${f(bx(181))} 75 ${f(bx(176))} 84 Q ${f(bx(170))} 90 ${f(bx(150))} 90 Q ${f(bx(128))} 90 114 85 Z`, C.bill, 3);
+  h += fillPath(`M ${f(bx(168))} 75 Q ${f(bx(178))} 75 ${f(bx(176))} 83 Q ${f(bx(171))} 82 ${f(bx(168))} 75 Z`, C.billTip);
+  h += fillPath(`M 114 85 Q ${f(bx(128))} 90 ${f(bx(150))} 90 Q ${f(bx(166))} 90 ${f(bx(172))} 86 Q ${f(bx(150))} 87 114 82 Z`, C.billLow, 'opacity="0.55"');
+  if (S.billSaddle) h += fillPath(`M ${f(bx(128))} 76 Q ${f(bx(146))} 73 ${f(bx(160))} 77 Q ${f(bx(146))} 84 ${f(bx(130))} 81 Z`, S.billSaddle, 'opacity="0.85"');
+  h += ink(`M ${f(bx(120))} 77 Q ${f(bx(140))} 77 ${f(bx(162))} 78`, 2.2, '#FFFFFF', 'opacity="0.55"');
+  h += ink(`M ${f(bx(139))} 79.5 L ${f(bx(142))} 79.5 M ${f(bx(150))} 80 L ${f(bx(153))} 80`, 2.4, C.nostril);
+  h += '</g>';
+  // No line is ever drawn on the face at the corner of the bill: it reads as a second mouth. Smiles come from
+  // the eyes, cheeks and open bill; unhappiness from the drooping bill.
+  if (p.bubble > 0.02) {
+    const br = 7 * (0.7 + 0.3 * (idle ? 0.5 - 0.5 * Math.cos(t * Math.PI) : 1));
+    h += ell(bx(181), 93, br, br, C.bubble, true, 2, op(0.9 * p.bubble)) + ell(bx(179), 91, 2, 1.5, '#FFFFFF', false, 0, op(p.bubble));
+  }
+  if (p.poof > 0.02) h += ink('M 92 32 L 86 22 M 108 26 L 107 15 M 124 27 L 128 16', 3, C.outline, op(p.poof));
+  // a quack when patted: sound waves pop out of the bill tip (no words, so nothing needs translating)
+  if (fx.quack >= 0) {
+    const cx = bx(180), cy = 82;
+    for (let i = 0; i < 3; i++) {
+      const q = (fx.quack - i * 0.07) / 0.6;
+      if (q <= 0 || q >= 1) continue;
+      const r = 7 + 6 * i + 8 * q, a = 0.62;
+      h += `<path d="M ${f(cx + r * Math.cos(-a))} ${f(cy + r * Math.sin(-a))} A ${f(r)} ${f(r)} 0 0 1 ${f(cx + r * Math.cos(a))} ${f(cy + r * Math.sin(a))}" fill="none" stroke="${C.outline}" stroke-width="${f(3 * SW)}" stroke-linecap="round" ${op(1 - smooth(0.5, 1, q))}/>`;
+    }
+  }
+  o += `<g transform="${headT}">${h}</g>`;
+  SW = 1;
+  if (WORN.has('goggles')) o += goggles(Hm(98, 58), Hm(136, 55), 12.5 * HK, tilt, HK);
+  if (WORN.has('cap')) o += cap(Hm(112, 27), tilt, HK);
+
+  // near wing: layered feathers folded on the body, blending into the wing clamped over the side of the head
+  const restAngle = (p.wing + flap) * (1 - cover);
+  const pivot = B(122, 130);
+  const wingPts = WING_REST.map((q, i) => {
+    const r = rot(...B(q[0], q[1]), restAngle, pivot[0], pivot[1]), c = at(WING_COVER[i]);
+    return [lerp(r[0], c[0], cover), lerp(r[1], c[1], cover)];
+  });
+  o += path(qPath(wingPts), S.wing, 3.5);
+  const restA = 1 - smooth(0, 0.5, cover), coverA = smooth(0.5, 1, cover);
+  if (restA > 0.02) {
+    SW = 1 / s;
+    let w = fillPath('M 124 132 Q 106 116 80 124 Q 96 136 122 140 Z', S.belly, 'opacity="0.45"');
+    w += ink('M 82 126 Q 88 132 94 130 Q 100 136 106 134 Q 112 140 120 138', 2, S.shade);
+    // dark flight feathers at the back of the folded wing, tapering to a point toward the front
+    // the blue patch is a flight feather at the back of the folded wing, tapering to a point toward the front
+    if (S.speculum) {
+      w += fillPath('M 92 143.5 Q 76 138.4 58 139 Q 54 142 52 145 Q 60 149 63 149 Q 78 149.6 92 143.5 Z', S.speculum);
+      w += fillPath('M 66 140 Q 60 140 57 141.5 Q 60 143 66 142.4 Z', '#9DB8F5', 'opacity="0.8"');
+    }
+    w += ink('M 98 139 Q 80 138 58 139 M 100 148 Q 82 150 63 149 M 102 156 Q 86 160 70 160', 2.2, S.shade);
+    o += `<g ${op(restA)} transform="${bodyT} rotate(${f(restAngle)} 122 130)">${w}</g>`;
+    SW = 1;
+  }
+  if (coverA > 0.02) {
+    SW = 1 / k;
+    o += `<g ${op(coverA)} transform="${headT}">` + ink('M 70 100 Q 66 70 64 44 M 80 96 Q 80 60 72 34', 2.2, S.shade) + '</g>';
+    SW = 1;
+  }
+
+  if (WORN.has('ring')) o += ringHalf(true);
+
+  // extras
+  if (p.sweat > 0.02) { const sp = Hm(62, 30); o += drop(sp[0], sp[1], 13 - 2 * p.shake, p.sweat); }
+  if (p.sparkle > 0.02) {
+    const tw = q => (idle ? 0.75 + 0.25 * Math.sin(t * 5 + q) : 1);
+    o += sparkle(22, 52, 8 * tw(0), p.sparkle) + sparkle(182, 26, 6 * tw(2), p.sparkle) + sparkle(190, 104, 4 * tw(4), p.sparkle);
+  }
+  if (p.zzz > 0.02) {
+    const zb = idle ? Math.sin(t * 1.6) * 2.5 : 0;
+    o += `<g transform="translate(0 ${f(zb)})">` + ink('M 158 22 L 172 22 L 158 36 L 172 36', 3.5, C.outline, op(p.zzz))
+      + ink('M 178 2 L 187 2 L 178 11 L 187 11', 3, C.outline, op(p.zzz)) + '</g>';
+  }
+  if (p.shock > 0.02) {
+    const fl = idle ? 0.7 + 0.3 * Math.sin(t * 22) : 1, R = DUCK.headR, x = hc[0], y = hc[1];
+    o += ink(`M ${f(x - R - 22)} ${f(y - 18)} L ${f(x - R - 36)} ${f(y - 26)} M ${f(x - R - 6)} ${f(y - R - 6)} L ${f(x - R - 16)} ${f(y - R - 18)} M ${f(x + R + 26)} ${f(y - 18)} L ${f(x + R + 40)} ${f(y - 26)} M ${f(x + R + 8)} ${f(y - R - 6)} L ${f(x + R + 16)} ${f(y - R - 18)}`, 4, C.loud, op(p.shock * fl));
+  }
+
+  // the waterline sits in front of her bottom so she floats, with a few glints
+  const front = ink('M 26 174 Q 60 179 94 176 M 106 176 Q 142 179 176 173', 3, C.water, 'opacity="0.85"')
+    + ink('M 36 183 L 44 183 M 160 182 L 165 182 M 52 189 L 56 189', 2.2, '#FFFFFF', 'opacity="0.9"');
+
+  // whole-body motion: floating, rocking, shiver, breathing, mood bounce and pat squash
+  const dx = idle ? tremble * 2.5 * Math.sin(t * Math.PI * 2 / 0.12) : 0;
+  const breath = idle ? 1 + 0.02 * p.breathe * (0.5 - 0.5 * Math.cos(t * Math.PI)) : 1;
+  const sx = breath * fx.bounce * (1 + 0.08 * fx.squash), sy = breath * fx.bounce * (1 - 0.12 * fx.squash);
+  return water
+    + `<g transform="translate(${f(dx)} ${f(floatY)}) rotate(${f(rock)} 100 174) translate(100 174) scale(${sx.toFixed(4)} ${sy.toFixed(4)}) translate(-100 -174)">${o}</g>`
+    + front + (fx.overlay || '');
+}
+
+const STATIC_FX = { time: 0, idle: false, blink: 0, twitch: 0, bounce: 1, squash: 0, patWag: 0, quack: -1, overlay: '' };
+
+// ---------- state ----------
+const svg = document.getElementById('duck');
+const stage = document.getElementById('stage');
+const stageTag = document.getElementById('stageTag');
+const caption = document.getElementById('caption');
+const patBtn = document.getElementById('patBtn');
+const patHint = document.getElementById('patHint');
+const ctl = {
+  blend: document.getElementById('blend'), idle: document.getElementById('idle'), slow: document.getElementById('slow'),
+  up: document.getElementById('upMs'), down: document.getElementById('downMs'), sleep: document.getElementById('sleepMs'),
+};
+if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ctl.idle.checked = false;
+
+let clock = 0;                 // scaled time in seconds
+let current = clonePose(POSES.happy);
+let moodKey = 'happy';
+let trans = null;              // { from, to, start, dur, kind }
+let bounceStart = -10;
+let nextBlink = 1.5, blinkStart = -10;
+let twitch = { start: -10, dir: 1, next: 2 };
+let pat = { last: -10, combo: 0, hearts: [] };
+
+const canPat = () => BY_KEY[moodKey].band === 'calm';
+
+function kindFor(fromKey, toKey) {
+  if (toKey === 'asleep') return 'sleep';
+  if (fromKey === 'asleep') return 'wake';
+  return BY_KEY[toKey].level > BY_KEY[fromKey].level ? 'louder' : 'calmer';
+}
+
+function setMood(key) {
+  if (key === moodKey && !trans) return;
+  const kind = kindFor(moodKey, key);
+  const dur = { louder: +ctl.up.value, calmer: +ctl.down.value, sleep: +ctl.sleep.value, wake: +ctl.sleep.value }[kind] / 1000;
+  if (ctl.blend.checked) trans = { from: clonePose(current), to: POSES[key], start: clock, dur, kind };
+  else { trans = null; current = clonePose(POSES[key]); }
+  bounceStart = clock;
+  moodKey = key;
+  const m = BY_KEY[key];
+  stage.style.backgroundColor = `var(--${m.band}-soft)`;
+  stageTag.textContent = m.bandLabel;
+  svg.setAttribute('aria-label', `Pip the duck, ${m.label.toLowerCase()}`);
+  document.querySelectorAll('.mood').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.key === key)));
+  const ok = canPat();
+  patBtn.disabled = !ok;
+  stage.classList.toggle('no-pat', !ok);
+  patHint.textContent = ok ? 'Pat quickly for a combo.' : 'Pip only wants pats when the room is calm.';
+}
+
+function doPat() {
+  if (!canPat()) return;
+  pat.combo = clock - pat.last < 0.7 ? pat.combo + 1 : 1;
+  pat.last = clock;
+  const n = Math.min(pat.combo, 3);
+  for (let i = 0; i < n; i++) pat.hearts.push({ t0: clock + i * 0.08, x: 112 + (Math.random() * 2 - 1) * 40, drift: Math.random() * 2 - 1 });
+}
+
+// hearts rise from the head when patted; quick pats send more of them (up to three per pat)
+function patOverlay() {
+  let o = '';
+  pat.hearts = pat.hearts.filter(h => clock - h.t0 < 1.3);
+  for (const h of pat.hearts) {
+    const k = (clock - h.t0) / 1.3;
+    if (k < 0) continue;
+    o += heart(h.x + h.drift * 14 * k, 20 - 36 * k, 8 + 3 * Math.sin(Math.PI * Math.min(1, k * 3)), 1 - smooth(0.6, 1, k));
+  }
+  return o;
+}
+
+function step(dt) {
+  clock += dt;
+  if (trans) {
+    const e = (clock - trans.start) / trans.dur;
+    const w = WINDOWS[trans.kind], ease = EASE[trans.kind];
+    current = lerpPose(trans.from, trans.to, k => {
+      const [a, b] = w[groupOf(k)];
+      return ease(clamp((e - a) / (b - a)));
+    });
+    if (e >= 1) { current = clonePose(trans.to); trans = null; }
+  }
+  // blinking
+  if (clock > nextBlink) { blinkStart = clock; nextBlink = clock + 2.2 + Math.random() * 3.2; }
+  const bp = (clock - blinkStart) / 0.16;
+  const blink = bp >= 0 && bp <= 1 ? Math.sin(Math.PI * bp) : 0;
+  // quick bird-like head tilts: random, more often when worried
+  if (clock > twitch.next) {
+    if (Math.random() < current.twitch * 2) { twitch.start = clock; twitch.dir = Math.random() < 0.5 ? -1 : 1; }
+    twitch.next = clock + 0.5;
+  }
+  const tp = (clock - twitch.start) / 0.35;
+  const tw = tp >= 0 && tp <= 1 ? twitch.dir * 8 * Math.sin(Math.PI * tp) : 0;
+  // bounce on mood change: 1 -> 1.06 -> 1 over 400 ms
+  const bt = (clock - bounceStart) / 0.4;
+  const bounce = bt >= 0 && bt <= 1 ? 1 + 0.06 * Math.sin(Math.PI * bt) : 1;
+  // pat: damped spring squash, a giggly face and a fast tail wag
+  const ps = clock - pat.last;
+  const squash = ps >= 0 && ps < 0.9 ? Math.exp(-ps * 6) * Math.cos(ps * 22) : 0;
+  const patFace = ps >= 0 ? 1 - smooth(0.55, 0.9, ps) : 0;
+  const patWag = ps >= 0 ? 1 - smooth(0.4, 1, ps) : 0;
+  const shown = patFace > 0 ? lerpPose(current, PAT_FACE, () => patFace) : current;
+  const idle = ctl.idle.checked;
+  svg.innerHTML = render(shown, {
+    time: clock, idle, blink: idle ? blink : 0, twitch: idle ? tw : 0,
+    bounce, squash, patWag, quack: ps >= 0 && ps < 0.8 ? ps : -1, overlay: patOverlay(),
+  });
+}
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(0.05, (now - last) / 1000) * (ctl.slow.checked ? 0.25 : 1);
+  last = now;
+  step(dt);
+  demoTick();
+  requestAnimationFrame(frame);
+}
+
+// ---------- mood buttons with resting-pose thumbnails ----------
+const moodsEl = document.getElementById('moods');
+MOODS.forEach((m, i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'mood'; b.dataset.key = m.key; b.id = `mood-${m.key}`;
+  b.setAttribute('aria-pressed', String(m.key === moodKey));
+  b.innerHTML = `<svg viewBox="-10 -14 220 220" aria-hidden="true" class="thumb"></svg>`
+    + `<span>${m.label}</span><span class="band ${m.band}">${m.bandLabel}</span><span class="key">${i + 1}</span>`;
+  b.addEventListener('click', () => { stopDemo(); setMood(m.key); });
+  moodsEl.appendChild(b);
+});
+const drawThumbs = () => document.querySelectorAll('.mood').forEach(b => {
+  b.querySelector('.thumb').innerHTML = render(POSES[b.dataset.key], STATIC_FX);
+});
+
+// ---------- styles ----------
+const stylesEl = document.getElementById('styles');
+Object.entries(STYLES).forEach(([key, s], i) => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.className = 'style'; b.dataset.key = key;
+  b.setAttribute('aria-pressed', String(i === 0));
+  const sw = s.head ? `linear-gradient(135deg, ${s.head} 50%, ${s.body} 50%)` : s.body;
+  b.innerHTML = `<span class="swatch" style="background:${sw}"></span><span>${s.name}</span><small>${s.unlock}</small>`;
+  b.addEventListener('click', () => {
+    S = s;
+    stylesEl.querySelectorAll('.style').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    drawThumbs();
+  });
+  stylesEl.appendChild(b);
+});
+
+document.querySelectorAll('.acc').forEach(cb => cb.addEventListener('change', () => {
+  WORN = new Set([...document.querySelectorAll('.acc:checked')].map(x => x.value));
+  drawThumbs();
+}));
+
+document.addEventListener('keydown', e => {
+  if (e.target.closest?.('input') && e.key !== 'p' && e.key !== 'P') return;
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 6) { stopDemo(); setMood(MOODS[n - 1].key); }
+  if (e.key === 'p' || e.key === 'P') doPat();
+});
+patBtn.addEventListener('click', doPat);
+stage.addEventListener('pointerdown', doPat);
+
+// ---------- sliders ----------
+const bindSlider = (input, outId) => {
+  const out = document.getElementById(outId);
+  const show = () => { out.textContent = `${input.value} ms`; };
+  input.addEventListener('input', show); show();
+};
+bindSlider(ctl.up, 'upOut'); bindSlider(ctl.down, 'downOut'); bindSlider(ctl.sleep, 'sleepOut');
+
+// ---------- noisy room demo ----------
+const SCRIPT = [
+  ['asleep', 2.2, 'Before class: app paused'],
+  ['happy', 2.6, 'Quiet room'],
+  ['fine', 2.2, 'Some chatter'],
+  ['worried', 2.2, 'Chatter builds'],
+  ['sad', 2.0, 'Getting really loud'],
+  ['covered', 2.4, 'Way too loud'],
+  ['sad', 1.8, 'Calming a little'],
+  ['worried', 1.8, 'Calming more'],
+  ['fine', 2.0, 'Back to normal'],
+  ['happy', 2.6, 'Quiet again'],
+  ['covered', 2.0, 'Someone drops a chair!'],
+  ['fine', 2.4, 'Settling down'],
+  ['happy', 2.6, 'Quiet work time'],
+  ['asleep', 3.0, 'End of class: paused'],
+];
+let demo = null;
+const playBtn = document.getElementById('playBtn'), stopBtn = document.getElementById('stopBtn');
+function startDemo() {
+  demo = { i: -1, until: clock };
+  playBtn.hidden = true; stopBtn.hidden = false; caption.hidden = false;
+}
+function stopDemo() {
+  if (!demo) return;
+  demo = null; playBtn.hidden = false; stopBtn.hidden = true; caption.hidden = true;
+}
+function demoTick() {
+  if (!demo || clock < demo.until) return;
+  demo.i++;
+  if (demo.i >= SCRIPT.length) { stopDemo(); return; }
+  const [key, hold, text] = SCRIPT[demo.i];
+  setMood(key);
+  caption.textContent = text;
+  demo.until = clock + hold;
+}
+playBtn.addEventListener('click', startDemo);
+stopBtn.addEventListener('click', stopDemo);
+
+// first frame renders synchronously so the page is complete at rest
+drawThumbs();
+setMood('happy');
+step(0);
+requestAnimationFrame(t => { last = t; requestAnimationFrame(frame); });
+})();
+</script>

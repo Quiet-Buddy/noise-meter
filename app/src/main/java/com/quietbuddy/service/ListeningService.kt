@@ -231,6 +231,7 @@ class ListeningService : LifecycleService() {
                 when (settings.character) {
                     Character.BUDDY -> R.drawable.ic_buddy_notification
                     Character.KITTEN -> R.drawable.ic_kitten_notification
+                    Character.DUCK -> R.drawable.ic_duck_notification
                 }
             )
             .setContentTitle(getString(Voices.of(settings.character).listeningTitle, settings.roomName))

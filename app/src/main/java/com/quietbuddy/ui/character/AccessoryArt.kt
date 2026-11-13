@@ -2,9 +2,11 @@ package com.quietbuddy.ui.character
 
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -62,6 +64,10 @@ class AccessoryAnchors(
     val rightFoot: Offset,
     val footRx: Float,
     val footRy: Float,
+    /** Centre and radii of a swim ring floating around the body; only characters that can wear one set these. */
+    val waistAt: Offset = Offset.Zero,
+    val waistRx: Float = 0f,
+    val waistRy: Float = 0f,
 )
 
 private fun stroke(w: Float) = Stroke(width = w, cap = StrokeCap.Round, join = StrokeJoin.Round)
@@ -97,12 +103,18 @@ fun DrawScope.drawAccessories(
             Accessory.BOW -> placed(anchors.bowAt, anchors.bowScale, anchors.bowTilt) { bow(outline) }
             Accessory.TOP_HAT -> placed(anchors.hatAt, anchors.hatScale, anchors.hatTilt) { topHat(outline) }
             Accessory.CROWN -> placed(anchors.hatAt, anchors.hatScale, anchors.hatTilt) { crown(outline) }
+            Accessory.BANDANA -> placed(anchors.collarAt, anchors.collarScale, 0f) { bandana(outline) }
+            Accessory.GOGGLES -> goggles(anchors, outline)
+            Accessory.CAP -> placed(anchors.hatAt, anchors.hatScale, anchors.hatTilt) { backwardsCap(outline) }
+            // Drawn in two halves around the body by the art itself, see drawSwimRing.
+            Accessory.SWIM_RING -> Unit
         }
     }
 }
 
 private val DrawOrder = listOf(
-    Accessory.BOOTS, Accessory.BELL_COLLAR, Accessory.TIE, Accessory.SUNGLASSES, Accessory.BOW, Accessory.FLOWER, Accessory.TOP_HAT, Accessory.CROWN,
+    Accessory.BOOTS, Accessory.BELL_COLLAR, Accessory.TIE, Accessory.BANDANA, Accessory.SUNGLASSES, Accessory.GOGGLES,
+    Accessory.BOW, Accessory.FLOWER, Accessory.TOP_HAT, Accessory.CROWN, Accessory.CAP,
 )
 
 // Each shape below is drawn around its anchor at (0, 0); brims and bases sit on y = 0 and rise into negative y.
@@ -287,5 +299,122 @@ private fun DrawScope.boots(a: AccessoryAnchors, outline: Color) {
         drawOval(BootRed, soleTl, soleSize)
         drawOval(outline, soleTl, soleSize, style = stroke(4f))
         drawLine(Color.White.copy(alpha = 0.5f), Offset(foot.x - a.footRx * 0.5f, foot.y - a.footRy * 0.3f), Offset(foot.x - a.footRx * 0.1f, foot.y - a.footRy * 0.5f), 3f, StrokeCap.Round)
+    }
+}
+
+// The duck's accessories, from the prototype in docs/design/duck-motion.html.
+private val CapWhite = Color(0xFFFFFFFF)
+private val CapPink = Color(0xFFF28B8B)
+private val CapBlue = Color(0xFF7FB8E8)
+private val GoggleTeal = Color(0xFF22A6B3)
+private val GoggleLens = Color(0xFFBFE8F2)
+private val BandanaRed = Color(0xFFE2453C)
+private val RingRed = Color(0xFFE8473F)
+private val RingWhite = Color(0xFFFFFFFF)
+
+private fun quad(x0: Float, y0: Float, cx: Float, cy: Float, x1: Float, y1: Float) = Path().apply {
+    moveTo(x0, y0)
+    quadraticTo(cx, cy, x1, y1)
+}
+
+/** A backwards cap: the crown hugs the top of the head and the peak points back over the nape (negative x). */
+private fun DrawScope.backwardsCap(outline: Color) {
+    val crownShape = Path().apply {
+        moveTo(-36f, 17f)
+        quadraticTo(-32f, -13f, 0f, -15f)
+        quadraticTo(32f, -15f, 36f, 13f)
+        quadraticTo(0f, 3f, -36f, 17f)
+        close()
+    }
+    outlined(crownShape, CapWhite, outline, 3.4f)
+    drawPath(
+        Path().apply {
+            moveTo(-28f, 3f); quadraticTo(-22f, -9f, -8f, -12f); lineTo(-4f, 7f); quadraticTo(-18f, 9f, -28f, 11f); close()
+        },
+        CapPink,
+    )
+    drawPath(Path().apply { moveTo(8f, -13f); quadraticTo(26f, -9f, 32f, 5f); lineTo(14f, 4f); close() }, CapBlue)
+    drawPath(quad(-36f, 17f, 0f, 3f, 36f, 13f), outline, style = stroke(3.4f))
+    val peak = Path().apply {
+        moveTo(-32f, 15f); quadraticTo(-52f, 17f, -62f, 27f); quadraticTo(-46f, 29f, -28f, 23f); close()
+    }
+    outlined(peak, CapBlue, outline, 3.2f)
+    drawOval(CapPink, Offset(-3.5f, -16.5f), Size(7f, 5f))
+    drawOval(outline, Offset(-3.5f, -16.5f), Size(7f, 5f), style = stroke(2f))
+    drawPath(quad(-20f, -4f, -14f, -10f, -6f, -11f), Color.White.copy(alpha = 0.8f), style = stroke(2.2f))
+}
+
+/**
+ * Swim goggles in three-quarter view: a strap back towards the nape, a bridge between the lenses, and the far lens
+ * narrower than the near one. The lenses stay mostly clear so the eyes, which carry the moods, still read.
+ */
+private fun DrawScope.goggles(a: AccessoryAnchors, outline: Color) {
+    val near = a.leftEye
+    val far = a.rightEye
+    val r = a.lensRx
+    val rf = r * 0.72f
+    val sc = a.hatScale
+    fun band(p: Path, w: Float) {
+        drawPath(p, outline, style = stroke(w + 4f))
+        drawPath(p, GoggleTeal, style = stroke(w))
+    }
+    band(quad(near.x - 27f * sc, near.y + 3f * sc, near.x - r - 6f, near.y - 2f, near.x - r, near.y), 5f)
+    band(Path().apply { moveTo(far.x + rf, far.y); lineTo(far.x + 15f * sc, far.y - sc) }, 5f)
+    band(quad(near.x + r, near.y - 1f, (near.x + far.x) / 2f, near.y - 5f, far.x - rf, far.y - 1f), 3.5f)
+    for ((c, rx) in listOf(far to rf, near to r)) {
+        // the rim is a ring, so the eyes show through the tinted lens
+        val rim = Size((rx + 1.5f) * 2f, (r + 1.5f) * 2f)
+        val rimTl = Offset(c.x - rx - 1.5f, c.y - r - 1.5f)
+        drawOval(GoggleLens.copy(alpha = 0.3f), rimTl, rim)
+        drawOval(outline, rimTl, rim, style = stroke(7.5f))
+        drawOval(GoggleTeal, rimTl, rim, style = stroke(4f))
+        drawPath(
+            quad(c.x - rx * 0.45f, c.y + r * 0.1f, c.x - rx * 0.4f, c.y - r * 0.45f, c.x, c.y - r * 0.55f),
+            Color.White.copy(alpha = 0.85f),
+            style = stroke(2.6f),
+        )
+    }
+}
+
+/**
+ * A striped swim ring floating around the body at the waterline, if worn. Arts draw it twice: the back half
+ * ([front] false) before the body and the front half after it, so the body sits inside the ring.
+ */
+fun DrawScope.drawSwimRing(worn: Set<Accessory>, anchors: AccessoryAnchors, outline: Color, front: Boolean) {
+    if (Accessory.SWIM_RING !in worn) return
+    val c = anchors.waistAt
+    val rx = anchors.waistRx
+    val ry = anchors.waistRy
+    val oval = Rect(c.x - rx, c.y - ry, c.x + rx, c.y + ry)
+    // Front half runs through the bottom of the oval (0..180 degrees), back half through the top.
+    val half = Path().apply { arcTo(oval, if (front) 0f else 180f, 180f, forceMoveTo = true) }
+    drawPath(half, outline, style = stroke(25f))
+    // round ends like the outline's, so the two halves join without dark notches at the sides
+    drawPath(half, RingWhite, style = stroke(19.5f))
+    drawPath(half, RingRed, style = Stroke(width = 19.5f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(22f, 22f))))
+    if (front) {
+        val shine = Rect(c.x - rx, c.y - ry * 0.55f, c.x + rx, c.y + ry * 0.55f)
+        drawPath(
+            Path().apply { arcTo(shine, 97f, 39f, forceMoveTo = true) },
+            Color.White.copy(alpha = 0.75f),
+            style = stroke(3f),
+        )
+    }
+}
+
+/** A red polka-dot bandana knotted at the back of the neck (negative x), its point hanging over the chest. */
+private fun DrawScope.bandana(outline: Color) {
+    val band = quad(-24f, -4f, 0f, 6f, 24f, -4f)
+    drawPath(band, outline, style = stroke(11f))
+    drawPath(band, BandanaRed, style = stroke(6.5f))
+    val knot = Path().apply {
+        moveTo(-26f, -3f); lineTo(-36f, 4f); lineTo(-27f, 7f); close()
+        moveTo(-25f, -2f); lineTo(-31f, 11f); lineTo(-22f, 8f); close()
+    }
+    outlined(knot, BandanaRed, outline, 2.8f)
+    val point = Path().apply { moveTo(-4f, 1f); quadraticTo(10f, 5f, 24f, -3f); lineTo(14f, 22f); close() }
+    outlined(point, BandanaRed, outline, 3.2f)
+    for (dot in listOf(Offset(4f, 6f), Offset(14f, 5f), Offset(12f, 13f), Offset(-10f, 2.5f), Offset(-18f, 0f))) {
+        drawCircle(Color.White, 1.7f, dot)
     }
 }
