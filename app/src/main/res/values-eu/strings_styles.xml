@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="style_buddy_sunny">Buddy Eguzkitsua</string>
-    <string name="style_buddy_mint">Buddy Menta</string>
-    <string name="style_buddy_berry">Buddy Mugurdia</string>
-    <string name="style_kitten_ginger">Mochi Laranja</string>
-    <string name="style_kitten_grey">Mochi Grisa</string>
-    <string name="style_kitten_snow">Mochi Elurra</string>
+    <string name="style_buddy_sunny">Lagun Eguzkitsua</string>
+    <string name="style_buddy_mint">Lagun Menta</string>
+    <string name="style_buddy_berry">Lagun Mugurdia</string>
+    <string name="style_kitten_ginger">Mixi Laranja</string>
+    <string name="style_kitten_grey">Mixi Grisa</string>
+    <string name="style_kitten_snow">Mixi Elurra</string>
     <string name="style_duck_lemon">Txito Limoia</string>
     <string name="style_duck_cloud">Txito Hodeia</string>
     <string name="style_duck_hazel">Txito Hurra</string>
