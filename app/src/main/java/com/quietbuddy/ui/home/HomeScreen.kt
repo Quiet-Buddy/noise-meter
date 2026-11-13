@@ -379,26 +379,22 @@ private fun RewardTile(
             .clearAndSetSemantics { contentDescription = sentence }
             .padding(14.dp),
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(10.dp)) {
-            RewardPreview(reward, styles, Modifier.size(40.dp), animated = false)
-            Column(Modifier.weight(1f)) {
-                Text(
-                    stringResource(R.string.home_next_reward_label),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = palette.inkSoft,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-                Text(
-                    rewardName(reward),
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
-                    color = palette.ink,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                )
-            }
+        // The label sits on top across the whole tile, like the calm tile's, so it has room in long languages
+        // and large font sizes; the preview and the reward's name share the row below it.
+        Text(stringResource(R.string.home_next_reward_label), style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
+        Spacer(Modifier.weight(1f).heightIn(min = 6.dp))
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(8.dp)) {
+            RewardPreview(reward, styles, Modifier.size(36.dp), animated = false)
+            Text(
+                rewardName(reward),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                color = palette.ink,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f),
+            )
         }
-        Spacer(Modifier.weight(1f).heightIn(min = 8.dp))
+        Spacer(Modifier.height(8.dp))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(8.dp)) {
             Box(Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(4.dp)).background(palette.line)) {
                 Box(Modifier.fillMaxWidth(animatedProgress).fillMaxHeight().background(QB.Calm))
