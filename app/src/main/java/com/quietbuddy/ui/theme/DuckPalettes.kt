@@ -41,7 +41,7 @@ data class DuckColors(
 
         val Cloud = DuckColors(wing = Color(0xFFECE5D3), shade = Color(0xFFCDC3AA), belly = Color(0xFFFFFFFF))
 
-        /** A mallard drake: green head, white neck ring, chestnut chest, grey flanks, white tail with a black curl. */
+        /** Mallard colours (the drake's, the best-known ones): green head, white neck ring, chestnut chest, grey flanks, white tail with a black curl. */
         val Mallard = DuckColors(
             wing = Color(0xFFB3A794), shade = Color(0xFF8F877A), belly = Color(0xFFF2F2EE),
             bill = Color(0xFFE8C53A), billLow = Color(0xFFCFA82A), billTip = Color(0xFF3D2B10), feet = Color(0xFFFF8A1F),

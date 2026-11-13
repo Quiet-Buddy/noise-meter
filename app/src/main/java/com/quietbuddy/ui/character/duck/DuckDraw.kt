@@ -240,7 +240,7 @@ fun DrawScope.drawDuck(pose: DuckPose, fx: DuckFx, pal: Palette, accessories: Se
         drawNearWing(p, fx, pal, rig)
         drawExtras(p, fx, pal, rig)
     }
-    // The waterline sits in front of his bottom so he floats, with a few glints.
+    // The waterline sits in front of her bottom so she floats, with a few glints.
     ink(WaterLine, Water, 3f, 0.85f)
     ink(Glints, Color.White, 2.2f, 0.9f)
 }
