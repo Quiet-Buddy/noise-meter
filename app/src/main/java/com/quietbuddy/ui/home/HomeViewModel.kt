@@ -23,7 +23,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,12 +35,6 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-sealed interface ChallengeState {
-    object Idle : ChallengeState
-    data class Running(val secondsLeft: Int) : ChallengeState
-    data class Finished(val won: Boolean) : ChallengeState
-}
-
 data class HomeUiState(
     val roomName: String = "",
     val listening: ListeningState = ListeningState.PAUSED,
@@ -52,7 +45,6 @@ data class HomeUiState(
     val thresholds: Thresholds = AppSettings().baseThresholds,
     @StringRes val speechLine: Int = BuddyVoice.sleeping,
     val calmMinutes: Int = 0,
-    val challenge: ChallengeState = ChallengeState.Idle,
     /** Newly unlocked rewards to celebrate, cheapest first; empty when none. */
     val pendingUnlocks: List<Reward> = emptyList(),
     /** The next reward to earn; null when everything is unlocked. */
@@ -76,8 +68,6 @@ class HomeViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val speechIndex = MutableStateFlow(0)
-    private val challenge = MutableStateFlow<ChallengeState>(ChallengeState.Idle)
-    private var challengeJob: Job? = null
 
     /** Index into the character's tap lines while a tap reply is showing; null otherwise. */
     private val tapReply = MutableStateFlow<Int?>(null)
@@ -129,7 +119,7 @@ class HomeViewModel @Inject constructor(
         )
     }
 
-    val uiState: StateFlow<HomeUiState> = combine(snapshot, speechIndex, challenge, tapReply, tapCount) { s, index, ch, reply, taps ->
+    val uiState: StateFlow<HomeUiState> = combine(snapshot, speechIndex, tapReply, tapCount) { s, index, reply, taps ->
         val active = s.listening == ListeningState.LISTENING
         val mood = if (active) s.mood else null
         HomeUiState(
@@ -147,7 +137,6 @@ class HomeViewModel @Inject constructor(
                 }
             },
             calmMinutes = s.calmMinutes,
-            challenge = ch,
             pendingUnlocks = s.pendingUnlocks,
             nextReward = s.nextReward,
             minutesToNext = s.minutesToNext,
@@ -214,36 +203,6 @@ class HomeViewModel @Inject constructor(
 
     fun pause() = controller.pause()
 
-    fun startChallenge() {
-        if (challengeJob?.isActive == true) return
-        challengeJob = viewModelScope.launch {
-            val startedAt = System.currentTimeMillis()
-            val threshold = settingsRepository.settings.first().worriedFromDb
-            var peak = Float.NEGATIVE_INFINITY
-            var lost = false
-            coroutineScope {
-                val watcher = launch {
-                    levelSource.samples.collect { sample ->
-                        peak = maxOf(peak, sample.laeq2sDb)
-                        if (sample.laeq2sDb >= threshold) lost = true
-                    }
-                }
-                for (left in CHALLENGE_SECONDS downTo 1) {
-                    if (lost) break
-                    challenge.value = ChallengeState.Running(left)
-                    delay(1_000)
-                }
-                watcher.cancel()
-            }
-            val won = !lost
-            historyRepository.recordChallenge(startedAt, won, if (peak.isInfinite()) 0f else peak)
-            if (won) progressRepository.addCalmMinutes(Unlocks.CHALLENGE_BONUS_MINUTES)
-            challenge.value = ChallengeState.Finished(won)
-            delay(RESULT_MS)
-            challenge.value = ChallengeState.Idle
-        }
-    }
-
     private data class Snapshot(
         val roomName: String,
         val character: Character,
@@ -260,8 +219,6 @@ class HomeViewModel @Inject constructor(
     )
 
     private companion object {
-        const val CHALLENGE_SECONDS = 30
-        const val RESULT_MS = 5_000L
         const val TAP_LINE_MIN_MS = 1_200L
         const val TAP_REPLY_MS = 4_000L
     }

@@ -20,7 +20,6 @@ What you can do:
 - Choose a noise limit that suits the place: Quiet time, Everyday or Playtime.
 - Set quiet hours. During those hours Buddy becomes stricter, handy for evenings or nap time.
 - Look back at History to see how noisy the day was and when the loudest moments happened.
-- Take on a 30-second Quiet Challenge and see whether the room can stay calm.
 - Hear sound alerts when it gets loud: a soft tone when Buddy is worried, stronger when Buddy is sad. You can turn them off in Settings.
 - Keep listening with the screen off. A small notification shows Buddy's mood, and you can pause listening from it at any time.
 - Calibrate the microphone against a sound meter you own, to improve accuracy on your phone.

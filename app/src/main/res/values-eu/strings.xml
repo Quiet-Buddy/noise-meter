@@ -33,10 +33,6 @@
     <string name="legend_calm">Lasai</string>
     <string name="legend_loud">Zaratatsu</string>
     <string name="legend_too_loud">Zarata gehiegi</string>
-    <string name="challenge_running">Ixo… %1$d s</string>
-    <string name="challenge_won">Lagun dantzan ari da! Lortu duzu.</string>
-    <string name="challenge_lost">Ia-ia! Berriro saiatu?</string>
-    <string name="challenge_start">Hasi 30 segundoko Isiltasun Erronka</string>
     <string name="buddy_name">Lagun</string>
     <string name="buddy_asleep">Lagun lo dago</string>
     <string name="buddy_happy">Lagun pozik dago</string>
@@ -61,7 +57,6 @@
     <string name="history_average_db">batez besteko dB</string>
     <string name="history_no_readings">Egun honetarako ez dago irakurketarik oraindik.</string>
     <string name="history_calm_time">Lasai emandako denbora</string>
-    <string name="history_challenges_won">%1$d Isiltasun Erronka irabazi dira aste honetan</string>
     <string name="settings_title">Ezarpenak</string>
     <string name="settings_sensitivity">Zaratarekiko sentikortasuna</string>
     <string name="preset_quiet_time">Isiltasun ordua</string>

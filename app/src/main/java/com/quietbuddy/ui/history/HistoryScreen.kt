@@ -78,7 +78,6 @@ fun HistoryScreen() {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
 
     val selectedSummary = days.firstOrNull { it.dateEpochDay == selected }
-    val challengesThisWeek = days.sumOf { it.challengesWon }
     val selectedName = LocalDate.ofEpochDay(selected).dayOfWeek.getDisplayName(JTextStyle.FULL, Locale.getDefault())
 
     val chartHeight = if (isLargeScreen()) 240.dp else 150.dp
@@ -178,24 +177,6 @@ fun HistoryScreen() {
         }
     }
 
-    // Challenges card
-    val challenges: @Composable () -> Unit = {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(palette.card, RoundedCornerShape(20.dp))
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-        ) {
-            Column {
-                Text(
-                    stringResource(R.string.history_challenges_won, challengesThisWeek),
-                    style = MaterialTheme.typography.titleMedium,
-                )
-            }
-        }
-    }
-
     BoxWithConstraints(
         Modifier
             .fillMaxSize()
@@ -222,14 +203,12 @@ fun HistoryScreen() {
                     }
                     Column(Modifier.weight(2f), verticalArrangement = Arrangement.spacedBy(16.dp)) {
                         stats()
-                        challenges()
                     }
                 }
             } else {
                 dayPicker()
                 chart()
                 stats()
-                challenges()
             }
         }
     }

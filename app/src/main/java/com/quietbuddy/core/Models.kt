@@ -109,5 +109,4 @@ data class DaySummary(
     val loudestDb: Float?,
     val loudestAtMs: Long?,
     val dominantMood: Mood?,
-    val challengesWon: Int,
 )

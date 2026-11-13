@@ -8,7 +8,6 @@ object BuddyVoice : Voice {
     override val name = R.string.buddy_name
     override val sleeping = R.string.speech_sleeping
     override val greeting = R.string.onb_hi
-    override val challengeWon = R.string.challenge_won
     override val listeningTitle = R.string.svc_title
 
     private val lines: Map<Mood, List<Int>> = mapOf(

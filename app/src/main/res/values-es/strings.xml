@@ -33,10 +33,6 @@
     <string name="legend_calm">Calma</string>
     <string name="legend_loud">Ruidoso</string>
     <string name="legend_too_loud">Demasiado ruido</string>
-    <string name="challenge_running">Shh… %1$d s</string>
-    <string name="challenge_won">¡Compi está bailando! Lo has conseguido.</string>
-    <string name="challenge_lost">¡Casi! ¿Lo intentamos otra vez?</string>
-    <string name="challenge_start">Empezar un Reto de Silencio de 30 segundos</string>
     <string name="buddy_name">Compi</string>
     <string name="buddy_asleep">Compi está dormido</string>
     <string name="buddy_happy">Compi está feliz</string>
@@ -61,7 +57,6 @@
     <string name="history_average_db">dB promedio</string>
     <string name="history_no_readings">Todavía no hay lecturas para este día.</string>
     <string name="history_calm_time">Tiempo en calma</string>
-    <string name="history_challenges_won">%1$d Retos de Silencio ganados esta semana</string>
     <string name="settings_title">Ajustes</string>
     <string name="settings_sensitivity">Sensibilidad al ruido</string>
     <string name="preset_quiet_time">Hora de silencio</string>

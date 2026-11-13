@@ -19,7 +19,6 @@ import kotlin.math.pow
 
 private const val MS_PER_DAY = 86_400_000L
 private const val MINUTE_RETENTION_DAYS = 35L
-private const val CHALLENGE_RETENTION_DAYS = 365L
 
 @Singleton
 class RoomHistoryRepository @Inject constructor(
@@ -38,10 +37,6 @@ class RoomHistoryRepository @Inject constructor(
                 listeningSeconds = minute.listeningSeconds,
             )
         )
-    }
-
-    override suspend fun recordChallenge(startedAtMs: Long, won: Boolean, peakDb: Float) {
-        dao.insertChallenge(ChallengeEntity(startedAtMs = startedAtMs, won = won, peakDb = peakDb))
     }
 
     override fun hourly(epochDay: Long): Flow<List<HourBar>> {
@@ -63,14 +58,9 @@ class RoomHistoryRepository @Inject constructor(
         val to = startOfDayMs(today.plusDays(1), zone)
         return combine(
             dao.minutesBetween(from, to),
-            dao.challengesBetween(from, to),
             settings.settings,
-        ) { minutes, challenges, appSettings ->
+        ) { minutes, appSettings ->
             val minutesByDay = minutes.groupBy { epochDayOf(it.minuteStartMs, zone) }
-            val wonByDay = challenges
-                .filter { it.won }
-                .groupingBy { epochDayOf(it.startedAtMs, zone) }
-                .eachCount()
             val calmThresholdDb = appSettings.worriedFromDb
 
             (0 until days).map { offset ->
@@ -89,7 +79,6 @@ class RoomHistoryRepository @Inject constructor(
                     loudestDb = loudest?.maxDb,
                     loudestAtMs = loudest?.minuteStartMs,
                     dominantMood = dominant,
-                    challengesWon = wonByDay[epochDay] ?: 0,
                 )
             }
         }
@@ -97,7 +86,6 @@ class RoomHistoryRepository @Inject constructor(
 
     override suspend fun prune(nowMs: Long) {
         dao.deleteMinutesBefore(nowMs - MINUTE_RETENTION_DAYS * MS_PER_DAY)
-        dao.deleteChallengesBefore(nowMs - CHALLENGE_RETENTION_DAYS * MS_PER_DAY)
     }
 
     /** Energy average: 10 * log10(mean(10^(dB/10))). Input must be non-empty. */

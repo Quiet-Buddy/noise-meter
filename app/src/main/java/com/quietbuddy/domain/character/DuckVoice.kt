@@ -8,7 +8,6 @@ object DuckVoice : Voice {
     override val name = R.string.duck_name
     override val sleeping = R.string.duck_sleeping
     override val greeting = R.string.duck_greeting
-    override val challengeWon = R.string.duck_challenge_won
     override val listeningTitle = R.string.duck_listening_title
 
     private val lines: Map<Mood, List<Int>> = mapOf(

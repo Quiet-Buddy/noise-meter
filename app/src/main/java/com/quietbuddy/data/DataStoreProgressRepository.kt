@@ -83,8 +83,7 @@ class DataStoreProgressRepository @Inject constructor(
     override suspend fun backfillIfNeeded() {
         val worriedFromDb = settingsRepository.settings.first().worriedFromDb
         val calm = dao.countCalmMinutes(worriedFromDb, Unlocks.MIN_LISTENING_SECONDS)
-        val won = dao.countWonChallenges()
-        val seed = calm.toLong() + Unlocks.CHALLENGE_BONUS_MINUTES.toLong() * won
+        val seed = calm.toLong()
         store.edit { prefs ->
             if (prefs[ProgressKeys.BACKFILLED] == true) return@edit
             // Not marked celebrated: existing users should get the celebration.

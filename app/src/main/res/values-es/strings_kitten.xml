@@ -3,7 +3,6 @@
     <string name="kitten_name">Michi</string>
     <string name="kitten_listening_title">Michi está escuchando · %1$s</string>
     <string name="kitten_greeting">¡Miau! Soy Michi.</string>
-    <string name="kitten_challenge_won">¡Michi ronronea a todo volumen! Lo has conseguido.</string>
     <string name="kitten_sleeping">Zzz… toca el micrófono para despertarme.</string>
 
     <string name="kitten_happy_1">Prrr, prrr… oigo los pájaros de fuera.</string>

@@ -101,9 +101,6 @@ object Unlocks {
     fun isCalmMinute(minute: MinuteAggregate, settings: AppSettings): Boolean =
         minute.listeningSeconds >= MIN_LISTENING_SECONDS && minute.laeqDb < settings.worriedFromDb
 
-    /** Calm minutes a won challenge is worth. */
-    const val CHALLENGE_BONUS_MINUTES = 5
-
     /** Rewards earned by [calmMinutes], free ones included. */
     fun earnedBy(calmMinutes: Long): Set<Reward> =
         Reward.all.filter { calmMinutes >= it.unlockAtCalmMinutes }.toSet()
@@ -160,8 +157,8 @@ interface ProgressRepository {
     suspend fun commitLedger(earnedMinutes: Int, state: LedgerState)
 
     /**
-     * Once per install: seeds the total from existing history (calm minutes still in the database plus
-     * [Unlocks.CHALLENGE_BONUS_MINUTES] per won challenge) so early users get credit. No-op afterwards.
+     * Once per install: seeds the total from existing history (calm minutes still in the database)
+     * so early users get credit. No-op afterwards.
      */
     suspend fun backfillIfNeeded()
 

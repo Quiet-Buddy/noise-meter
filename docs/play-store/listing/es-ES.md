@@ -20,7 +20,6 @@ Qué puedes hacer:
 - Elegir un límite de ruido adecuado para el lugar: Hora de silencio, Cada día o Hora de juego.
 - Configurar horas de silencio. Durante ese tiempo, Compi es más estricto, útil por la noche o a la hora de la siesta.
 - Consultar el Historial para ver lo ruidoso que fue el día y cuándo hubo los momentos más fuertes.
-- Participar en un Reto de Silencio de 30 segundos y comprobar si la habitación se mantiene en calma.
 - Recibir avisos sonoros cuando hay mucho ruido: un tono suave cuando Compi se preocupa y más fuerte cuando se pone triste. Puedes desactivarlos en Ajustes.
 - Seguir escuchando con la pantalla apagada. Una pequeña notificación muestra el ánimo de Compi, y puedes pausar la escucha desde ahí en cualquier momento.
 - Calibrar el micrófono con un sonómetro que tengas, para mejorar la precisión en tu teléfono.

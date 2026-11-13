@@ -20,7 +20,6 @@ Zer egin dezakezu:
 - Lekuari egokitutako zarata muga aukeratu: Isiltasun ordua, Egunerokoa edo Jolasaldia.
 - Ezarri isiltasun orduak. Ordu horietan Lagun zorrotzagoa da, arratsaldeetan edo lo hartzeko orduan baliagarria.
 - Begiratu Historia atalera, eguna zenbateraino zaratatsua izan zen eta une zaratatsuenak noiz izan ziren ikusteko.
-- Hartu 30 segundoko Isiltasun Erronka bat, eta ikusi gela lasai mantendu daitekeen.
 - Entzun abisu soinuak zarata handitzen denean: tonu leun bat Lagun kezkatzen denean, indartsuagoa triste dagoenean. Ezarpenetan itzal ditzakezu.
 - Jarraitu entzuten pantaila itzalita. Jakinarazpen txiki batek Lagunen aurpegia erakusten du, eta edonoiz geldi dezakezu entzuketa hortik.
 - Kalibratu mikrofonoa zuk duzun soinu-neurgailu batekin, telefonoan zehaztasuna hobetzeko.

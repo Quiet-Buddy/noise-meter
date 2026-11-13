@@ -93,8 +93,6 @@ import androidx.compose.material.icons.rounded.Mic
 import androidx.compose.material.icons.rounded.MicOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -176,7 +174,6 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
     // On tablets the device usually sits on a shelf and is read from across the room, so Buddy and the
     // status chip get much bigger there. The cards stay at their normal size.
     val large = isLargeScreen()
-    val canStartChallenge = listening && (state.mood == Mood.SAD || state.mood == Mood.EARS_COVERED)
 
     val header: @Composable () -> Unit = {
         Header(
@@ -189,21 +186,13 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
     val chip: @Composable () -> Unit = {
         NoiseMeter(mood = state.mood, db = state.db, thresholds = state.thresholds, listening = state.listening, large = large)
     }
-    // Everything below the status chip: wake prompt, challenge and the reward strip.
+    // Everything below the status chip: wake prompt and the reward strip.
     val details: @Composable () -> Unit = {
         if (!listening) {
             NotListeningMessage(state.listening)
             Spacer(Modifier.height(12.dp))
             DarkButton(text = stringResource(R.string.home_wake_buddy), onClick = ::wake)
             Spacer(Modifier.height(16.dp))
-        }
-        if (state.challenge != ChallengeState.Idle || canStartChallenge) {
-            ChallengeSection(
-                challenge = state.challenge,
-                canStart = canStartChallenge,
-                onStart = viewModel::startChallenge,
-            )
-            Spacer(Modifier.height(12.dp))
         }
         ProgressTiles(
             calmMinutes = state.calmMinutes,
@@ -281,8 +270,8 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
             }
         } else {
             // Portrait: one column. Buddy takes the width, or the height left after the rest of the content,
-            // so the listening screen fits without scrolling on typical phones; taller states (challenge,
-            // wake button) scroll. On tablets the column is capped in width and centred.
+            // so the listening screen fits without scrolling on typical phones; taller states (wake
+            // button) scroll. On tablets the column is capped in width and centred.
             val contentWidth = minOf(maxWidth, SingleColumnMaxWidth) - 48.dp
             // Buddy absorbs whatever height the rest of the content leaves: the non-Buddy height is measured
             // (content height minus Buddy's current height), so the result is stable and doesn't loop.
@@ -760,42 +749,6 @@ private fun NotListeningMessage(listening: ListeningState) {
         textAlign = TextAlign.Center,
         modifier = Modifier.fillMaxWidth(),
     )
-}
-
-@Composable
-private fun ChallengeSection(challenge: ChallengeState, canStart: Boolean, onStart: () -> Unit) {
-    val palette = LocalPalette.current
-    val voice = Voices.of(LocalCharacter.current)
-    when (challenge) {
-        is ChallengeState.Running -> Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = palette.card),
-        ) {
-            Text(
-                stringResource(R.string.challenge_running, challenge.secondsLeft),
-                style = MaterialTheme.typography.headlineSmall,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
-            )
-        }
-        is ChallengeState.Finished -> Card(
-            modifier = Modifier.fillMaxWidth(),
-            shape = RoundedCornerShape(20.dp),
-            colors = CardDefaults.cardColors(containerColor = if (challenge.won) QB.CalmSoft else QB.TooLoudSoft),
-        ) {
-            Text(
-                stringResource(if (challenge.won) voice.challengeWon else R.string.challenge_lost),
-                style = MaterialTheme.typography.titleMedium,
-                color = if (challenge.won) QB.CalmText else QB.TooLoudText,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
-            )
-        }
-        ChallengeState.Idle -> if (canStart) {
-            DarkButton(text = stringResource(R.string.challenge_start), onClick = onStart)
-        }
-    }
 }
 
 @Composable

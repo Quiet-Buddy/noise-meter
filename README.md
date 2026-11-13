@@ -35,7 +35,6 @@ Buddy doesn't flip moods at every little sound. It waits a moment to be sure the
 
 - **Pick a noise limit** that suits the place: a quiet-time setting, an everyday setting, or a more relaxed playtime setting.
 - **Look back at history** to see how noisy the day was and when the loudest moments happened.
-- **Take on challenges** to try to keep things quiet.
 - **Keep it running in the background.** A small notification shows Buddy's current mood, and you can pause listening from it at any time.
 - **Use it in English, Spanish or Basque (euskara).** It follows your phone's language.
 

@@ -12,7 +12,7 @@ https://quiet-buddy.github.io/en/privacy.html
 - Explanation for reviewers:
   - The app declares no INTERNET permission, so it cannot transmit data off the device.
   - Microphone audio is processed in memory only to compute a decibel level. Audio is never written to storage or sent anywhere.
-  - Noise history (decibel readings, timestamps, challenge results) is stored locally on the device only.
+  - Noise history (decibel readings, timestamps) is stored locally on the device only.
   - No accounts, no analytics SDKs, no advertising ID.
 - Encryption in transit: not applicable (no network transmission). Data deletion: uninstalling the app removes all local data.
 
