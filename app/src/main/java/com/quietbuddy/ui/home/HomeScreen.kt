@@ -1,5 +1,6 @@
 package com.quietbuddy.ui.home
 
+import com.quietbuddy.ui.formatDuration
 import kotlinx.coroutines.flow.collectLatest
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.unit.sp
@@ -345,14 +346,14 @@ private val TileShape = RoundedCornerShape(20.dp)
 @Composable
 private fun CalmTile(calmMinutes: Int, modifier: Modifier) {
     val palette = LocalPalette.current
-    Column(modifier.clip(TileShape).background(palette.card).padding(14.dp)) {
-        Text(stringResource(R.string.home_calm_time_today), style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
-        Spacer(Modifier.weight(1f).heightIn(min = 6.dp))
+    Column(modifier.clip(TileShape).background(palette.card).padding(12.dp)) {
+        Text(stringResource(R.string.home_calm_time_today), style = MaterialTheme.typography.bodySmall, color = palette.inkSoft)
+        Spacer(Modifier.weight(1f).heightIn(min = 4.dp))
+        // May wrap between hours and minutes at large font sizes rather than be cut off.
         Text(
-            formatMinutes(calmMinutes),
-            style = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.ExtraBold),
+            formatDuration(calmMinutes),
+            style = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, lineHeight = 24.sp),
             color = QB.CalmText,
-            softWrap = false,
         )
     }
 }
@@ -377,30 +378,30 @@ private fun RewardTile(
             .background(palette.card)
             .clickable(role = Role.Button, onClick = onClick)
             .clearAndSetSemantics { contentDescription = sentence }
-            .padding(14.dp),
+            .padding(12.dp),
     ) {
         // The label sits on top across the whole tile, like the calm tile's, so it has room in long languages
         // and large font sizes; the preview and the reward's name share the row below it.
-        Text(stringResource(R.string.home_next_reward_label), style = MaterialTheme.typography.bodyMedium, color = palette.inkSoft)
-        Spacer(Modifier.weight(1f).heightIn(min = 6.dp))
+        Text(stringResource(R.string.home_next_reward_label), style = MaterialTheme.typography.bodySmall, color = palette.inkSoft)
+        Spacer(Modifier.weight(1f).heightIn(min = 4.dp))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(8.dp)) {
-            RewardPreview(reward, styles, Modifier.size(36.dp), animated = false)
+            RewardPreview(reward, styles, Modifier.size(32.dp), animated = false)
             Text(
                 rewardName(reward),
-                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
+                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.Bold),
                 color = palette.ink,
                 maxLines = 2,
                 overflow = TextOverflow.Ellipsis,
                 modifier = Modifier.weight(1f),
             )
         }
-        Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(6.dp))
         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = spacedBy(8.dp)) {
             Box(Modifier.weight(1f).height(8.dp).clip(RoundedCornerShape(4.dp)).background(palette.line)) {
                 Box(Modifier.fillMaxWidth(animatedProgress).fillMaxHeight().background(QB.Calm))
             }
             Text(
-                formatMinutes(minutesToNext),
+                formatDuration(minutesToNext),
                 style = MaterialTheme.typography.labelSmall,
                 color = palette.inkSoft,
                 softWrap = false,
@@ -822,11 +823,6 @@ private fun DarkButton(text: String, onClick: () -> Unit) {
     }
 }
 
-private fun formatMinutes(minutes: Int): String {
-    val h = minutes / 60
-    val m = minutes % 60
-    return if (h > 0) "$h h $m min" else "$m min"
-}
 
 private fun hasMicPermission(context: Context): Boolean =
     ContextCompat.checkSelfPermission(context, Manifest.permission.RECORD_AUDIO) == PackageManager.PERMISSION_GRANTED

@@ -18,6 +18,8 @@
     <string name="home_resume_listening">Reanudar la escucha</string>
     <string name="home_wake_buddy">Empezar a escuchar</string>
     <string name="home_calm_time_today">Tiempo en calma hoy</string>
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="duration_minutes">%1$d min</string>
     <string name="home_next_reward_label">Próximo premio</string>
     <string name="home_loudest_moment">Momento más ruidoso</string>
     <string name="band_nice_calm">Tranquilo y agradable</string>

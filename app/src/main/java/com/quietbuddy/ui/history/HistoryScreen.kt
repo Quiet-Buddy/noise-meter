@@ -1,5 +1,6 @@
 package com.quietbuddy.ui.history
 
+import com.quietbuddy.ui.formatDuration
 import androidx.compose.ui.res.stringResource
 import com.quietbuddy.R
 import com.quietbuddy.ui.character.moodLabelRes
@@ -165,7 +166,7 @@ fun HistoryScreen() {
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp), modifier = Modifier.fillMaxWidth()) {
             StatCard(
                 title = stringResource(R.string.history_calm_time),
-                value = formatCalm(selectedSummary?.calmMinutes ?: 0),
+                value = formatDuration(selectedSummary?.calmMinutes ?: 0),
                 modifier = Modifier.weight(1f),
             )
             StatCard(
@@ -337,7 +338,6 @@ private fun StatCard(title: String, value: String, modifier: Modifier = Modifier
     }
 }
 
-private fun formatCalm(minutes: Int): String = "${minutes / 60} h ${minutes % 60} min"
 
 private fun formatTime(ms: Long): String =
     DateTimeFormatter.ofPattern("HH:mm").format(Instant.ofEpochMilli(ms).atZone(ZoneId.systemDefault()))
