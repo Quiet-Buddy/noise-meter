@@ -11,6 +11,7 @@ import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.MinuteAggregate
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.Progress
+import com.quietbuddy.core.LedgerState
 import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.Reward
 import com.quietbuddy.core.SettingsRepository
@@ -70,6 +71,8 @@ class HomeViewModelTapTest {
         object : ProgressRepository {
             override val progress: Flow<Progress> = flowOf(Progress())
             override suspend fun addCalmMinutes(minutes: Int) = Unit
+            override suspend fun ledger() = LedgerState()
+            override suspend fun commitLedger(earnedMinutes: Int, state: LedgerState) = Unit
             override suspend fun backfillIfNeeded() = Unit
             override suspend fun markCelebrated(rewards: Collection<Reward>) = Unit
         },

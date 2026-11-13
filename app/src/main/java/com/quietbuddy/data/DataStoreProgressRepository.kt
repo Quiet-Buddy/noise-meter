@@ -9,6 +9,7 @@ import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.quietbuddy.core.LedgerState
 import com.quietbuddy.core.Progress
 import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.Reward
@@ -31,6 +32,11 @@ private object ProgressKeys {
     val UNLOCKED = stringSetPreferencesKey("unlocked")
     val CELEBRATED = stringSetPreferencesKey("celebrated")
     val BACKFILLED = booleanPreferencesKey("backfilled")
+    val DEBT_MS = longPreferencesKey("ledger_debt_ms")
+    val CALM_MS = longPreferencesKey("ledger_calm_ms")
+    /** Episode start times as decimal strings (a set, which is fine: they are distinct timestamps). */
+    val EPISODES = stringSetPreferencesKey("ledger_episodes")
+    val LEDGER_AT = longPreferencesKey("ledger_updated_at_ms")
 }
 
 @Singleton
@@ -49,6 +55,29 @@ class DataStoreProgressRepository @Inject constructor(
     override suspend fun addCalmMinutes(minutes: Int) {
         if (minutes <= 0) return
         store.edit { prefs -> prefs.credit(minutes.toLong()) }
+    }
+
+    override suspend fun ledger(): LedgerState {
+        val prefs = store.data
+            .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
+            .first()
+        return LedgerState(
+            debtMs = prefs[ProgressKeys.DEBT_MS] ?: 0L,
+            calmMs = prefs[ProgressKeys.CALM_MS] ?: 0L,
+            episodeStartsMs = prefs[ProgressKeys.EPISODES].orEmpty().mapNotNull { it.toLongOrNull() }.sorted(),
+            updatedAtMs = prefs[ProgressKeys.LEDGER_AT] ?: 0L,
+        )
+    }
+
+    override suspend fun commitLedger(earnedMinutes: Int, state: LedgerState) {
+        store.edit { prefs ->
+            if (earnedMinutes > 0) prefs.credit(earnedMinutes.toLong())
+            if (state.updatedAtMs < (prefs[ProgressKeys.LEDGER_AT] ?: 0L)) return@edit
+            prefs[ProgressKeys.DEBT_MS] = state.debtMs
+            prefs[ProgressKeys.CALM_MS] = state.calmMs
+            prefs[ProgressKeys.EPISODES] = state.episodeStartsMs.map { it.toString() }.toSet()
+            prefs[ProgressKeys.LEDGER_AT] = state.updatedAtMs
+        }
     }
 
     override suspend fun backfillIfNeeded() {
