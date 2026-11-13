@@ -15,13 +15,13 @@
     <string name="svc_mood_ears">Covering ears</string>
 
     <!-- UI -->
-    <string name="greeting_morning">Good morning</string>
-    <string name="greeting_afternoon">Good afternoon</string>
-    <string name="greeting_evening">Good evening</string>
     <string name="home_pause_listening">Pause listening</string>
     <string name="home_resume_listening">Resume listening</string>
     <string name="home_wake_buddy">Start listening</string>
     <string name="home_calm_time_today">Calm time today</string>
+    <string name="duration_hours_minutes">%1$d h %2$d min</string>
+    <string name="duration_minutes">%1$d min</string>
+    <string name="home_next_reward_label">Next reward</string>
     <string name="home_loudest_moment">Loudest moment</string>
     <string name="band_nice_calm">Nice and calm</string>
     <string name="band_getting_loud">Getting loud</string>
@@ -107,4 +107,12 @@
     <string name="speech_ears_1">Too loud! My ears!</string>
     <string name="speech_ears_2">Whoa! I\'m covering my ears!</string>
     <string name="speech_ears_3">Big noise! Let\'s take a quiet break!</string>
+    <string name="speech_tap_1">Hee hee, that tickles!</string>
+    <string name="speech_tap_2">Psst… let\'s keep it quiet together.</string>
+    <string name="speech_tap_3">Yay, a friend! Shh, nice and calm.</string>
+    <string name="speech_tap_4">I love calm pats. Thank you!</string>
+    <string name="speech_tap_5">Ooh, so cozy when it\'s quiet.</string>
+    <string name="home_pat_character">Pat the character</string>
+    <string name="home_full_screen">Full screen</string>
+    <string name="home_full_screen_exit_hint">Tap to exit</string>
 </resources>

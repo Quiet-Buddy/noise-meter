@@ -28,4 +28,9 @@
     <string name="kitten_worried">Mochi is worried</string>
     <string name="kitten_sad">Mochi is sad</string>
     <string name="kitten_ears">Mochi is startled, with puffed-up fur</string>
+    <string name="kitten_tap_1">Purr purr… that feels nice.</string>
+    <string name="kitten_tap_2">Purr… gentle pats are my favourite.</string>
+    <string name="kitten_tap_3">Mew! Right behind my ears, please.</string>
+    <string name="kitten_tap_4">Shh, let\'s purr together, nice and quiet.</string>
+    <string name="kitten_tap_5">Soft paws, soft voices. Purr.</string>
 </resources>

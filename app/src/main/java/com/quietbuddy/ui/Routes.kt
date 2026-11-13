@@ -4,7 +4,8 @@ package com.quietbuddy.ui
  * Navigation routes and the screen composables that MainActivity's NavHost calls.
  * Every screen gets its ViewModel with hiltViewModel() itself.
  *   OnboardingScreen(onDone: () -> Unit)           ui/onboarding
- *   HomeScreen(onOpenCharacters: () -> Unit)       ui/home
+ *   HomeScreen(onOpenCharacters: () -> Unit,       ui/home
+ *              onFullScreenChange: (Boolean) -> Unit)
  *   HistoryScreen()                                ui/history
  *   CharactersScreen()                             ui/characters
  *   SettingsScreen(onOpenCalibration: () -> Unit)  ui/settings

@@ -32,6 +32,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Modifier
@@ -145,7 +148,9 @@ private fun AppContent(loaded: AppSettings, controller: ListeningController) {
     val backEntry by nav.currentBackStackEntryAsState()
     val route = backEntry?.destination?.route
 
-    val showTabs = tabs.any { it.route == route }
+    // Home's full-screen "stage" mode hides the tabs; Home owns the flag and reports changes here.
+    var homeFullScreen by rememberSaveable { mutableStateOf(false) }
+    val showTabs = tabs.any { it.route == route } && !(route == Routes.HOME && homeFullScreen)
     // Tablets and phones on their side get a rail at the start edge; a bottom bar would eat the short height.
     val rail = useNavigationRail()
     fun select(tab: Tab) {
@@ -174,7 +179,10 @@ private fun AppContent(loaded: AppSettings, controller: ListeningController) {
             }
         },
     ) { padding ->
-        Row(Modifier.padding(padding).consumeWindowInsets(padding)) {
+        // Full-screen Home hides the system bars; skip the inset padding too so the mood background reaches every
+        // edge instead of leaving a strip where the display cutout sits.
+        val fullScreenHome = route == Routes.HOME && homeFullScreen
+        Row(if (fullScreenHome) Modifier else Modifier.padding(padding).consumeWindowInsets(padding)) {
             if (showTabs && rail) {
                 // Insets are already applied by the Scaffold padding above.
                 NavigationRail(windowInsets = WindowInsets(0)) {
@@ -190,13 +198,25 @@ private fun AppContent(loaded: AppSettings, controller: ListeningController) {
                     Spacer(Modifier.weight(1f))
                 }
             }
-            AppNavHost(nav, start, Modifier.weight(1f), onOpenCharacters = { select(tabs.first { it.route == Routes.CHARACTERS }) })
+            AppNavHost(
+                nav,
+                start,
+                Modifier.weight(1f),
+                onOpenCharacters = { select(tabs.first { it.route == Routes.CHARACTERS }) },
+                onHomeFullScreenChange = { homeFullScreen = it },
+            )
         }
     }
 }
 
 @Composable
-private fun AppNavHost(nav: NavHostController, start: String, modifier: Modifier, onOpenCharacters: () -> Unit) {
+private fun AppNavHost(
+    nav: NavHostController,
+    start: String,
+    modifier: Modifier,
+    onOpenCharacters: () -> Unit,
+    onHomeFullScreenChange: (Boolean) -> Unit,
+) {
     // consumeWindowInsets in the caller stops screens that also apply statusBarsPadding() from adding the inset twice.
     NavHost(nav, startDestination = start, modifier = modifier) {
         composable(Routes.ONBOARDING) {
@@ -207,7 +227,7 @@ private fun AppNavHost(nav: NavHostController, start: String, modifier: Modifier
                 }
             })
         }
-        composable(Routes.HOME) { HomeScreen(onOpenCharacters = onOpenCharacters) }
+        composable(Routes.HOME) { HomeScreen(onOpenCharacters = onOpenCharacters, onFullScreenChange = onHomeFullScreenChange) }
         composable(Routes.CHARACTERS) { CharactersScreen() }
         composable(Routes.HISTORY) { HistoryScreen() }
         composable(Routes.SETTINGS) {

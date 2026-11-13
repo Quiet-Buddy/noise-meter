@@ -28,4 +28,10 @@
     <string name="kitten_worried">Mochi kezkatuta dago</string>
     <string name="kitten_sad">Mochi triste dago</string>
     <string name="kitten_ears">Mochi izututa dago, ilea harrotuta</string>
+    <!-- TODO review translation -->
+    <string name="kitten_tap_1">Prrr, prrr… zein gustura.</string>
+    <string name="kitten_tap_2">Prrr… laztan leunak dira nire gogokoenak.</string>
+    <string name="kitten_tap_3">Miau! Belarrien atzean, mesedez.</string>
+    <string name="kitten_tap_4">Ixo, egin dezagun purrust elkarrekin, ahopeka.</string>
+    <string name="kitten_tap_5">Hanka leunak, ahots leunak. Prrr.</string>
 </resources>
