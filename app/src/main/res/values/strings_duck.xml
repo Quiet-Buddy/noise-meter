@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="duck_name">Pip</string>
+    <string name="duck_listening_title">Pip is listening · %1$s</string>
+    <string name="duck_greeting">Quack! I\'m Pip.</string>
+    <string name="duck_challenge_won">Pip splashes with joy! You did it.</string>
+
+    <string name="duck_sleeping">Zzz… tap the microphone to wake me up.</string>
+
+    <string name="duck_happy_1">Quack… the pond is so still and calm.</string>
+    <string name="duck_happy_2">Everything is calm and cozy. Time to float.</string>
+    <string name="duck_happy_3">Shh, I can hear the ripples. So peaceful.</string>
+    <string name="duck_fine_1">Nice. Everyone\'s chatting softly.</string>
+    <string name="duck_fine_2">Just the right amount of noise.</string>
+    <string name="duck_fine_3">Good talking, good listening.</string>
+    <string name="duck_worried_1">Quack? It\'s getting a bit loud in here.</string>
+    <string name="duck_worried_2">My feathers are ruffling. Can we turn it down?</string>
+    <string name="duck_worried_3">Could we play a little more quietly?</string>
+    <string name="duck_sad_1">Quack… can we use our indoor voices?</string>
+    <string name="duck_sad_2">That\'s a lot of noise. My wings shake.</string>
+    <string name="duck_sad_3">Please help me find some quiet.</string>
+    <string name="duck_ears_1">Quack! So loud! I\'m covering my head!</string>
+    <string name="duck_ears_2">Eek! Wings over my head! Can we be quiet?</string>
+    <string name="duck_ears_3">Big noise! Let\'s take a quiet break!</string>
+
+    <string name="duck_asleep">Pip is asleep, head tucked in</string>
+    <string name="duck_happy">Pip is happy</string>
+    <string name="duck_fine">Pip is fine</string>
+    <string name="duck_worried">Pip is worried</string>
+    <string name="duck_sad">Pip is sad</string>
+    <string name="duck_ears">Pip is covering his head with his wings</string>
+
+    <string name="duck_tap_1">Hehe! That tickles my tail.</string>
+    <string name="duck_tap_2">Quack! Gentle pats are my favourite.</string>
+    <string name="duck_tap_3">Hee hee! Wiggle wiggle!</string>
+    <string name="duck_tap_4">Shh, let\'s float together, so quiet.</string>
+    <string name="duck_tap_5">Soft pats, soft voices. Quack.</string>
+</resources>

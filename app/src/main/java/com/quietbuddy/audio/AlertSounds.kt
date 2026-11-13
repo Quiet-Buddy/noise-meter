@@ -26,6 +26,10 @@ import kotlin.random.Random
  * - Worried: a questioning "mrrp?" trill, a small rising "mew?", soft "prrt-prrt" chirps.
  * - Sad: a long falling "mewww", a whimpering "mew... mew", a sad descending meow.
  * - Too loud (startled, fur puffed up): a hiss, a vibrato yowl "mrrraaow", a startled double "mreow!".
+ * The duck's set is made of quacks (buzzy odd-harmonic tones with a quick pitch drop, often in pairs):
+ * - Worried: a questioning "quack?", a small "qua-ack?" with a rising end, soft "quack-quack".
+ * - Sad: a long drooping "quaaaack", a whimpering "quack... quack", a quack that sags step by step.
+ * - Too loud (flustered): three sharp "quack! quack! quack!", a raucous rasping "quaaaack", a startled double "QUACK! QUACK!".
  *
  * Timbres are rich in harmonics in the 1–4 kHz range, where phone speakers and ears are most
  * sensitive, and are gently saturated so they sound loud and cut through a noisy room.
@@ -49,6 +53,7 @@ object AlertSounds {
     private fun soundSet(character: Character): Map<Mood, List<Recipe>> = when (character) {
         Character.BUDDY -> buddySounds
         Character.KITTEN -> kittenSounds
+        Character.DUCK -> duckSounds
     }
 
     private class Recipe(val seconds: Double, val gain: Double, val drive: Double, val draw: Buf.() -> Unit)
@@ -172,6 +177,71 @@ object AlertSounds {
                 for (i in 0..1) {
                     tone(i * 0.5, 0.45, { t -> meow(t / 0.45, 600.0, 1_000.0 - 60.0 * i, 500.0, peakAt = 0.25) },
                         harmonics = 10, attack = 0.015, release = 0.1, vibratoHz = 9.0, vibratoDepth = 0.03)
+                }
+            },
+        ),
+    )
+
+    private val duckSounds: Map<Mood, List<Recipe>> = mapOf(
+        Mood.WORRIED to listOf(
+            // "Quack?": a single soft quack that lifts at the start and droops a little.
+            Recipe(0.7, gain = 0.75, drive = 1.5) {
+                tone(0.0, 0.4, { t -> meow(t / 0.4, 420.0, 560.0, 380.0, peakAt = 0.3) }, harmonics = 12, oddOnly = true,
+                    attack = 0.03, release = 0.1, vibratoHz = 40.0, vibratoDepth = 0.03)
+            },
+            // "Qua-ack?": a small quack, then a questioning rise.
+            Recipe(0.65, gain = 0.75, drive = 1.5) {
+                tone(0.0, 0.2, { t -> glide(480.0, 340.0, t / 0.2) }, harmonics = 12, oddOnly = true, attack = 0.02,
+                    release = 0.06, vibratoHz = 45.0, vibratoDepth = 0.03)
+                tone(0.25, 0.35, { t -> glide(360.0, 560.0, t / 0.3) }, harmonics = 10, oddOnly = true, attack = 0.03,
+                    release = 0.1, vibratoHz = 40.0, vibratoDepth = 0.03)
+            },
+            // "Quack-quack": two soft little quacks.
+            Recipe(0.6, gain = 0.75, drive = 1.5) {
+                for (i in 0..1) {
+                    tone(i * 0.27, 0.2, { t -> glide(520.0 + 60.0 * i, 360.0 + 40.0 * i, t / 0.2) }, harmonics = 11,
+                        oddOnly = true, attack = 0.02, release = 0.06, vibratoHz = 45.0, vibratoDepth = 0.03)
+                }
+            },
+        ),
+        Mood.SAD to listOf(
+            // A long, drooping "quaaaack".
+            Recipe(1.5, gain = 0.9, drive = 2.0) {
+                tone(0.0, 1.4, { t -> meow(t / 1.4, 440.0, 520.0, 220.0, peakAt = 0.15) }, harmonics = 14, oddOnly = true,
+                    attack = 0.06, release = 0.25, vibratoHz = 35.0, vibratoDepth = 0.04)
+            },
+            // A whimpering "quack... quack".
+            Recipe(1.4, gain = 0.9, drive = 2.0) {
+                for (i in 0..1) {
+                    tone(i * 0.65, 0.55, { t -> meow(t / 0.55, 450.0 - 40.0 * i, 520.0 - 50.0 * i, 250.0 - 30.0 * i, peakAt = 0.2) },
+                        harmonics = 12, oddOnly = true, attack = 0.05, release = 0.15, vibratoHz = 38.0, vibratoDepth = 0.035)
+                }
+            },
+            // A sad quack that sags step by step.
+            Recipe(1.2, gain = 0.9, drive = 2.0) {
+                tone(0.0, 1.1, { t -> glide(520.0, 230.0, t / 1.0) * (1 + 0.05 * sin(2 * PI * 3 * t)) }, harmonics = 13,
+                    oddOnly = true, attack = 0.08, release = 0.25, vibratoHz = 36.0, vibratoDepth = 0.04)
+            },
+        ),
+        Mood.EARS_COVERED to listOf(
+            // "Quack! Quack! Quack!": three sharp, insistent quacks.
+            Recipe(0.9, gain = 1.0, drive = 3.0) {
+                for (i in 0..2) {
+                    tone(i * 0.3, 0.22, { t -> glide(700.0, 380.0, t / 0.2) }, harmonics = 14, oddOnly = true,
+                        attack = 0.01, release = 0.06, vibratoHz = 50.0, vibratoDepth = 0.03)
+                }
+            },
+            // A raucous "quaaaack" with a hoarse rasp.
+            Recipe(1.4, gain = 1.0, drive = 3.0) {
+                tone(0.0, 1.3, { t -> meow(t / 1.3, 550.0, 750.0, 300.0, peakAt = 0.2) }, harmonics = 16, oddOnly = true,
+                    attack = 0.03, release = 0.2, vibratoHz = 45.0, vibratoDepth = 0.05)
+                noise(0.0, 1.0, lowHz = 1_500.0, highHz = 4_000.0, attack = 0.05, release = 0.4)
+            },
+            // A startled double "QUACK! QUACK!".
+            Recipe(1.1, gain = 1.0, drive = 3.0) {
+                for (i in 0..1) {
+                    tone(i * 0.5, 0.45, { t -> meow(t / 0.45, 600.0, 800.0 - 60.0 * i, 330.0, peakAt = 0.15) },
+                        harmonics = 14, oddOnly = true, attack = 0.012, release = 0.1, vibratoHz = 48.0, vibratoDepth = 0.04)
                 }
             },
         ),

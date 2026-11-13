@@ -36,6 +36,8 @@ data class Palette(
     /** Kitten markings: tabby stripes and the pale muzzle, belly and paws. Unused by Buddy. */
     val stripe: Color = Color(0xFFE48A3A),
     val cream: Color = Color(0xFFFFF3E2),
+    /** Duck plumage, bill and markings. Unused by the other characters. */
+    val duck: DuckColors = DuckColors.Lemon,
 ) {
     /** Screen background for [m]: the alarm tint for the loud moods, the palette's own otherwise. */
     fun screenBackground(m: Mood?) = when (m) { Mood.SAD, Mood.EARS_COVERED -> QB.TooLoudBackground; else -> background }

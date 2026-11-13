@@ -19,8 +19,10 @@ class UnlocksTest {
         assertTrue(CharacterStyle.KITTEN_GINGER in Unlocks.earnedBy(120))
         assertFalse(Accessory.SUNGLASSES in Unlocks.earnedBy(59))
         assertTrue(Accessory.SUNGLASSES in Unlocks.earnedBy(60))
-        assertEquals(Reward.all.toSet() - Accessory.CROWN, Unlocks.earnedBy(999))
-        assertEquals(Reward.all.toSet(), Unlocks.earnedBy(1000))
+        assertFalse(Accessory.CROWN in Unlocks.earnedBy(999))
+        assertTrue(Accessory.CROWN in Unlocks.earnedBy(1000))
+        assertEquals(Reward.all.toSet() - CharacterStyle.DUCK_MALLARD, Unlocks.earnedBy(1499))
+        assertEquals(Reward.all.toSet(), Unlocks.earnedBy(1500))
     }
 
     @Test
@@ -38,10 +40,16 @@ class UnlocksTest {
             480L to Accessory.FLOWER,
             540L to CharacterStyle.KITTEN_SNOW,
             600L to Accessory.BOOTS,
-            750L to Accessory.CROWN,
+            750L to CharacterStyle.DUCK_LEMON,
+            800L to Accessory.CAP,
+            900L to Accessory.CROWN,
+            1000L to CharacterStyle.DUCK_CLOUD,
+            1050L to Accessory.GOGGLES,
+            1200L to Accessory.BANDANA,
+            1350L to CharacterStyle.DUCK_MALLARD,
         )
         for ((minutes, expected) in order) assertEquals("at $minutes", expected, Unlocks.next(minutes))
-        assertNull(Unlocks.next(1000))
+        assertNull(Unlocks.next(1500))
     }
 
     @Test
@@ -49,7 +57,7 @@ class UnlocksTest {
         assertEquals(0, Unlocks.previousThreshold(0))
         assertEquals(30, Unlocks.previousThreshold(59))
         assertEquals(60, Unlocks.previousThreshold(60))
-        assertEquals(1000, Unlocks.previousThreshold(5000))
+        assertEquals(1500, Unlocks.previousThreshold(5000))
     }
 
     @Test
@@ -123,6 +131,14 @@ class UnlocksTest {
     }
 
     @Test
+    fun pipUnlocksAtEightHundredMinutes() {
+        val at799 = Progress(calmMinutes = 799, unlocked = Unlocks.earnedBy(799))
+        val at800 = Progress(calmMinutes = 800, unlocked = Unlocks.earnedBy(800))
+        assertFalse(at799.isUnlocked(Character.DUCK))
+        assertTrue(at800.isUnlocked(Character.DUCK))
+    }
+
+    @Test
     fun buddyIsAlwaysUnlocked() {
         assertTrue(Progress().isUnlocked(Character.BUDDY))
         assertTrue(Progress().isUnlocked(Character.DEFAULT))
@@ -132,6 +148,8 @@ class UnlocksTest {
     fun characterDefaultStyles() {
         assertTrue(CharacterStyle.BUDDY_SUNNY.isCharacterDefault)
         assertTrue(CharacterStyle.KITTEN_GINGER.isCharacterDefault)
+        assertTrue(CharacterStyle.DUCK_LEMON.isCharacterDefault)
+        assertFalse(CharacterStyle.DUCK_MALLARD.isCharacterDefault)
         assertFalse(CharacterStyle.BUDDY_MINT.isCharacterDefault)
         assertFalse(CharacterStyle.KITTEN_SNOW.isCharacterDefault)
     }

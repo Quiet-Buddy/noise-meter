@@ -18,7 +18,7 @@ sealed interface Reward {
 }
 
 /**
- * A colour style for a character. Buddy's default is free; Mochi's default is earned, and the others unlock
+ * A colour style for a character. Buddy's default is free; Mochi's and Pip's defaults are earned, and the others unlock
  * as the room collects calm minutes (see [Unlocks]).
  *
  * [key] is persisted (selected style and unlocked set); never change an existing key.
@@ -33,7 +33,10 @@ enum class CharacterStyle(
     KITTEN_GINGER("kitten_ginger", Character.KITTEN, 120),
     BUDDY_BERRY("buddy_berry", Character.BUDDY, 240),
     KITTEN_GREY("kitten_grey", Character.KITTEN, 400),
-    KITTEN_SNOW("kitten_snow", Character.KITTEN, 600);
+    KITTEN_SNOW("kitten_snow", Character.KITTEN, 600),
+    DUCK_LEMON("duck_lemon", Character.DUCK, 800),
+    DUCK_CLOUD("duck_cloud", Character.DUCK, 1050),
+    DUCK_MALLARD("duck_mallard", Character.DUCK, 1500);
 
     val isFree: Boolean get() = unlockAtCalmMinutes == 0
 
@@ -44,6 +47,7 @@ enum class CharacterStyle(
         fun defaultFor(character: Character): CharacterStyle = when (character) {
             Character.BUDDY -> BUDDY_SUNNY
             Character.KITTEN -> KITTEN_GINGER
+            Character.DUCK -> DUCK_LEMON
         }
 
         fun of(character: Character): List<CharacterStyle> = entries.filter { it.character == character }
@@ -74,7 +78,10 @@ enum class Accessory(
     TOP_HAT("acc_top_hat", Character.BUDDY, AccessorySlot.HEAD, 480),
     FLOWER("acc_flower", Character.KITTEN, AccessorySlot.HEAD, 540),
     BOOTS("acc_boots", Character.BUDDY, AccessorySlot.FEET, 750),
-    CROWN("acc_crown", Character.KITTEN, AccessorySlot.HEAD, 1000);
+    CROWN("acc_crown", Character.KITTEN, AccessorySlot.HEAD, 1000),
+    CAP("acc_cap", Character.DUCK, AccessorySlot.HEAD, 900),
+    GOGGLES("acc_goggles", Character.DUCK, AccessorySlot.FACE, 1200),
+    BANDANA("acc_bandana", Character.DUCK, AccessorySlot.NECK, 1350);
 
     companion object {
         fun fromKey(key: String?): Accessory? = entries.firstOrNull { it.key == key }

@@ -1,6 +1,7 @@
 package com.quietbuddy.ui.character
 
 import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.character.duck.DuckAnimator
 import com.quietbuddy.ui.character.kitten.KittenAnimator
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -88,6 +89,42 @@ class PokeReactionTest {
         k.setMood(Mood.WORRIED)
         run(0.25f, k::advance)
         assertEquals(0f, k.giggle)
+    }
+
+    @Test
+    fun duckGigglesQuacksAndWagsOnlyWhenCalm() {
+        val calm = DuckAnimator(Mood.FINE, Random(1))
+        calm.advance(step)
+        calm.poke()
+        run(0.1f, calm::advance)
+        assertTrue(calm.giggle > 0.9f)
+        assertTrue(calm.fx.giggle > 0.9f)
+        assertTrue(calm.fx.patWag > 0f)
+        assertTrue(calm.fx.quack in 0f..0.8f)
+        run(1f, calm::advance)
+        assertEquals(0f, calm.fx.giggle)
+        assertEquals(0f, calm.fx.patWag)
+        assertTrue(calm.fx.quack < 0f)
+
+        for (mood in listOf(Mood.WORRIED, Mood.SAD, Mood.EARS_COVERED, null)) {
+            val tense = DuckAnimator(mood, Random(1))
+            tense.poke()
+            run(0.1f, tense::advance)
+            assertEquals(0f, tense.giggle)
+            assertEquals(0f, tense.fx.patWag)
+            assertTrue(tense.fx.quack < 0f)
+        }
+    }
+
+    @Test
+    fun duckGiggleFadesWhenMoodTurnsTense() {
+        val d = DuckAnimator(Mood.HAPPY, Random(1))
+        d.poke()
+        run(0.1f, d::advance)
+        d.setMood(Mood.WORRIED)
+        run(0.7f, d::advance)
+        assertEquals(0f, d.giggle)
+        assertEquals(0f, d.fx.patWag)
     }
 
     @Test

@@ -6,6 +6,9 @@
     <string name="style_kitten_ginger">Mochi Naranja</string>
     <string name="style_kitten_grey">Mochi Gris</string>
     <string name="style_kitten_snow">Mochi Nieve</string>
+    <string name="style_duck_lemon">Pío Limón</string>
+    <string name="style_duck_cloud">Pío Nube</string>
+    <string name="style_duck_mallard">Pío Ánade</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, bloqueado. %2$s</string>
@@ -59,6 +62,9 @@
     <string name="acc_top_hat">Chistera</string>
     <string name="acc_boots">Botas de agua</string>
     <string name="acc_crown">Corona</string>
+    <string name="acc_cap">Gorra</string>
+    <string name="acc_goggles">Gafas de natación</string>
+    <string name="acc_bandana">Pañuelo</string>
 
     <plurals name="accessory_next_hint">
         <item quantity="one">Falta %1$d minuto en calma para desbloquear: %2$s</item>

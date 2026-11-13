@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="duck_name">Pío</string>
+    <string name="duck_listening_title">Pío está escuchando · %1$s</string>
+    <string name="duck_greeting">¡Cuac! Soy Pío.</string>
+    <string name="duck_challenge_won">¡Pío chapotea de alegría! Lo has conseguido.</string>
+
+    <string name="duck_sleeping">Zzz… toca el micrófono para despertarme.</string>
+
+    <string name="duck_happy_1">Cuac… el estanque está quieto y tranquilo.</string>
+    <string name="duck_happy_2">Todo está en calma. Hora de flotar un ratito.</string>
+    <string name="duck_happy_3">Shh, oigo las ondas del agua. Qué paz.</string>
+    <string name="duck_fine_1">Qué bien. Todos charlan bajito.</string>
+    <string name="duck_fine_2">Justo la cantidad de ruido adecuada.</string>
+    <string name="duck_fine_3">Hablar bien, escuchar bien. Cuac.</string>
+    <string name="duck_worried_1">¿Cuac? Se está poniendo algo ruidoso aquí.</string>
+    <string name="duck_worried_2">Se me erizan las plumas. ¿Bajamos un poco el volumen?</string>
+    <string name="duck_worried_3">¿Podemos jugar un poco más bajito?</string>
+    <string name="duck_sad_1">Cuac… ¿podemos hablar más bajito?</string>
+    <string name="duck_sad_2">Hay mucho ruido. Me tiemblan las alitas.</string>
+    <string name="duck_sad_3">Por favor, ayúdame a encontrar algo de calma.</string>
+    <string name="duck_ears_1">¡Cuac! ¡Qué ruido! ¡Me tapo con las alas!</string>
+    <string name="duck_ears_2">¡Uy! ¡Alas sobre la cabeza! ¿Hacemos silencio?</string>
+    <string name="duck_ears_3">¡Qué ruidazo! ¡Hagamos una pausa tranquila!</string>
+
+    <string name="duck_asleep">Pío está dormido, con la cabeza escondida</string>
+    <string name="duck_happy">Pío está feliz</string>
+    <string name="duck_fine">Pío está bien</string>
+    <string name="duck_worried">Pío está preocupado</string>
+    <string name="duck_sad">Pío está triste</string>
+    <string name="duck_ears">Pío se tapa la cabeza con las alas</string>
+
+    <string name="duck_tap_1">¡Jiji! Me haces cosquillas en la cola.</string>
+    <string name="duck_tap_2">Cuac… las caricias suaves me encantan.</string>
+    <string name="duck_tap_3">¡Jiji! ¡Mueve que mueve la colita!</string>
+    <string name="duck_tap_4">Shh, flotemos juntos, bajito.</string>
+    <string name="duck_tap_5">Caricias suaves, voces suaves. Cuac.</string>
+</resources>
