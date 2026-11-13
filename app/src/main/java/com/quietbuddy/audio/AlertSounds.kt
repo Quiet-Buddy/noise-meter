@@ -54,6 +54,7 @@ object AlertSounds {
         Character.BUDDY -> buddySounds
         Character.KITTEN -> kittenSounds
         Character.DUCK -> duckSounds
+        Character.ROBOT -> duckSounds // TODO(robot): placeholder until Astro's own sounds exist
     }
 
     private class Recipe(val seconds: Double, val gain: Double, val drive: Double, val draw: Buf.() -> Unit)

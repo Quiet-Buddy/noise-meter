@@ -108,6 +108,8 @@ fun DrawScope.drawAccessories(
             Accessory.CAP -> placed(anchors.hatAt, anchors.hatScale, anchors.hatTilt) { backwardsCap(outline) }
             // Drawn in two halves around the body by the art itself, see drawSwimRing.
             Accessory.SWIM_RING -> Unit
+            // TODO(robot): placeholder until Astro's own accessory drawings exist
+            Accessory.PROPELLER_CAP, Accessory.STAR_GLASSES, Accessory.BOW_TIE, Accessory.PLANET_RING -> Unit
         }
     }
 }

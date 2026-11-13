@@ -118,12 +118,17 @@ object CharacterLooks {
             CharacterStyle.DUCK_LEMON -> DuckPalette
             CharacterStyle.DUCK_CLOUD -> DuckCloudPalette
             CharacterStyle.DUCK_HAZEL -> DuckHazelPalette
+            // TODO(robot): placeholder until Astro's own palettes exist
+            CharacterStyle.ROBOT_PEARL -> DuckCloudPalette
+            CharacterStyle.ROBOT_LILAC -> DuckCloudPalette
+            CharacterStyle.ROBOT_SKY -> DuckCloudPalette
         }
         CharacterLook(
             art = when (style.character) {
                 Character.BUDDY -> BuddyArt
                 Character.KITTEN -> KittenArt
                 Character.DUCK -> DuckArt
+                Character.ROBOT -> DuckArt // TODO(robot): placeholder until Astro's own art exists
             },
             palette = palette,
         )

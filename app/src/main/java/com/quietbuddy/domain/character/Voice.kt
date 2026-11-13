@@ -43,5 +43,6 @@ object Voices {
         Character.BUDDY -> BuddyVoice
         Character.KITTEN -> KittenVoice
         Character.DUCK -> DuckVoice
+        Character.ROBOT -> DuckVoice // TODO(robot): placeholder until Astro's own voice exists
     }
 }

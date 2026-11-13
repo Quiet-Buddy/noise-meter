@@ -9,6 +9,9 @@
     <string name="style_duck_lemon">Pío Limón</string>
     <string name="style_duck_cloud">Pío Nube</string>
     <string name="style_duck_hazel">Pío Avellana</string>
+    <string name="style_robot_pearl">Astro Perla</string>
+    <string name="style_robot_lilac">Astro Lila</string>
+    <string name="style_robot_sky">Astro Cielo</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, bloqueado. %2$s</string>
@@ -66,6 +69,10 @@
     <string name="acc_goggles">Gafas de natación</string>
     <string name="acc_bandana">Pañuelo</string>
     <string name="acc_swim_ring">Flotador</string>
+    <string name="acc_propeller_cap">Gorra con hélice</string>
+    <string name="acc_star_glasses">Gafas de estrella</string>
+    <string name="acc_bow_tie">Pajarita</string>
+    <string name="acc_planet_ring">Anillo planetario</string>
 
     <plurals name="accessory_next_hint">
         <item quantity="one">Falta %1$d minuto en calma para desbloquear: %2$s</item>

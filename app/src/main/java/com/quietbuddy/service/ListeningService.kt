@@ -257,6 +257,7 @@ class ListeningService : LifecycleService() {
                     Character.BUDDY -> R.drawable.ic_buddy_notification
                     Character.KITTEN -> R.drawable.ic_kitten_notification
                     Character.DUCK -> R.drawable.ic_duck_notification
+                    Character.ROBOT -> R.drawable.ic_duck_notification // TODO(robot): placeholder until Astro's own icon exists
                 }
             )
             .setContentTitle(getString(Voices.of(settings.character).listeningTitle, settings.roomName))

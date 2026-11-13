@@ -12,7 +12,8 @@ package com.quietbuddy.core
 enum class Character(val key: String) {
     BUDDY("buddy"),
     KITTEN("kitten"),
-    DUCK("duck");
+    DUCK("duck"),
+    ROBOT("robot");
 
     companion object {
         val DEFAULT = BUDDY
