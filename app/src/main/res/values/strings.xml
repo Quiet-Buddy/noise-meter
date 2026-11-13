@@ -115,4 +115,5 @@
     <string name="home_pat_character">Pat the character</string>
     <string name="home_full_screen">Full screen</string>
     <string name="home_full_screen_exit_hint">Tap to exit</string>
+    <string name="default_room_name">Living room</string>
 </resources>

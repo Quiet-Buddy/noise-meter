@@ -12,6 +12,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.quietbuddy.R
 import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.Character
@@ -22,6 +23,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onStart
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -51,14 +53,26 @@ private object Keys {
 
 @Singleton
 class DataStoreSettingsRepository @Inject constructor(
-    @ApplicationContext context: Context,
+    @ApplicationContext private val context: Context,
 ) : SettingsRepository {
 
     private val store: DataStore<Preferences> = context.settingsDataStore
 
     override val settings: Flow<AppSettings> = store.data
+        .onStart { persistDefaultRoomName() }
         .catch { e -> if (e is IOException) emit(emptyPreferences()) else throw e }
         .map { it.toAppSettings() }
+
+    /** The room is created once, named in the language at that moment, and never re-translated. */
+    private suspend fun persistDefaultRoomName() {
+        runCatching {
+            store.edit { prefs ->
+                if (prefs[Keys.ROOM_NAME] == null) {
+                    prefs[Keys.ROOM_NAME] = context.getString(R.string.default_room_name)
+                }
+            }
+        }
+    }
 
     override suspend fun update(transform: (AppSettings) -> AppSettings) {
         store.edit { prefs ->
@@ -67,7 +81,7 @@ class DataStoreSettingsRepository @Inject constructor(
     }
 
     private fun Preferences.toAppSettings(): AppSettings {
-        val d = AppSettings()
+        val d = AppSettings(roomName = context.getString(R.string.default_room_name))
         val presetRaw = this[Keys.PRESET]
         val preset = when (presetRaw) {
             null -> d.preset

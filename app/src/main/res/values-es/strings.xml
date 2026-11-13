@@ -115,4 +115,5 @@
     <string name="home_pat_character">Acariciar al personaje</string>
     <string name="home_full_screen">Pantalla completa</string>
     <string name="home_full_screen_exit_hint">Toca para salir</string>
+    <string name="default_room_name">Salón</string>
 </resources>
