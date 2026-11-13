@@ -165,7 +165,11 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
         if (hasMicPermission(context)) viewModel.start()
     }
 
-    val background by animateColorAsState(palette.screenBackground(state.mood), tween(600), label = "background")
+    // The background follows the dB continuously (see LoudWash); the short tween only smooths the 100 ms updates.
+    val wash = loudWash(state.db?.toFloat(), state.thresholds, palette.background)
+    val washTop by animateColorAsState(wash.top, tween(400), label = "washTop")
+    val washBottom by animateColorAsState(wash.bottom, tween(400), label = "washBottom")
+    val background = Brush.verticalGradient(listOf(washTop, washBottom))
     // Kept here (not in MainActivity) so it survives rotation; MainActivity only needs it to hide the tabs.
     var fullScreen by rememberSaveable { mutableStateOf(false) }
     FullScreenEffect(fullScreen, onFullScreenChange)

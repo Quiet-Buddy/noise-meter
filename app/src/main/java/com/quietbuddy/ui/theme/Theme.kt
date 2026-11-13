@@ -40,10 +40,7 @@ data class Palette(
     val duck: DuckColors = DuckColors.Lemon,
     /** Astro's shell, screen and glow colours. Unused by the other characters. */
     val robot: RobotColors = RobotColors.Pearl,
-) {
-    /** Screen background for [m]: the alarm tint for the loud moods, the palette's own otherwise. */
-    fun screenBackground(m: Mood?) = when (m) { Mood.SAD, Mood.EARS_COVERED -> QB.TooLoudBackground; else -> background }
-}
+)
 
 /** Colours from the mockups. Use these, not hard-coded hex values. */
 val BuddyPalette = Palette(
@@ -150,7 +147,6 @@ object QB {
     val TooLoud = Color(0xFFD9513F)
     val TooLoudSoft = Color(0xFFFAD6CF)
     val TooLoudText = Color(0xFF8A2E21)
-    val TooLoudBackground = Color(0xFFFFF1EE)
 
     fun bandColor(m: Mood) = when (m) { Mood.HAPPY, Mood.FINE -> Calm; Mood.WORRIED -> Loud; else -> TooLoud }
     fun bandSoft(m: Mood) = when (m) { Mood.HAPPY, Mood.FINE -> CalmSoft; Mood.WORRIED -> LoudSoft; else -> TooLoudSoft }
