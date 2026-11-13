@@ -8,7 +8,7 @@
 
     <string name="robot_happy_1">Bip… nire sentsoreek diote dena lasai dagoela.</string>
     <string name="robot_happy_2">Dena lasai dago. Airean flotatzeko ordua.</string>
-    <string name="robot_happy_3">Bop… nire zirkuituen zurrumurrua entzuten dut. Zer bakea.</string>
+    <string name="robot_happy_3">Bop… nire zirkuituen burrunba entzuten dut. Zein lasai!</string>
     <string name="robot_fine_1">Ederki. Denak ahopeka berriketan ari dira.</string>
     <string name="robot_fine_2">Bip! Zarata kopuru egokia.</string>
     <string name="robot_fine_3">Ondo hitz egin, ondo entzun. Bop.</string>
@@ -16,7 +16,7 @@
     <string name="robot_worried_2">Antena dardarka dut. Jaitsi dezakegu bolumena?</string>
     <string name="robot_worried_3">Jolas dezakegu pixka bat isilago?</string>
     <string name="robot_sad_1">Bip… ahots baxuan hitz egin dezakegu?</string>
-    <string name="robot_sad_2">Zarata asko da. Zirkuituak dardarka ditut.</string>
+    <string name="robot_sad_2">Zarata gehiegi dago. Zirkuituak dardarka ditut.</string>
     <string name="robot_sad_3">Mesedez, lagundu iezadazu isiltasuna aurkitzen.</string>
     <string name="robot_ears_1">Bip! Zarata handia! Belarriak estaltzen ditut!</string>
     <string name="robot_ears_2">Ene! Eskuak belarrien gainean! Isilik egongo gara?</string>
@@ -27,7 +27,7 @@
     <string name="robot_fine">Astro ondo dago</string>
     <string name="robot_worried">Astro kezkatuta dago</string>
     <string name="robot_sad">Astro triste dago</string>
-    <string name="robot_ears">Astro eskuekin belarrietako sentsoreak estaltzen ari da</string>
+    <string name="robot_ears">Astro belarriak eskuekin estaltzen ari da</string>
 
     <string name="robot_tap_1">Hihi! Antena kilikatzen didazu.</string>
     <string name="robot_tap_2">Bip bop! Laztan leunak dira nire gogokoenak.</string>

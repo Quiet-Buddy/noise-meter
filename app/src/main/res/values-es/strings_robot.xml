@@ -19,7 +19,7 @@
     <string name="robot_sad_2">Hay mucho ruido. Me tiemblan los circuitos.</string>
     <string name="robot_sad_3">Por favor, ayúdame a encontrar algo de calma.</string>
     <string name="robot_ears_1">¡Bip! ¡Qué ruido! ¡Me tapo los oídos!</string>
-    <string name="robot_ears_2">¡Uy! ¡Manos sobre mis orejas! ¿Hacemos silencio?</string>
+    <string name="robot_ears_2">¡Uy! ¡Me tapo las orejas con las manos! ¿Hacemos silencio?</string>
     <string name="robot_ears_3">¡Qué ruidazo! ¡Hagamos una pausa tranquila!</string>
 
     <string name="robot_asleep">Astro está dormido, recargando su batería</string>
@@ -27,11 +27,11 @@
     <string name="robot_fine">Astro está bien</string>
     <string name="robot_worried">Astro está preocupado</string>
     <string name="robot_sad">Astro está triste</string>
-    <string name="robot_ears">Astro se tapa los sensores de las orejas con las manos</string>
+    <string name="robot_ears">Astro se tapa las orejas con las manos</string>
 
     <string name="robot_tap_1">¡Jiji! Me haces cosquillas en la antena.</string>
     <string name="robot_tap_2">Bip bop… las caricias suaves me encantan.</string>
-    <string name="robot_tap_3">¡Jiji! ¡Mueve que mueve la antena!</string>
+    <string name="robot_tap_3">¡Jiji! ¡Mira cómo se mueve mi antena!</string>
     <string name="robot_tap_4">Shh, flotemos juntos, bajito.</string>
     <string name="robot_tap_5">Caricias suaves, voces suaves. Bop.</string>
 </resources>
