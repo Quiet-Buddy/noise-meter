@@ -20,7 +20,9 @@ object DataModule {
     @Provides
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): QuietBuddyDatabase =
-        Room.databaseBuilder(context, QuietBuddyDatabase::class.java, "quietbuddy.db").build()
+        Room.databaseBuilder(context, QuietBuddyDatabase::class.java, "quietbuddy.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
 
     @Provides
     fun provideHistoryDao(db: QuietBuddyDatabase): HistoryDao = db.historyDao()

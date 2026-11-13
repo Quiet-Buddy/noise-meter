@@ -3,7 +3,6 @@
     <string name="duck_name">Pío</string>
     <string name="duck_listening_title">Pío está escuchando · %1$s</string>
     <string name="duck_greeting">¡Cuac! Soy Pío.</string>
-    <string name="duck_challenge_won">¡Pío chapotea de alegría! Lo has conseguido.</string>
 
     <string name="duck_sleeping">Zzz… toca el micrófono para despertarme.</string>
 

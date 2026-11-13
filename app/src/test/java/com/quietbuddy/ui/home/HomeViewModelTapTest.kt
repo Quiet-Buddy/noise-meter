@@ -63,7 +63,6 @@ class HomeViewModelTapTest {
         },
         object : HistoryRepository {
             override suspend fun recordMinute(minute: MinuteAggregate, dominantMood: Mood) = Unit
-            override suspend fun recordChallenge(startedAtMs: Long, won: Boolean, peakDb: Float) = Unit
             override fun hourly(epochDay: Long): Flow<List<HourBar>> = flowOf(emptyList())
             override fun lastDays(days: Int): Flow<List<DaySummary>> = flowOf(emptyList())
             override suspend fun prune(nowMs: Long) = Unit

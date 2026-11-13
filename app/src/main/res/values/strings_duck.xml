@@ -3,7 +3,6 @@
     <string name="duck_name">Pip</string>
     <string name="duck_listening_title">Pip is listening · %1$s</string>
     <string name="duck_greeting">Quack! I\'m Pip.</string>
-    <string name="duck_challenge_won">Pip splashes with joy! You did it.</string>
 
     <string name="duck_sleeping">Zzz… tap the microphone to wake me up.</string>
 

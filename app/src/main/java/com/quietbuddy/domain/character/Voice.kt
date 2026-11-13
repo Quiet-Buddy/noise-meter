@@ -27,9 +27,6 @@ interface Voice {
     /** Onboarding introduction, e.g. "Hi! I'm Buddy." */
     @get:StringRes val greeting: Int
 
-    /** Shown when a Quiet Challenge is won. */
-    @get:StringRes val challengeWon: Int
-
     /** Notification title while listening; takes the room name as %1$s. */
     @get:StringRes val listeningTitle: Int
 

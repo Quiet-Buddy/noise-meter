@@ -28,11 +28,10 @@ interface SettingsRepository {
 /** Implemented in the data package on Room. All times epoch ms, days are LocalDate.toEpochDay() in the system zone. */
 interface HistoryRepository {
     suspend fun recordMinute(minute: MinuteAggregate, dominantMood: Mood)
-    suspend fun recordChallenge(startedAtMs: Long, won: Boolean, peakDb: Float)
     /** Hourly energy-averaged levels for one day, only hours that have data, ascending. */
     fun hourly(epochDay: Long): Flow<List<HourBar>>
     /** Summaries for the last [days] days ending today, oldest first; days without data have null fields and 0 counts. */
     fun lastDays(days: Int): Flow<List<DaySummary>>
-    /** Deletes minute rows older than 35 days and challenge rows older than 365 days. */
+    /** Deletes minute rows older than 35 days. */
     suspend fun prune(nowMs: Long)
 }
