@@ -38,6 +38,8 @@ data class Palette(
     val cream: Color = Color(0xFFFFF3E2),
     /** Duck plumage, bill and markings. Unused by the other characters. */
     val duck: DuckColors = DuckColors.Lemon,
+    /** Astro's shell, screen and glow colours. Unused by the other characters. */
+    val robot: RobotColors = RobotColors.Pearl,
 ) {
     /** Screen background for [m]: the alarm tint for the loud moods, the palette's own otherwise. */
     fun screenBackground(m: Mood?) = when (m) { Mood.SAD, Mood.EARS_COVERED -> QB.TooLoudBackground; else -> background }
