@@ -120,7 +120,7 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-h
 <div class="wrap">
   <header>
     <h1>Duck mood motion</h1>
-    <p class="lede">Meet Pip the duck (Pío in Spanish, Txito in Basque), floating on his pond. Tap a mood and watch him move into it, in any order. When the room is calm, tap Pip (or press P) to pat him. Number keys 1–6 switch moods.</p>
+    <p class="lede">Meet Pip the duck (Pío in Spanish, Txito in Basque), floating on her pond. Tap a mood and watch her move into it, in any order. When the room is calm, tap Pip (or press P) to pat her. Number keys 1–6 switch moods.</p>
   </header>
 
   <div class="main">
@@ -161,6 +161,7 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-h
         <label class="toggle"><input type="checkbox" class="acc" value="cap"><div><b>Backwards cap</b><span>Head · 900 calm minutes</span></div></label>
         <label class="toggle"><input type="checkbox" class="acc" value="goggles"><div><b>Swim goggles</b><span>Face · 1,200 calm minutes</span></div></label>
         <label class="toggle"><input type="checkbox" class="acc" value="bandana"><div><b>Bandana</b><span>Neck · 1,350 calm minutes</span></div></label>
+        <label class="toggle"><input type="checkbox" class="acc" value="ring"><div><b>Swim ring</b><span>Body · 1,400 calm minutes</span></div></label>
       </div>
 
       <div class="group">
@@ -175,7 +176,7 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-h
         <div class="slider">
           <div class="slider-head"><label for="upMs">Getting louder</label><output id="upOut" for="upMs">180 ms</output></div>
           <input type="range" id="upMs" min="60" max="800" step="10" value="180">
-          <small>Fast: the wings snap up over the sides of his head.</small>
+          <small>Fast: the wings snap up over the sides of her head.</small>
         </div>
         <div class="slider">
           <div class="slider-head"><label for="downMs">Calming down</label><output id="downOut" for="downMs">900 ms</output></div>
@@ -193,11 +194,11 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-h
         <div class="group-title">What changes</div>
         <ul class="notes">
           <li><b>Head</b> tilts up and bobs when happy, stretches up when worried, droops when sad and tucks in to sleep.</li>
-          <li><b>Wings</b> flap when happy, hang when sad, and clamp over both sides of his head when too loud.</li>
+          <li><b>Wings</b> flap when happy, hang when sad, and clamp over both sides of her head when too loud.</li>
           <li><b>Feathers</b> ruffle and shiver when it gets too loud.</li>
           <li><b>Tail</b> perks up and wags when happy or patted, droops when sad.</li>
-          <li><b>Bill</b> opens in a smile or a quack and droops when he’s unhappy; tears, sweat, sparkles and Z’s fade in.</li>
-          <li><b>Water</b>: he bobs on the pond, ripples spread out and his feet paddle underneath, faster when he’s upset.</li>
+          <li><b>Bill</b> opens in a smile or a quack and droops when she’s unhappy; tears, sweat, sparkles and Z’s fade in.</li>
+          <li><b>Water</b>: she bobs on the pond, ripples spread out and her feet paddle underneath, faster when she’s upset.</li>
         </ul>
       </div>
     </aside>
@@ -209,20 +210,16 @@ h1 { font-family: var(--font-display); font-weight: 800; font-size: 30px; line-h
 'use strict';
 
 // ---------- palette (character art stays the same in both themes) ----------
-// Lemon is Pip's own colour; the others are candidates for the two unlockable styles.
-// Optional parts: head, headShade, headShine, neckRing, chest, speculum (the blue wing patch), bill colours.
+// Pip is lemon by default; Cloud (white) and Hazel (a mallard hen) are the two unlockable styles.
+// Optional parts: head, headShade, headShine (a different head colour), crown, eyeStripe, mottle, billSaddle,
+// speculum (the blue wing feather), tail, tailLine, bill, billLow, billTip, feet, cheek (cheek blush strength).
 const STYLES = {
   lemon:     { name: 'Lemon',     body: '#FFD43B', wing: '#F9C21F', shade: '#E2A400', belly: '#FFF1A6', unlock: 'Free with Pip' },
-  cloud:     { name: 'Cloud',     body: '#FBF8EF', wing: '#ECE5D3', shade: '#CDC3AA', belly: '#FFFFFF', unlock: 'Candidate' },
-  // A mallard drake: green head with a blue sheen, white neck ring, chestnut chest, pale grey flanks with fine wavy
-  // markings, darker back, white tail with black curled feathers over a black rump, blue wing patch, orange feet.
-  mallard:   { name: 'Mallard',   body: '#DCDCD5', wing: '#B3A794', shade: '#8F877A', belly: '#F2F2EE',
-               head: '#2E8E58', headShade: '#1C6640', headShine: '#9BE3BA', headSheen: '#3B5FC0', neckRing: '#FFFFFF',
-               chest: '#93452A', chestShade: '#6E2F1A', back: '#9C9384', vermiculation: true,
-               tail: '#F6F6F2', tailLine: '#C9C9C2', rump: '#2A2622', curl: '#2A2622', speculum: '#3F6FD8',
-               bill: '#E8C53A', billLow: '#CFA82A', billTip: '#3D2B10', feet: '#FF8A1F', cheek: 0.3, unlock: 'Candidate' },
-  bubblegum: { name: 'Bubblegum', body: '#FFA6CB', wing: '#F98DB8', shade: '#E0659A', belly: '#FFD6E7', unlock: 'Candidate' },
-  sky:       { name: 'Sky',       body: '#8FD3F5', wing: '#72C2EC', shade: '#4A9FD0', belly: '#D6F0FC', unlock: 'Candidate' },
+  cloud:     { name: 'Cloud',     body: '#FBF8EF', wing: '#ECE5D3', shade: '#CDC3AA', belly: '#FFFFFF', unlock: '1,050 calm minutes' },
+  hazel:     { name: 'Hazel',     body: '#C9A57A', wing: '#A9845A', shade: '#8C6A45', belly: '#E6CDA8',
+               head: '#C29D70', headShade: '#9C774C', headShine: '#EBD6B4', crown: '#7A5A38', eyeStripe: '#5A4128',
+               mottle: '#8A6540', billSaddle: '#4A3A2A', speculum: '#3F6FD8', tail: '#B89468', tailLine: '#8A6540',
+               bill: '#EE8F30', billLow: '#CF7621', billTip: '#3D2B10', feet: '#F28C28', cheek: 0.7, unlock: '1,500 calm minutes' },
 };
 let S = STYLES.lemon;
 const BILL = { bill: '#FF9A1F', billLow: '#F07A12', billTip: '#E8780E' };
@@ -377,7 +374,7 @@ function foot(cx, cy, flip, angle) {
 // ---------- accessories ----------
 // Each is drawn around an anchor the art supplies (the app's AccessoryAnchors): the top of the head (with the head's
 // tilt and scale), the two eye centres, and the middle of the neck ring.
-const ACC = { cap: '#FFFFFF', capPink: '#F28B8B', capBlue: '#7FB8E8', goggles: '#22A6B3', lens: '#BFE8F2', bandana: '#E2453C' };
+const ACC = { cap: '#FFFFFF', capPink: '#F28B8B', capBlue: '#7FB8E8', goggles: '#22A6B3', lens: '#BFE8F2', bandana: '#E2453C', ring: '#E8473F', ringWhite: '#FFFFFF' };
 let WORN = new Set();
 function cap(at, tilt, sc) {
   // a backwards cap: the crown hugs the top of the head, the peak points back over the nape
@@ -404,6 +401,15 @@ function goggles(near, far, r, tilt, sc) {
     o += ell(c[0], c[1], rx + 1.5, r + 1.5, 'none', false, 0, `stroke="${ACC.goggles}" stroke-width="4"`);
     o += ink(`M ${f(c[0] - rx * 0.45)} ${f(c[1] + r * 0.1)} Q ${f(c[0] - rx * 0.4)} ${f(c[1] - r * 0.45)} ${f(c[0])} ${f(c[1] - r * 0.55)}`, 2.6, '#FFFFFF', 'opacity="0.85"');
   }
+  return o;
+}
+// a striped swim ring floating at the waterline: its back half goes behind the body, its front half in front
+function ringHalf(front) {
+  // a fat tube hugging the body: its middle line runs just outside the body's sides
+  const cx = 99, cy = 166, rx = 70, ry = 14;
+  const d = front ? `M ${cx - rx} ${cy} A ${rx} ${ry} 0 0 0 ${cx + rx} ${cy}` : `M ${cx - rx} ${cy} A ${rx} ${ry} 0 0 1 ${cx + rx} ${cy}`;
+  let o = ink(d, 25, C.outline) + ink(d, 19.5, ACC.ringWhite) + ink(d, 19.5, ACC.ring, 'stroke-dasharray="22 22" stroke-linecap="butt"');
+  if (front) o += ink(`M ${cx - rx * 0.72} ${cy + ry * 0.35} A ${rx} ${ry} 0 0 0 ${cx - rx * 0.12} ${cy + ry * 0.62}`, 3, '#FFFFFF', 'opacity="0.75"');
   return o;
 }
 function bandana(c) {
@@ -451,6 +457,7 @@ function render(p, fx) {
   water += foot(76, 186, false, kick) + foot(126, 188, true, -kick);
   water += ell(100, 184, 76, 12, C.water, false, 0, 'opacity="0.16"');
 
+  if (WORN.has('ring')) o += ringHalf(false);
   // far wing: tucked behind the body, rising behind the head when it gets too loud
   if (cover > 0.02) {
     const fw = FAR_REST.map((q, i) => { const a = B(q[0], q[1]), b = at(FAR_COVER[i]); return [lerp(a[0], b[0], cover), lerp(a[1], b[1], cover)]; });
@@ -464,19 +471,15 @@ function render(p, fx) {
   let b = path(bodyD, S.body, 3.5);
   b += fillPath('M 40 162 Q 100 184 162 160 Q 100 172 40 162 Z', S.shade, 'opacity="0.45"');
   if (S.tail) {
-    // white tail over a black rump; the body outline is drawn again on top below
+    // the tail fill; the body outline is drawn again on top below
     b += fillPath(`M 52 117 Q 34 ${f(108 + td * 0.5)} ${f(24 - td * 0.25)} ${f(96 + td)} Q 22 ${f(118 + td * 0.5)} 32 140 Q 38 126 52 117 Z`, S.tail);
-    b += fillPath('M 52 117 Q 38 126 32 140 Q 36 150 44 154 Q 42 134 58 121 Z', S.rump);
   }
-  if (S.back) b += fillPath('M 54 119 Q 72 126 94 119 Q 100 124 94 126 Q 72 134 56 126 Z', S.back, 'opacity="0.6"');
-  else b += ell(70, 128, 18, 4.5, S.belly, false, 0, 'opacity="0.6" transform="rotate(-12 70 128)"');
-  if (S.vermiculation) b += ink('M 64 162 q 5 -2.5 10 0 t 10 0 t 10 0 M 92 168 q 5 -2.5 10 0 t 10 0 M 112 160 q 5 -2.5 10 0 t 10 0 M 58 152 q 4 -2 8 0', 1.3, S.shade, 'opacity="0.55"');
-  b += S.chest ? fillPath('M 116 121 Q 146 110 160 126 Q 172 144 160 160 Q 140 156 126 140 Q 118 132 116 121 Z', S.chest) : ell(142, 148, 17, 13, S.belly, false, 0, 'opacity="0.8"');
+  b += ell(70, 128, 18, 4.5, S.belly, false, 0, 'opacity="0.6" transform="rotate(-12 70 128)"');
+  b += ell(142, 148, 17, 13, S.belly, false, 0, 'opacity="0.8"');
+  if (S.mottle) b += ink('M 60 140 l 4 4 l 4 -4 M 76 148 l 4 4 l 4 -4 M 96 154 l 4 4 l 4 -4 M 66 160 l 4 4 l 4 -4 M 86 164 l 4 4 l 4 -4 M 112 162 l 4 4 l 4 -4 M 126 150 l 4 4 l 4 -4 M 50 128 l 3 3 l 3 -3 M 138 160 l 3 3 l 3 -3', 2, S.mottle, 'opacity="0.8"');
   b += ink(`M 46 122 Q 36 ${f(112 + td * 0.6)} ${f(30 - td * 0.15)} ${f(102 + td * 0.9)} M 40 132 Q 32 ${f(122 + td * 0.4)} ${f(28 - td * 0.1)} ${f(114 + td * 0.6)}`, 2.2, S.tailLine || S.shade);
-  b += ink('M 140 136 q 4 4 8 0 M 150 146 q 4 4 8 0 M 138 150 q 4 4 8 0 M 150 160 q 4 3 8 -1', 2, S.chestShade || S.shade, 'opacity="0.8"');
-  if (S.tail || S.chest) b += ink(bodyD, 3.5);
-  // a drake's curled tail feathers: a small flick, kept low so it doesn't read as a handle
-  if (S.curl) b += ink(`M 52 119 Q 49 ${f(112 + td * 0.3)} 53.5 ${f(109 + td * 0.3)} Q 57.5 ${f(108 + td * 0.3)} 56.5 ${f(112 + td * 0.3)} M 57 120 Q 57 ${f(115 + td * 0.3)} 60.5 ${f(114 + td * 0.3)}`, 2.8, S.curl);
+  b += ink('M 140 136 q 4 4 8 0 M 150 146 q 4 4 8 0 M 138 150 q 4 4 8 0 M 150 160 q 4 3 8 -1', 2, S.shade, 'opacity="0.8"');
+  if (S.tail) b += ink(bodyD, 3.5);
   b += ell(118, 122, 30, 6, S.shade, false, 0, 'opacity="0.35"');
   if (p.poof > 0.02) b += ink('M 52 116 L 46 106 M 66 120 L 63 109 M 40 112 L 32 104', 3, C.outline, op(p.poof));
   o += `<g transform="${bodyT}">${b}</g>`;
@@ -493,11 +496,11 @@ function render(p, fx) {
   if (hb[1] < nb[1] - 4) {
     const cb = [(nb[0] + hb[0]) / 2 - 2, (nb[1] + hb[1]) / 2], cf = [(nf[0] + hf[0]) / 2 + 2, (nf[1] + hf[1]) / 2 + 2];
     // the fill reaches a little into the body to hide the body's outline under the neck
-    o += fillPath(`M ${f(nb[0])} ${f(nb[1] + (S.neckRing ? 5 : 8))} L ${pt(nb)} Q ${pt(cb)} ${pt(hb)} L ${pt(hbi)} L ${pt(hfi)} L ${pt(hf)} Q ${pt(cf)} ${pt(nf)} L ${f(nf[0])} ${f(nf[1] + (S.neckRing ? 5 : 8))} Z`, head);
+    // the part inside the body takes the body colour; the neck itself takes the head colour
+    o += fillPath(`M ${f(nb[0])} ${f(nb[1] + 8)} L ${pt(nb)} L ${pt(nf)} L ${f(nf[0])} ${f(nf[1] + 8)} Z`, S.body);
+    o += fillPath(`M ${pt(nb)} Q ${pt(cb)} ${pt(hb)} L ${pt(hbi)} L ${pt(hfi)} L ${pt(hf)} Q ${pt(cf)} ${pt(nf)} Q ${pt(B(118, 109))} ${pt(nb)} Z`, head);
     o += ink(`M ${pt(nb)} Q ${pt(cb)} ${pt(hb)} M ${pt(hf)} Q ${pt(cf)} ${pt(nf)}`, 3.5);
   }
-  // a mallard's white neck ring sits where the neck meets the body, along the body's top edge
-  if (S.neckRing) o += ink(`M ${pt(nb)} Q ${pt(B(118, 109))} ${pt(nf)}`, 7, S.neckRing);
   const ringMid = B(118, 109), collar = [0.25 * nb[0] + 0.5 * ringMid[0] + 0.25 * nf[0], 0.25 * nb[1] + 0.5 * ringMid[1] + 0.25 * nf[1]];
   if (WORN.has('bandana')) o += bandana(collar);
 
@@ -505,7 +508,8 @@ function render(p, fx) {
   SW = 1 / k;
   let h = '';
   h += fillPath('M 75.5 70 Q 78 97 106 101.5 Q 86 94 81 70 Z', headShade, 'opacity="0.3"');
-  if (S.headSheen) h += fillPath('M 90 34 Q 76 50 78 72 Q 84 54 100 40 Z', S.headSheen, 'opacity="0.22"');
+  if (S.crown) h += fillPath('M 80 44 Q 92 26 114 26 Q 138 27 148 46 Q 118 34 80 44 Z', S.crown, 'opacity="0.85"');
+  if (S.eyeStripe) h += ink('M 75 60 Q 84 58 89 58 M 107 60 Q 111 66 113 74', 4, S.eyeStripe, 'opacity="0.9"');
   h += ell(92, 36, 9, 4.5, headShine, false, 0, 'opacity="0.85" transform="rotate(-35 92 36)"') + ell(81, 46, 2.4, 2.4, headShine, false, 0, 'opacity="0.8"');
   const cheekA = p.cheek * (S.cheek ?? 1);
   h += ell(90, 80, 8.5, 5.5, C.cheek, false, 0, op(cheekA));
@@ -551,6 +555,7 @@ function render(p, fx) {
   h += path(`M 112 78 Q ${f(bx(124))} 72 ${f(bx(140))} 74.5 Q ${f(bx(158))} 77 ${f(bx(170))} 74 Q ${f(bx(181))} 75 ${f(bx(176))} 84 Q ${f(bx(170))} 90 ${f(bx(150))} 90 Q ${f(bx(128))} 90 114 85 Z`, C.bill, 3);
   h += fillPath(`M ${f(bx(168))} 75 Q ${f(bx(178))} 75 ${f(bx(176))} 83 Q ${f(bx(171))} 82 ${f(bx(168))} 75 Z`, C.billTip);
   h += fillPath(`M 114 85 Q ${f(bx(128))} 90 ${f(bx(150))} 90 Q ${f(bx(166))} 90 ${f(bx(172))} 86 Q ${f(bx(150))} 87 114 82 Z`, C.billLow, 'opacity="0.55"');
+  if (S.billSaddle) h += fillPath(`M ${f(bx(128))} 76 Q ${f(bx(146))} 73 ${f(bx(160))} 77 Q ${f(bx(146))} 84 ${f(bx(130))} 81 Z`, S.billSaddle, 'opacity="0.85"');
   h += ink(`M ${f(bx(120))} 77 Q ${f(bx(140))} 77 ${f(bx(162))} 78`, 2.2, '#FFFFFF', 'opacity="0.55"');
   h += ink(`M ${f(bx(139))} 79.5 L ${f(bx(142))} 79.5 M ${f(bx(150))} 80 L ${f(bx(153))} 80`, 2.4, C.nostril);
   h += '</g>';
@@ -589,6 +594,7 @@ function render(p, fx) {
     SW = 1 / s;
     let w = fillPath('M 124 132 Q 106 116 80 124 Q 96 136 122 140 Z', S.belly, 'opacity="0.45"');
     w += ink('M 82 126 Q 88 132 94 130 Q 100 136 106 134 Q 112 140 120 138', 2, S.shade);
+    // dark flight feathers at the back of the folded wing, tapering to a point toward the front
     // the blue patch is a flight feather at the back of the folded wing, tapering to a point toward the front
     if (S.speculum) {
       w += fillPath('M 92 143.5 Q 76 138.4 58 139 Q 54 142 52 145 Q 60 149 63 149 Q 78 149.6 92 143.5 Z', S.speculum);
@@ -603,6 +609,8 @@ function render(p, fx) {
     o += `<g ${op(coverA)} transform="${headT}">` + ink('M 70 100 Q 66 70 64 44 M 80 96 Q 80 60 72 34', 2.2, S.shade) + '</g>';
     SW = 1;
   }
+
+  if (WORN.has('ring')) o += ringHalf(true);
 
   // extras
   if (p.sweat > 0.02) { const sp = Hm(62, 30); o += drop(sp[0], sp[1], 13 - 2 * p.shake, p.sweat); }
@@ -620,7 +628,7 @@ function render(p, fx) {
     o += ink(`M ${f(x - R - 22)} ${f(y - 18)} L ${f(x - R - 36)} ${f(y - 26)} M ${f(x - R - 6)} ${f(y - R - 6)} L ${f(x - R - 16)} ${f(y - R - 18)} M ${f(x + R + 26)} ${f(y - 18)} L ${f(x + R + 40)} ${f(y - 26)} M ${f(x + R + 8)} ${f(y - R - 6)} L ${f(x + R + 16)} ${f(y - R - 18)}`, 4, C.loud, op(p.shock * fl));
   }
 
-  // the waterline sits in front of his bottom so he floats, with a few glints
+  // the waterline sits in front of her bottom so she floats, with a few glints
   const front = ink('M 26 174 Q 60 179 94 176 M 106 176 Q 142 179 176 173', 3, C.water, 'opacity="0.85"')
     + ink('M 36 183 L 44 183 M 160 182 L 165 182 M 52 189 L 56 189', 2.2, '#FFFFFF', 'opacity="0.9"');
 

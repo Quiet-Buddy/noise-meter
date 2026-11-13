@@ -5,8 +5,8 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * The duck's own drawing colours, beyond the shared ones in [Palette] (outline, body, cheek, ...).
- * The optional markings are null for a plain duck; the mallard sets them all.
- * Values come from the approved prototype, docs/design/duck-motion.html.
+ * The optional markings are null for a plain duck. Values come from the approved prototype,
+ * docs/design/duck-motion.html.
  */
 @Immutable
 data class DuckColors(
@@ -18,38 +18,37 @@ data class DuckColors(
     val billTip: Color = Color(0xFFE8780E),
     /** Webbed feet; the bill colour unless set. */
     val feet: Color = bill,
-    /** How strongly the cheeks blush, 0..1 (pink reads grey on a green head). */
+    /** How strongly the cheeks blush, 0..1. */
     val cheekStrength: Float = 1f,
-    // Mallard markings
+    /** A head (and neck) coloured differently from the body, with its own shading and shine. */
     val head: Color? = null,
     val headShade: Color? = null,
     val headShine: Color? = null,
-    val headSheen: Color? = null,
-    val neckRing: Color? = null,
-    val chest: Color? = null,
-    val chestShade: Color? = null,
-    val back: Color? = null,
-    val vermiculation: Boolean = false,
+    /** Mallard hen markings: a darker crown, a stripe through the eye, brown chevrons on the body, a dark patch
+     *  on the bill and the blue wing feather (speculum). */
+    val crown: Color? = null,
+    val eyeStripe: Color? = null,
+    val mottle: Color? = null,
+    val billSaddle: Color? = null,
+    val speculum: Color? = null,
+    /** A tail coloured differently from the body, and the feather lines on it. */
     val tail: Color? = null,
     val tailLine: Color? = null,
-    val rump: Color? = null,
-    val curl: Color? = null,
-    val speculum: Color? = null,
 ) {
     companion object {
         val Lemon = DuckColors(wing = Color(0xFFF9C21F), shade = Color(0xFFE2A400), belly = Color(0xFFFFF1A6))
 
         val Cloud = DuckColors(wing = Color(0xFFECE5D3), shade = Color(0xFFCDC3AA), belly = Color(0xFFFFFFFF))
 
-        /** Mallard colours (the drake's, the best-known ones): green head, white neck ring, chestnut chest, grey flanks, white tail with a black curl. */
-        val Mallard = DuckColors(
-            wing = Color(0xFFB3A794), shade = Color(0xFF8F877A), belly = Color(0xFFF2F2EE),
-            bill = Color(0xFFE8C53A), billLow = Color(0xFFCFA82A), billTip = Color(0xFF3D2B10), feet = Color(0xFFFF8A1F),
-            cheekStrength = 0.3f,
-            head = Color(0xFF2E8E58), headShade = Color(0xFF1C6640), headShine = Color(0xFF9BE3BA), headSheen = Color(0xFF3B5FC0),
-            neckRing = Color(0xFFFFFFFF), chest = Color(0xFF93452A), chestShade = Color(0xFF6E2F1A), back = Color(0xFF9C9384),
-            vermiculation = true, tail = Color(0xFFF6F6F2), tailLine = Color(0xFFC9C9C2), rump = Color(0xFF2A2622),
-            curl = Color(0xFF2A2622), speculum = Color(0xFF3F6FD8),
+        /** A mallard hen: mottled brown, darker crown, dark eye stripe, orange bill with a dark patch, blue wing feather. */
+        val Hazel = DuckColors(
+            wing = Color(0xFFA9845A), shade = Color(0xFF8C6A45), belly = Color(0xFFE6CDA8),
+            bill = Color(0xFFEE8F30), billLow = Color(0xFFCF7621), billTip = Color(0xFF3D2B10), feet = Color(0xFFF28C28),
+            cheekStrength = 0.7f,
+            head = Color(0xFFC29D70), headShade = Color(0xFF9C774C), headShine = Color(0xFFEBD6B4),
+            crown = Color(0xFF7A5A38), eyeStripe = Color(0xFF5A4128), mottle = Color(0xFF8A6540),
+            billSaddle = Color(0xFF4A3A2A), speculum = Color(0xFF3F6FD8),
+            tail = Color(0xFFB89468), tailLine = Color(0xFF8A6540),
         )
     }
 }
@@ -84,14 +83,14 @@ val DuckCloudPalette = DuckPalette.copy(
     duck = DuckColors.Cloud,
 )
 
-/** Mallard Pip: a mallard drake with reed-green chrome. */
-val DuckMallardPalette = DuckPalette.copy(
-    ink = Color(0xFF1C2A22),
-    inkSoft = Color(0xFF55675C),
-    background = Color(0xFFF3F7F3),
-    line = Color(0xFFDFE9E1),
-    accent = Color(0xFF2E7D4F),
-    accentSoft = Color(0xFFE1F1E6),
-    body = Color(0xFFDCDCD5),
-    duck = DuckColors.Mallard,
+/** Hazel Pip: a mallard hen with warm brown chrome. */
+val DuckHazelPalette = DuckPalette.copy(
+    ink = Color(0xFF2C2117),
+    inkSoft = Color(0xFF6B5A48),
+    background = Color(0xFFFAF6F0),
+    line = Color(0xFFEDE3D6),
+    accent = Color(0xFF8A5A2B),
+    accentSoft = Color(0xFFF5E9DC),
+    body = Color(0xFFC9A57A),
+    duck = DuckColors.Hazel,
 )

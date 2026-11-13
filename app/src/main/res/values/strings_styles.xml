@@ -8,7 +8,7 @@
     <string name="style_kitten_snow">Snow Mochi</string>
     <string name="style_duck_lemon">Lemon Pip</string>
     <string name="style_duck_cloud">Cloud Pip</string>
-    <string name="style_duck_mallard">Mallard Pip</string>
+    <string name="style_duck_hazel">Hazel Pip</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, locked. %2$s</string>
@@ -60,6 +60,7 @@
     <string name="acc_cap">Cap</string>
     <string name="acc_goggles">Swim goggles</string>
     <string name="acc_bandana">Bandana</string>
+    <string name="acc_swim_ring">Swim ring</string>
 
     <plurals name="accessory_next_hint">
         <item quantity="one">%1$d more calm minute to unlock the %2$s</item>

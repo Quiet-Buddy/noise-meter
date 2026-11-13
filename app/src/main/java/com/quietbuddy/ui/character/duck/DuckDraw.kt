@@ -14,6 +14,7 @@ import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.AccessorySlot
 import com.quietbuddy.ui.character.AccessoryAnchors
 import com.quietbuddy.ui.character.drawAccessories
+import com.quietbuddy.ui.character.drawSwimRing
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.QB
 import kotlin.math.PI
@@ -178,24 +179,25 @@ private fun DrawScope.foot(pal: Palette, cx: Float, cy: Float, flip: Boolean, an
 }
 
 private val BodyShade = svgPath("M 40 162 Q 100 184 162 160 Q 100 172 40 162 Z")
-private val Rump = svgPath("M 52 117 Q 38 126 32 140 Q 36 150 44 154 Q 42 134 58 121 Z")
-private val Back = svgPath("M 54 119 Q 72 126 94 119 Q 100 124 94 126 Q 72 134 56 126 Z")
-private val Vermiculation = svgPath(
-    "M 64 162 q 5 -2.5 10 0 t 10 0 t 10 0 M 92 168 q 5 -2.5 10 0 t 10 0 M 112 160 q 5 -2.5 10 0 t 10 0 M 58 152 q 4 -2 8 0",
+private val Mottle = svgPath(
+    "M 60 140 L 64 144 L 68 140 M 76 148 L 80 152 L 84 148 M 96 154 L 100 158 L 104 154 M 66 160 L 70 164 L 74 160 " +
+        "M 86 164 L 90 168 L 94 164 M 112 162 L 116 166 L 120 162 M 126 150 L 130 154 L 134 150 " +
+        "M 50 128 L 53 131 L 56 128 M 138 160 L 141 163 L 144 160",
 )
-private val Chest = svgPath("M 116 121 Q 146 110 160 126 Q 172 144 160 160 Q 140 156 126 140 Q 118 132 116 121 Z")
+private val Crown = svgPath("M 80 44 Q 92 26 114 26 Q 138 27 148 46 Q 118 34 80 44 Z")
+private val EyeStripe = svgPath("M 75 60 Q 84 58 89 58 M 107 60 Q 111 66 113 74")
+private val BillSaddle = svgPath("M 128 76 Q 146 73 160 77 Q 146 84 130 81 Z")
 private val Scallops = svgPath("M 140 136 q 4 4 8 0 M 150 146 q 4 4 8 0 M 138 150 q 4 4 8 0 M 150 160 q 4 3 8 -1")
 private val PoofBody = svgPath("M 52 116 L 46 106 M 66 120 L 63 109 M 40 112 L 32 104")
 private val PoofHead = svgPath("M 92 32 L 86 22 M 108 26 L 107 15 M 124 27 L 128 16")
 private val Nape = svgPath("M 78 72 Q 70 72 67 77 Q 72 79 76 80 Q 71 84 71 89 Q 77 87 80 84 Z")
 private val CheekShade = svgPath("M 75.5 70 Q 78 97 106 101.5 Q 86 94 81 70 Z")
-private val Sheen = svgPath("M 90 34 Q 76 50 78 72 Q 84 54 100 40 Z")
 private val BlushStrokes = svgPath("M 86 78.5 L 84 82 M 90.5 78.5 L 88.5 82 M 95 78.5 L 93 82")
 private val Well = svgPath("M 89 70 Q 98 79 107 70 Q 98 74 89 70 Z")
-private val WingBelly = svgPath("M 124 132 Q 106 116 80 124 Q 96 136 122 140 Z")
-private val WingFeathers = svgPath("M 82 126 Q 88 132 94 130 Q 100 136 106 134 Q 112 140 120 138")
 private val Speculum = svgPath("M 92 143.5 Q 76 138.4 58 139 Q 54 142 52 145 Q 60 149 63 149 Q 78 149.6 92 143.5 Z")
 private val SpeculumGlint = svgPath("M 66 140 Q 60 140 57 141.5 Q 60 143 66 142.4 Z")
+private val WingBelly = svgPath("M 124 132 Q 106 116 80 124 Q 96 136 122 140 Z")
+private val WingFeathers = svgPath("M 82 126 Q 88 132 94 130 Q 100 136 106 134 Q 112 140 120 138")
 private val WingLines = svgPath("M 98 139 Q 80 138 58 139 M 100 148 Q 82 150 63 149 M 102 156 Q 86 160 70 160")
 private val WingCoverLines = svgPath("M 70 100 Q 66 70 64 44 M 80 96 Q 80 60 72 34")
 private val ZzzBig = svgPath("M 158 22 L 172 22 L 158 36 L 172 36")
@@ -230,14 +232,16 @@ fun DrawScope.drawDuck(pose: DuckPose, fx: DuckFx, pal: Palette, accessories: Se
         rotate(rock, Offset(100f, 174f))
         scale(breath, breath, Offset(100f, 174f))
     }) {
+        val anchors = anchors(p, rig)
+        drawSwimRing(accessories, anchors, pal.outline, front = false)
         drawFarWing(p, pal, rig)
         drawBody(p, fx, pal)
         drawHead(p, pal, rig)
-        val anchors = anchors(p, rig)
         drawAccessories(accessories, anchors, pal.outline, NeckSlots)
         drawFace(p, fx, pal, rig)
         drawAccessories(accessories, anchors, pal.outline, HeadSlots)
         drawNearWing(p, fx, pal, rig)
+        drawSwimRing(accessories, anchors, pal.outline, front = true)
         drawExtras(p, fx, pal, rig)
     }
     // The waterline sits in front of her bottom so she floats, with a few glints.
@@ -274,17 +278,17 @@ private const val HEAD_STROKE = 1f / DuckShapes.HEAD_SCALE
 
 private val NeckStart = Offset(88f, 118f)
 private val NeckEnd = Offset(144f, 115f)
-private val NeckRingMid = Offset(118f, 109f)
+private val NeckMid = Offset(118f, 109f)
 
 /**
  * Where the duck wears things for this frame. Head anchors ride the head's transform; the neck ones sit on the
- * neck ring along the body's top edge.
+ * neck join along the body's top edge.
  */
 private fun anchors(p: DuckPose, rig: Rig): AccessoryAnchors {
     val k = DuckShapes.HEAD_SCALE
     val ring = Offset(
-        (NeckStart.x + 2f * NeckRingMid.x + NeckEnd.x) / 4f,
-        (NeckStart.y + 2f * NeckRingMid.y + NeckEnd.y) / 4f,
+        (NeckStart.x + 2f * NeckMid.x + NeckEnd.x) / 4f,
+        (NeckStart.y + 2f * NeckMid.y + NeckEnd.y) / 4f,
     )
     val near = DuckShapes.Eyes[0]
     val far = DuckShapes.Eyes[1]
@@ -297,6 +301,7 @@ private fun anchors(p: DuckPose, rig: Rig): AccessoryAnchors {
         lensRx = near.rx * p.eyeScale * k, lensRy = near.ry * p.eyeScale * k,
         neckAt = ring, neckScale = 1f,
         leftFoot = Offset(70f, 190f), rightFoot = Offset(132f, 192f), footRx = 14f, footRy = 8f,
+        waistAt = Offset(99f, 166f), waistRx = 70f, waistRy = 14f,
     )
 }
 
@@ -330,7 +335,7 @@ private fun DrawScope.drawFarWing(p: DuckPose, pal: Palette, rig: Rig) {
     outlined(pal, qPath(pts), pal.duck.wing, 3.5f)
 }
 
-/** The body with its pointed rubber-duck tail and, for a mallard, the markings. */
+/** The body with its pointed rubber-duck tail and, when the style has one, a tail in its own colour. */
 private fun DrawScope.drawBody(p: DuckPose, fx: DuckFx, pal: Palette) {
     val d = pal.duck
     val idle = fx.idle
@@ -350,8 +355,8 @@ private fun DrawScope.drawBody(p: DuckPose, fx: DuckFx, pal: Palette) {
     }
     outlined(pal, bodyD, pal.body, 3.5f)
     fill(BodyShade, d.shade, 0.45f)
-    if (d.tail != null && d.rump != null) {
-        // White tail over a black rump; the body outline is drawn again on top below.
+    if (d.tail != null) {
+        // The tail region in its own colour; the body outline is drawn again on top below.
         val tail = Path().apply {
             moveTo(52f, 117f)
             quadraticTo(34f, 108f + td * 0.5f, 24f - td * 0.25f, 96f + td)
@@ -360,12 +365,10 @@ private fun DrawScope.drawBody(p: DuckPose, fx: DuckFx, pal: Palette) {
             close()
         }
         fill(tail, d.tail)
-        fill(Rump, d.rump)
     }
-    if (d.back != null) fill(Back, d.back, 0.6f)
-    else tiltedOval(70f, 128f, 18f, 4.5f, d.belly, 0.6f, -12f, 70f, 128f)
-    if (d.vermiculation) ink(Vermiculation, d.shade, 1.3f, 0.55f)
-    if (d.chest != null) fill(Chest, d.chest) else oval(142f, 148f, 17f, 13f, d.belly, 0.8f)
+    tiltedOval(70f, 128f, 18f, 4.5f, d.belly, 0.6f, -12f, 70f, 128f)
+    oval(142f, 148f, 17f, 13f, d.belly, 0.8f)
+    if (d.mottle != null) ink(Mottle, d.mottle, 2f, 0.8f)
     val tailLines = Path().apply {
         moveTo(46f, 122f)
         quadraticTo(36f, 112f + td * 0.6f, 30f - td * 0.15f, 102f + td * 0.9f)
@@ -373,19 +376,8 @@ private fun DrawScope.drawBody(p: DuckPose, fx: DuckFx, pal: Palette) {
         quadraticTo(32f, 122f + td * 0.4f, 28f - td * 0.1f, 114f + td * 0.6f)
     }
     ink(tailLines, d.tailLine ?: d.shade, 2.2f)
-    ink(Scallops, d.chestShade ?: d.shade, 2f, 0.8f)
-    if (d.tail != null || d.chest != null) ink(bodyD, pal.outline, 3.5f)
-    // A drake's curled tail feathers: a small flick, kept low so it doesn't read as a handle.
-    if (d.curl != null) {
-        val curl = Path().apply {
-            moveTo(52f, 119f)
-            quadraticTo(49f, 112f + td * 0.3f, 53.5f, 109f + td * 0.3f)
-            quadraticTo(57.5f, 108f + td * 0.3f, 56.5f, 112f + td * 0.3f)
-            moveTo(57f, 120f)
-            quadraticTo(57f, 115f + td * 0.3f, 60.5f, 114f + td * 0.3f)
-        }
-        ink(curl, d.curl, 2.8f)
-    }
+    ink(Scallops, d.shade, 2f, 0.8f)
+    if (d.tail != null) ink(bodyD, pal.outline, 3.5f)
     oval(118f, 122f, 30f, 6f, d.shade, 0.35f)
     if (p.poof > 0.02f) ink(PoofBody, pal.outline, 3f, p.poof)
 }
@@ -394,7 +386,6 @@ private fun headColour(pal: Palette) = pal.duck.head ?: pal.body
 
 /** Nape feathers, the round head and the short neck that joins it to the body. */
 private fun DrawScope.drawHead(p: DuckPose, pal: Palette, rig: Rig) {
-    val d = pal.duck
     val head = headColour(pal)
     inHead(rig) {
         outlined(pal, Nape, head, 3f * HEAD_STROKE)
@@ -410,20 +401,27 @@ private fun DrawScope.drawHead(p: DuckPose, pal: Palette, rig: Rig) {
     if (hb.y < nb.y - 4f) {
         val cb = Offset((nb.x + hb.x) / 2f - 2f, (nb.y + hb.y) / 2f)
         val cf = Offset((nf.x + hf.x) / 2f + 2f, (nf.y + hf.y) / 2f + 2f)
-        // The fill reaches a little into the body to hide the body's outline under the neck.
-        val reach = if (d.neckRing != null) 5f else 8f
-        val fillPath = Path().apply {
-            moveTo(nb.x, nb.y + reach)
+        // The fill reaches a little into the body to hide the body's outline under the neck: that part takes the
+        // body colour, and the neck itself takes the head colour.
+        val reach = Path().apply {
+            moveTo(nb.x, nb.y + 8f)
             lineTo(nb.x, nb.y)
+            lineTo(nf.x, nf.y)
+            lineTo(nf.x, nf.y + 8f)
+            close()
+        }
+        fill(reach, pal.body)
+        val neck = Path().apply {
+            moveTo(nb.x, nb.y)
             quadraticTo(cb.x, cb.y, hb.x, hb.y)
             lineTo(hbi.x, hbi.y)
             lineTo(hfi.x, hfi.y)
             lineTo(hf.x, hf.y)
             quadraticTo(cf.x, cf.y, nf.x, nf.y)
-            lineTo(nf.x, nf.y + reach)
+            quadraticTo(NeckMid.x, NeckMid.y, nb.x, nb.y)
             close()
         }
-        fill(fillPath, head)
+        fill(neck, head)
         val edges = Path().apply {
             moveTo(nb.x, nb.y)
             quadraticTo(cb.x, cb.y, hb.x, hb.y)
@@ -431,14 +429,6 @@ private fun DrawScope.drawHead(p: DuckPose, pal: Palette, rig: Rig) {
             quadraticTo(cf.x, cf.y, nf.x, nf.y)
         }
         ink(edges, pal.outline, 3.5f)
-    }
-    // A mallard's white neck ring sits where the neck meets the body, along the body's top edge.
-    if (d.neckRing != null) {
-        val ring = Path().apply {
-            moveTo(nb.x, nb.y)
-            quadraticTo(NeckRingMid.x, NeckRingMid.y, nf.x, nf.y)
-        }
-        ink(ring, d.neckRing, 7f)
     }
 }
 
@@ -452,12 +442,13 @@ private fun DrawScope.drawFace(p: DuckPose, fx: DuckFx, pal: Palette, rig: Rig) 
     val headShine = d.headShine ?: d.belly
     inHead(rig) {
         fill(CheekShade, headShade, 0.3f)
-        if (d.headSheen != null) fill(Sheen, d.headSheen, 0.22f)
+        if (d.crown != null) fill(Crown, d.crown, 0.85f)
         tiltedOval(92f, 36f, 9f, 4.5f, headShine, 0.85f, -35f, 92f, 36f)
         oval(81f, 46f, 2.4f, 2.4f, headShine, 0.8f)
         val cheekA = p.cheek * d.cheekStrength
         oval(90f, 80f, 8.5f, 5.5f, pal.cheek, cheekA)
         ink(BlushStrokes, Blush, 1.5f * sw, cheekA)
+        if (d.eyeStripe != null) ink(EyeStripe, d.eyeStripe, 4f * sw, 0.9f)
         if (p.browA > 0.02f) {
             ink(q1(p.browN), pal.outline, 3.2f * sw, p.browA)
             ink(q1(p.browF), pal.outline, 3f * sw, p.browA)
@@ -572,6 +563,7 @@ private fun DrawScope.drawBill(p: DuckPose, pal: Palette, sw: Float) {
             close()
         }
         fill(underside, d.billLow, 0.55f)
+        if (d.billSaddle != null) fill(BillSaddle, d.billSaddle, 0.85f)
         val ridge = Path().apply {
             moveTo(120f, 77f)
             quadraticTo(140f, 77f, 162f, 78f)

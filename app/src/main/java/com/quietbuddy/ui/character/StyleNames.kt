@@ -18,7 +18,7 @@ val CharacterStyle.nameRes: Int
         CharacterStyle.KITTEN_SNOW -> R.string.style_kitten_snow
         CharacterStyle.DUCK_LEMON -> R.string.style_duck_lemon
         CharacterStyle.DUCK_CLOUD -> R.string.style_duck_cloud
-        CharacterStyle.DUCK_MALLARD -> R.string.style_duck_mallard
+        CharacterStyle.DUCK_HAZEL -> R.string.style_duck_hazel
     }
 
 /** The display name of an accessory, e.g. "Top hat". */
@@ -36,6 +36,7 @@ val Accessory.nameRes: Int
         Accessory.CAP -> R.string.acc_cap
         Accessory.GOGGLES -> R.string.acc_goggles
         Accessory.BANDANA -> R.string.acc_bandana
+        Accessory.SWIM_RING -> R.string.acc_swim_ring
     }
 
 /** The display name of any reward. */

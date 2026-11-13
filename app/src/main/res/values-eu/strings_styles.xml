@@ -8,7 +8,7 @@
     <string name="style_kitten_snow">Mochi Elurra</string>
     <string name="style_duck_lemon">Txito Limoia</string>
     <string name="style_duck_cloud">Txito Hodeia</string>
-    <string name="style_duck_mallard">Txito Basahatea</string>
+    <string name="style_duck_hazel">Txito Hurra</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, blokeatuta. %2$s</string>
@@ -60,6 +60,7 @@
     <string name="acc_cap">Bisera</string>
     <string name="acc_goggles">Igerilari-betaurrekoak</string>
     <string name="acc_bandana">Zapia</string>
+    <string name="acc_swim_ring">Flotagailua</string>
 
     <plurals name="accessory_next_hint">
         <item quantity="one">Minutu lasai %1$d falta da %2$s desblokeatzeko</item>

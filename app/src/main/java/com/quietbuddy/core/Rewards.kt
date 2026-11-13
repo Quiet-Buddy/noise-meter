@@ -36,7 +36,7 @@ enum class CharacterStyle(
     KITTEN_SNOW("kitten_snow", Character.KITTEN, 600),
     DUCK_LEMON("duck_lemon", Character.DUCK, 800),
     DUCK_CLOUD("duck_cloud", Character.DUCK, 1050),
-    DUCK_MALLARD("duck_mallard", Character.DUCK, 1500);
+    DUCK_HAZEL("duck_hazel", Character.DUCK, 1500);
 
     val isFree: Boolean get() = unlockAtCalmMinutes == 0
 
@@ -56,8 +56,8 @@ enum class CharacterStyle(
     }
 }
 
-/** Where on the body an accessory sits; arts use it to layer accessories (e.g. a tie goes under the chin). */
-enum class AccessorySlot { HEAD, FACE, NECK, FEET }
+/** Where on the body an accessory sits; arts use it to layer accessories (e.g. a tie goes under the chin). BODY wraps around the body. */
+enum class AccessorySlot { HEAD, FACE, NECK, FEET, BODY }
 
 /**
  * Something one character can wear, earned with calm minutes like the styles. Each character has its own set,
@@ -81,7 +81,8 @@ enum class Accessory(
     CROWN("acc_crown", Character.KITTEN, AccessorySlot.HEAD, 1000),
     CAP("acc_cap", Character.DUCK, AccessorySlot.HEAD, 900),
     GOGGLES("acc_goggles", Character.DUCK, AccessorySlot.FACE, 1200),
-    BANDANA("acc_bandana", Character.DUCK, AccessorySlot.NECK, 1350);
+    BANDANA("acc_bandana", Character.DUCK, AccessorySlot.NECK, 1350),
+    SWIM_RING("acc_swim_ring", Character.DUCK, AccessorySlot.BODY, 1400);
 
     companion object {
         fun fromKey(key: String?): Accessory? = entries.firstOrNull { it.key == key }

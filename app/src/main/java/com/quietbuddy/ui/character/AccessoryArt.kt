@@ -2,9 +2,11 @@ package com.quietbuddy.ui.character
 
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -62,6 +64,10 @@ class AccessoryAnchors(
     val rightFoot: Offset,
     val footRx: Float,
     val footRy: Float,
+    /** Centre and radii of a swim ring floating around the body; only characters that can wear one set these. */
+    val waistAt: Offset = Offset.Zero,
+    val waistRx: Float = 0f,
+    val waistRy: Float = 0f,
 )
 
 private fun stroke(w: Float) = Stroke(width = w, cap = StrokeCap.Round, join = StrokeJoin.Round)
@@ -100,6 +106,8 @@ fun DrawScope.drawAccessories(
             Accessory.BANDANA -> placed(anchors.collarAt, anchors.collarScale, 0f) { bandana(outline) }
             Accessory.GOGGLES -> goggles(anchors, outline)
             Accessory.CAP -> placed(anchors.hatAt, anchors.hatScale, anchors.hatTilt) { backwardsCap(outline) }
+            // Drawn in two halves around the body by the art itself, see drawSwimRing.
+            Accessory.SWIM_RING -> Unit
         }
     }
 }
@@ -301,6 +309,8 @@ private val CapBlue = Color(0xFF7FB8E8)
 private val GoggleTeal = Color(0xFF22A6B3)
 private val GoggleLens = Color(0xFFBFE8F2)
 private val BandanaRed = Color(0xFFE2453C)
+private val RingRed = Color(0xFFE8473F)
+private val RingWhite = Color(0xFFFFFFFF)
 
 private fun quad(x0: Float, y0: Float, cx: Float, cy: Float, x1: Float, y1: Float) = Path().apply {
     moveTo(x0, y0)
@@ -362,6 +372,32 @@ private fun DrawScope.goggles(a: AccessoryAnchors, outline: Color) {
             quad(c.x - rx * 0.45f, c.y + r * 0.1f, c.x - rx * 0.4f, c.y - r * 0.45f, c.x, c.y - r * 0.55f),
             Color.White.copy(alpha = 0.85f),
             style = stroke(2.6f),
+        )
+    }
+}
+
+/**
+ * A striped swim ring floating around the body at the waterline, if worn. Arts draw it twice: the back half
+ * ([front] false) before the body and the front half after it, so the body sits inside the ring.
+ */
+fun DrawScope.drawSwimRing(worn: Set<Accessory>, anchors: AccessoryAnchors, outline: Color, front: Boolean) {
+    if (Accessory.SWIM_RING !in worn) return
+    val c = anchors.waistAt
+    val rx = anchors.waistRx
+    val ry = anchors.waistRy
+    val oval = Rect(c.x - rx, c.y - ry, c.x + rx, c.y + ry)
+    // Front half runs through the bottom of the oval (0..180 degrees), back half through the top.
+    val half = Path().apply { arcTo(oval, if (front) 0f else 180f, 180f, forceMoveTo = true) }
+    drawPath(half, outline, style = stroke(25f))
+    // round ends like the outline's, so the two halves join without dark notches at the sides
+    drawPath(half, RingWhite, style = stroke(19.5f))
+    drawPath(half, RingRed, style = Stroke(width = 19.5f, pathEffect = PathEffect.dashPathEffect(floatArrayOf(22f, 22f))))
+    if (front) {
+        val shine = Rect(c.x - rx, c.y - ry * 0.55f, c.x + rx, c.y + ry * 0.55f)
+        drawPath(
+            Path().apply { arcTo(shine, 97f, 39f, forceMoveTo = true) },
+            Color.White.copy(alpha = 0.75f),
+            style = stroke(3f),
         )
     }
 }

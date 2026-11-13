@@ -15,7 +15,7 @@ import com.quietbuddy.ui.theme.BuddyBerryPalette
 import com.quietbuddy.ui.theme.BuddyMintPalette
 import com.quietbuddy.ui.theme.BuddyPalette
 import com.quietbuddy.ui.theme.DuckCloudPalette
-import com.quietbuddy.ui.theme.DuckMallardPalette
+import com.quietbuddy.ui.theme.DuckHazelPalette
 import com.quietbuddy.ui.theme.DuckPalette
 import com.quietbuddy.ui.theme.KittenGreyPalette
 import com.quietbuddy.ui.theme.KittenSnowPalette
@@ -117,7 +117,7 @@ object CharacterLooks {
             CharacterStyle.KITTEN_SNOW -> KittenSnowPalette
             CharacterStyle.DUCK_LEMON -> DuckPalette
             CharacterStyle.DUCK_CLOUD -> DuckCloudPalette
-            CharacterStyle.DUCK_MALLARD -> DuckMallardPalette
+            CharacterStyle.DUCK_HAZEL -> DuckHazelPalette
         }
         CharacterLook(
             art = when (style.character) {

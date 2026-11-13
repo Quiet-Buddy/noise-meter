@@ -21,7 +21,7 @@ class UnlocksTest {
         assertTrue(Accessory.SUNGLASSES in Unlocks.earnedBy(60))
         assertFalse(Accessory.CROWN in Unlocks.earnedBy(999))
         assertTrue(Accessory.CROWN in Unlocks.earnedBy(1000))
-        assertEquals(Reward.all.toSet() - CharacterStyle.DUCK_MALLARD, Unlocks.earnedBy(1499))
+        assertEquals(Reward.all.toSet() - CharacterStyle.DUCK_HAZEL, Unlocks.earnedBy(1499))
         assertEquals(Reward.all.toSet(), Unlocks.earnedBy(1500))
     }
 
@@ -46,7 +46,8 @@ class UnlocksTest {
             1000L to CharacterStyle.DUCK_CLOUD,
             1050L to Accessory.GOGGLES,
             1200L to Accessory.BANDANA,
-            1350L to CharacterStyle.DUCK_MALLARD,
+            1350L to Accessory.SWIM_RING,
+            1400L to CharacterStyle.DUCK_HAZEL,
         )
         for ((minutes, expected) in order) assertEquals("at $minutes", expected, Unlocks.next(minutes))
         assertNull(Unlocks.next(1500))
@@ -149,7 +150,7 @@ class UnlocksTest {
         assertTrue(CharacterStyle.BUDDY_SUNNY.isCharacterDefault)
         assertTrue(CharacterStyle.KITTEN_GINGER.isCharacterDefault)
         assertTrue(CharacterStyle.DUCK_LEMON.isCharacterDefault)
-        assertFalse(CharacterStyle.DUCK_MALLARD.isCharacterDefault)
+        assertFalse(CharacterStyle.DUCK_HAZEL.isCharacterDefault)
         assertFalse(CharacterStyle.BUDDY_MINT.isCharacterDefault)
         assertFalse(CharacterStyle.KITTEN_SNOW.isCharacterDefault)
     }
