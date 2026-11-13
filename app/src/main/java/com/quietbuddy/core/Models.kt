@@ -58,7 +58,8 @@ data class Thresholds(val worriedFromDb: Float, val sadFromDb: Float) {
 }
 
 data class AppSettings(
-    val roomName: String = "Living room",
+    /** Filled in with the localized default by the settings repository on first launch. */
+    val roomName: String = "",
     val preset: Preset? = Preset.EVERYDAY,
     val worriedFromDb: Float = Preset.EVERYDAY.worriedFromDb,
     val sadFromDb: Float = Preset.EVERYDAY.sadFromDb,
