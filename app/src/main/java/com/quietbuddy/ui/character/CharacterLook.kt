@@ -49,6 +49,53 @@ interface CharacterAnimator {
 
     /** Draws the current frame in the 200x200 design space, wearing [accessories]. */
     fun DrawScope.drawFrame(palette: Palette, accessories: Set<Accessory>)
+
+    /**
+     * The child patted the character. Calm moods react (a giggle); others ignore it. Repeated pokes extend the
+     * reaction smoothly rather than restarting it.
+     */
+    fun poke() {}
+}
+
+/** Moods in which a poke makes the character giggle. */
+internal val Mood?.isCalm: Boolean get() = this == Mood.HAPPY || this == Mood.FINE
+
+/**
+ * A 0..1 reaction level for pokes: rises over [attackSec], holds for [holdSec], then falls over [releaseSec].
+ * A new [trigger] rises again from the current level (never drops first), so rapid pokes just keep it up.
+ * Pure Kotlin; the caller feeds it time via [advance].
+ */
+class PokeEnvelope(
+    private val attackSec: Float,
+    private val holdSec: Float,
+    private val releaseSec: Float,
+) {
+    private var level = 0f
+    private var sustainLeft = 0f
+
+    /** The eased level (smoothstep of the linear one), 0 at rest. */
+    val value: Float get() = level * level * (3f - 2f * level)
+
+    /** True while rising, holding or falling. */
+    val isActive: Boolean get() = level > 0f || sustainLeft > 0f
+
+    fun trigger() {
+        sustainLeft = (1f - level) * attackSec + holdSec
+    }
+
+    /** Skips the hold and starts falling now, e.g. when the mood stops being calm. */
+    fun release() {
+        sustainLeft = 0f
+    }
+
+    fun advance(dtSec: Float) {
+        if (sustainLeft > 0f) {
+            level = minOf(1f, level + dtSec / attackSec)
+            sustainLeft -= dtSec
+        } else {
+            level = maxOf(0f, level - dtSec / releaseSec)
+        }
+    }
 }
 
 /** A character's art and palette. */

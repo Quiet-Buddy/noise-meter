@@ -351,7 +351,7 @@ private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette, accesso
         scale(breath, breath, Offset(100f, 100f))
     }) {
         val tailBehind = p.tailFront < 0.5f
-        if (tailBehind) tail(pal, p.tail, poof, sway)
+        if (tailBehind) tail(pal, p.tail, poof, sway + fx.tailSwish)
 
         // body
         val body = fluffy(100f, 158f, 46f + 6f * poof, 34f + 2f * poof, 20, 0.66f) { a, i ->
@@ -364,7 +364,7 @@ private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette, accesso
             moveTo(130f + 4f * poof, 152f); lineTo(124f + 2f * poof, 150f)
         }
         ink(belly, pal.stripe, 2.5f)
-        if (!tailBehind) tail(pal, p.tail, poof, sway)
+        if (!tailBehind) tail(pal, p.tail, poof, sway + fx.tailSwish)
         for (cx in listOf(84f, 116f)) {
             oval(cx, 184f, 16f, 10f, pal.cream, outline = pal.outline)
             val toes = Path().apply {
@@ -405,8 +405,11 @@ private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette, accesso
 private fun DrawScope.drawHead(p: KittenPose, fx: KittenFx, pal: Palette, poof: Float) {
     val t = fx.time
     val idle = fx.idle
-    ear(pal, p, left = true, twitchDeg = fx.twitchL)
-    ear(pal, p, left = false, twitchDeg = fx.twitchR)
+    val g = fx.giggle
+    // A poke flicks both ears back (the same direction as a droop).
+    val flick = -20f * fx.earFlick
+    ear(pal, p, left = true, twitchDeg = fx.twitchL + flick)
+    ear(pal, p, left = false, twitchDeg = fx.twitchR + flick)
     outlined(pal, Crest, pal.body)
     val head = fluffy(100f, 88f, 64f, 54f, 28, 0.66f) { a, i ->
         10f * zone(a, HeadZones, 26f, 8f) + poof * 9f * vary(i)
@@ -422,8 +425,9 @@ private fun DrawScope.drawHead(p: KittenPose, fx: KittenFx, pal: Palette, poof: 
     withTransform({ rotate(-p.whisker, Offset(60f, 112f)) }) { ink(WhiskersL, pal.outline, 2f, 0.75f) }
     withTransform({ rotate(p.whisker, Offset(140f, 112f)) }) { ink(WhiskersR, pal.outline, 2f, 0.75f) }
     // cheeks
-    oval(55f, 112f, 11f, 7f, pal.cheek, clamp01(p.cheek))
-    oval(145f, 112f, 11f, 7f, pal.cheek, clamp01(p.cheek))
+    val cheekA = clamp01(p.cheek + 0.4f * g)
+    oval(55f, 112f, 11f + 2f * g, 7f + 1.5f * g, pal.cheek, cheekA)
+    oval(145f, 112f, 11f + 2f * g, 7f + 1.5f * g, pal.cheek, cheekA)
 
     // Eyes are drawn at the base size, then scaled about each eye's centre. Brows ride with them.
     val lift = (EYE_S - 1f) * 15f - EYE_DY
@@ -443,9 +447,12 @@ private fun DrawScope.drawHead(p: KittenPose, fx: KittenFx, pal: Palette, poof: 
         withTransform({ translate(EYE_DX, -lift) }) { ink(quadChain(mirrorPts(p.brow)), pal.outline, 4f, clamp01(p.browA)) }
     }
     // open shape, then the closed stroke for blinks and closed-eye moods
-    val effOpen = p.open * (1f - p.blink * fx.blink)
+    // A giggle squeezes the eyes shut into happy arcs (^ ^).
+    val effOpen = p.open * (1f - p.blink * fx.blink) * (1f - g)
     val ca = 1f - smooth(0.08f, 0.4f, effOpen)
-    val shape = if (p.open > 0.5f) List(6) { KittenShapes.ClosedSleep[it] + if (it % 2 == 1) p.eyeDy else 0f } else p.closed
+    val restShape = if (p.open > 0.5f) List(6) { KittenShapes.ClosedSleep[it] + if (it % 2 == 1) p.eyeDy else 0f } else p.closed
+    val shape = if (g > 0f) List(6) { lerp(restShape[it], KittenShapes.ClosedHappy[it], g) } else restShape
+    val closedW = lerp(p.closedW, 5f, g)
     val wellA = 0.9f * p.well * smooth(0.3f, 0.8f, effOpen)
     for (left in listOf(true, false)) {
         eyeSpace(left, EYE_S) {
@@ -456,15 +463,15 @@ private fun DrawScope.drawHead(p: KittenPose, fx: KittenFx, pal: Palette, poof: 
     if (ca > 0.02f || p.lashes > 0.02f) {
         for (left in listOf(true, false)) {
             eyeSpace(left, closedS) {
-                if (ca > 0.02f) ink(quadChain(if (left) shape else mirrorPts(shape)), pal.outline, p.closedW, clamp01(ca))
+                if (ca > 0.02f) ink(quadChain(if (left) shape else mirrorPts(shape)), pal.outline, closedW, clamp01(ca))
                 if (p.lashes > 0.02f) ink(if (left) Lashes.first else Lashes.second, pal.outline, 2.5f, clamp01(p.lashes))
             }
         }
     }
 
     // mouth
-    if (p.mouthOpen > 0.02f) {
-        val mo = p.mouthOpen
+    val mo = maxOf(p.mouthOpen, 0.8f * g)
+    if (mo > 0.02f) {
         val m = Path().apply {
             moveTo(90f, 116f)
             quadraticTo(100f, 116f + 20f * mo, 110f, 116f)

@@ -12,14 +12,77 @@ import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.QB
+import kotlin.math.PI
+import kotlin.math.sin
+import kotlin.random.Random
 
-/** Buddy: a yellow blob with hair tufts, hands for covering its ears, and a "z z" when asleep. */
-object BuddyArt : CharacterArt {
+/**
+ * Buddy: a yellow blob with hair tufts, hands for covering its ears, and a "z z" when asleep. It jumps between moods
+ * and relies on CharacterView's shared motions; the animator only adds an idle blink and a giggle when poked.
+ */
+object BuddyArt : AnimatedCharacterArt {
     override val motion = Motion()
 
     override fun DrawScope.draw(mood: Mood?, palette: Palette, accessories: Set<Accessory>) {
         drawBuddy(mood, palette)
         drawAccessories(accessories, BuddyAnchors, palette.outline)
+    }
+
+    override fun createAnimator(mood: Mood?): CharacterAnimator = object : CharacterAnimator {
+        private val animator = BuddyAnimator(mood)
+
+        override fun setMood(mood: Mood?, animate: Boolean) = animator.setMood(mood)
+
+        override fun advance(dtSec: Float) = animator.advance(dtSec)
+
+        override fun poke() = animator.poke()
+
+        override fun DrawScope.drawFrame(palette: Palette, accessories: Set<Accessory>) {
+            drawBuddy(animator.mood, palette, giggle = animator.giggle, blink = animator.blink)
+            drawAccessories(accessories, BuddyAnchors, palette.outline)
+        }
+    }
+}
+
+/**
+ * Buddy's per-view state: the mood, a giggle envelope for pokes (calm moods only) and an occasional blink for the
+ * open-eyed moods. Pure Kotlin; the caller feeds it time via [advance].
+ */
+class BuddyAnimator(initial: Mood?, private val random: Random = Random.Default) {
+    var mood: Mood? = initial
+        private set
+
+    private val giggleEnv = PokeEnvelope(attackSec = 0.06f, holdSec = 0.2f, releaseSec = 0.2f)
+    private var clock = 0f
+    private var nextBlink = 1.8f
+    private var blinkStart = -10f
+
+    /** Giggle level, 0..1: eyes squeeze into happy arcs and the cheeks blush. */
+    val giggle: Float get() = giggleEnv.value
+
+    /** Blink amount, 0 open .. 1 shut. */
+    var blink: Float = 0f
+        private set
+
+    fun setMood(newMood: Mood?) {
+        mood = newMood
+        if (!newMood.isCalm) giggleEnv.release()
+    }
+
+    /** A pat: giggles in a calm mood, otherwise nothing. */
+    fun poke() {
+        if (mood.isCalm) giggleEnv.trigger()
+    }
+
+    fun advance(dtSec: Float) {
+        clock += dtSec
+        giggleEnv.advance(dtSec)
+        if (clock > nextBlink) {
+            blinkStart = clock
+            nextBlink = clock + 2.5f + random.nextFloat() * 3.5f
+        }
+        val bp = (clock - blinkStart) / 0.16f
+        blink = if (bp in 0f..1f) sin(PI.toFloat() * bp) else 0f
     }
 }
 
@@ -50,12 +113,54 @@ private fun DrawScope.outlinedOval(pal: Palette, cx: Float, cy: Float, rx: Float
     drawOval(pal.outline, topLeft = tl, size = sz, style = Stroke(width = 4f))
 }
 
-private fun DrawScope.eye(pal: Palette, cx: Float, cy: Float, hx: Float, hy: Float) {
-    drawCircle(pal.outline, radius = 9f, center = Offset(cx, cy))
-    drawCircle(Color.White, radius = 3f, center = Offset(hx, hy))
+/** An open eye; [shut] 0..1 squashes it vertically (blink or giggle). */
+private fun DrawScope.eye(pal: Palette, cx: Float, cy: Float, hx: Float, hy: Float, shut: Float = 0f) {
+    if (shut <= 0f) {
+        drawCircle(pal.outline, radius = 9f, center = Offset(cx, cy))
+        drawCircle(Color.White, radius = 3f, center = Offset(hx, hy))
+        return
+    }
+    val ry = 9f * (1f - shut)
+    if (ry < 1f) {
+        // Fully shut: a short lid line.
+        ink(pal, path { moveTo(cx - 9f, cy); lineTo(cx + 9f, cy) }, 3f)
+        return
+    }
+    drawOval(pal.outline, topLeft = Offset(cx - 9f, cy - ry), size = Size(18f, ry * 2f))
+    if (shut < 0.5f) {
+        val hr = 3f * (1f - shut)
+        drawCircle(Color.White, radius = hr, center = Offset(hx, cy + (hy - cy) * (1f - shut)))
+    }
 }
 
-private fun DrawScope.drawBuddy(mood: Mood?, p: Palette) {
+/** Buddy's happy closed eye (^), centred on [cx]; [lift] makes the arc taller, [alpha] fades it in. */
+private fun DrawScope.happyArc(pal: Palette, cx: Float, alpha: Float, lift: Float = 0f) {
+    drawPath(
+        path {
+            moveTo(cx - 12f, 96f)
+            quadraticTo(cx, 82f - lift, cx + 12f, 96f)
+        },
+        pal.outline,
+        alpha = alpha.coerceIn(0f, 1f),
+        style = Stroke(width = 5f, cap = Round, join = StrokeJoin.Round),
+    )
+}
+
+/** Extra blush on top of the mood's cheeks while giggling. */
+private fun DrawScope.giggleBlush(pal: Palette, g: Float) {
+    if (g <= 0f) return
+    for (cx in listOf(52f, 148f)) {
+        val rx = 13f + 4f * g
+        val ry = 8f + 2.5f * g
+        drawOval(pal.cheek, topLeft = Offset(cx - rx, 124f - ry), size = Size(rx * 2f, ry * 2f), alpha = 0.55f * g)
+    }
+}
+
+/**
+ * Draws Buddy in [mood]. [giggle] (calm moods) squeezes the eyes into happy arcs and adds blush; [blink] closes the
+ * open eyes. With both 0 this is the still drawing.
+ */
+private fun DrawScope.drawBuddy(mood: Mood?, p: Palette, giggle: Float = 0f, blink: Float = 0f) {
     // Hair tufts
     ink(p, path {
         moveTo(78f, 30f)
@@ -97,14 +202,21 @@ private fun DrawScope.drawBuddy(mood: Mood?, p: Palette) {
         Mood.HAPPY -> {
             drawOval(p.cheek, topLeft = Offset(39f, 116f), size = Size(26f, 16f), alpha = 0.8f)
             drawOval(p.cheek, topLeft = Offset(135f, 116f), size = Size(26f, 16f), alpha = 0.8f)
-            ink(p, path {
-                moveTo(58f, 96f)
-                quadraticTo(70f, 82f, 82f, 96f)
-            }, 5f)
-            ink(p, path {
-                moveTo(118f, 96f)
-                quadraticTo(130f, 82f, 142f, 96f)
-            }, 5f)
+            giggleBlush(p, giggle)
+            if (giggle > 0f) {
+                // Squeeze the arcs a little tighter.
+                happyArc(p, 70f, 1f, lift = 4f * giggle)
+                happyArc(p, 130f, 1f, lift = 4f * giggle)
+            } else {
+                ink(p, path {
+                    moveTo(58f, 96f)
+                    quadraticTo(70f, 82f, 82f, 96f)
+                }, 5f)
+                ink(p, path {
+                    moveTo(118f, 96f)
+                    quadraticTo(130f, 82f, 142f, 96f)
+                }, 5f)
+            }
             fillPath(path {
                 moveTo(68f, 126f)
                 quadraticTo(100f, 160f, 132f, 126f)
@@ -126,8 +238,16 @@ private fun DrawScope.drawBuddy(mood: Mood?, p: Palette) {
         Mood.FINE -> {
             drawOval(p.cheek, topLeft = Offset(39f, 116f), size = Size(26f, 16f), alpha = 0.6f)
             drawOval(p.cheek, topLeft = Offset(135f, 116f), size = Size(26f, 16f), alpha = 0.6f)
-            eye(p, 72f, 96f, 75f, 92f)
-            eye(p, 128f, 96f, 131f, 92f)
+            giggleBlush(p, giggle)
+            // Giggling squashes the open eyes while happy arcs fade in; a blink only squashes them.
+            val shut = maxOf(blink, giggle)
+            eye(p, 72f, 96f, 75f, 92f, shut)
+            eye(p, 128f, 96f, 131f, 92f, shut)
+            if (giggle > 0f) {
+                val a = ((giggle - 0.3f) / 0.5f).coerceIn(0f, 1f)
+                happyArc(p, 70f, a)
+                happyArc(p, 130f, a)
+            }
             ink(p, path {
                 moveTo(78f, 134f)
                 quadraticTo(100f, 150f, 122f, 134f)
@@ -137,8 +257,8 @@ private fun DrawScope.drawBuddy(mood: Mood?, p: Palette) {
         Mood.WORRIED -> {
             ink(p, path { moveTo(56f, 70f); lineTo(84f, 78f) }, 5f)
             ink(p, path { moveTo(144f, 70f); lineTo(116f, 78f) }, 5f)
-            eye(p, 72f, 100f, 75f, 96f)
-            eye(p, 128f, 100f, 131f, 96f)
+            eye(p, 72f, 100f, 75f, 96f, blink)
+            eye(p, 128f, 100f, 131f, 96f, blink)
             ink(p, path {
                 moveTo(76f, 140f)
                 quadraticTo(88f, 128f, 100f, 140f)
@@ -161,8 +281,8 @@ private fun DrawScope.drawBuddy(mood: Mood?, p: Palette) {
         Mood.SAD -> {
             ink(p, path { moveTo(58f, 76f); lineTo(84f, 68f) }, 5f)
             ink(p, path { moveTo(142f, 76f); lineTo(116f, 68f) }, 5f)
-            eye(p, 72f, 100f, 75f, 96f)
-            eye(p, 128f, 100f, 131f, 96f)
+            eye(p, 72f, 100f, 75f, 96f, blink)
+            eye(p, 128f, 100f, 131f, 96f, blink)
             ink(p, path {
                 moveTo(74f, 148f)
                 quadraticTo(100f, 126f, 126f, 148f)
