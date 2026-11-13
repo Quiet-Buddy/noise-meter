@@ -27,8 +27,8 @@ import com.quietbuddy.core.MinuteAggregate
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.SettingsRepository
-import com.quietbuddy.core.Unlocks
 import com.quietbuddy.domain.AlertPolicy
+import com.quietbuddy.domain.CalmLedger
 import com.quietbuddy.domain.MoodEngine
 import com.quietbuddy.domain.character.Voices
 import com.quietbuddy.audio.LevelProcessor
@@ -64,6 +64,11 @@ class ListeningService : LifecycleService() {
     private var sounder: AlertSounder? = null
     // While our own alert tone is in the mic's rolling window, hold the mood so Buddy doesn't react to it.
     private var holdMoodUntilMs = 0L
+    // Earns calm minutes; null until the saved debt has loaded. Fed from the capture thread.
+    @Volatile private var ledger: CalmLedger? = null
+    @Volatile private var silenced = false
+    // Minutes the ledger has earned since the last commit; capture thread only (and after it has stopped).
+    private var pendingCalmMinutes = 0
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -101,8 +106,15 @@ class ListeningService : LifecycleService() {
         holdMoodUntilMs = 0L
         moodCounts.fill(0)
         bus.setMood(Mood.HAPPY)
+        silenced = false
+        ledger = null
+        pendingCalmMinutes = 0
 
         lifecycleScope.launch {
+            launch(Dispatchers.IO) {
+                val saved = progress.ledger()
+                if (running) ledger = CalmLedger(saved)
+            }
             launch { settingsRepo.settings.collect { s ->
                 settings = s
                 processor?.calibrationOffsetDb = s.calibrationOffsetDb
@@ -114,8 +126,9 @@ class ListeningService : LifecycleService() {
             context = this,
             onFrame = ::onFrame,
             onFailure = { onCaptureFailure() },
-            onSilenced = { silenced ->
-                bus.setState(if (silenced) ListeningState.MIC_BUSY else ListeningState.LISTENING)
+            onSilenced = { isSilenced ->
+                silenced = isSilenced
+                bus.setState(if (isSilenced) ListeningState.MIC_BUSY else ListeningState.LISTENING)
             },
         )
         val rate = cap.prepare()
@@ -138,6 +151,11 @@ class ListeningService : LifecycleService() {
         else engine.update(r.sample.laeq2sDb, s.baseThresholds, ts)
         bus.setMood(mood)
         moodCounts[mood.ordinal]++
+        ledger?.let { l ->
+            // A silenced mic reads as silence and our own tone as noise; neither should count.
+            if (silenced || ts < holdMoodUntilMs) l.skip(ts)
+            else pendingCalmMinutes += l.update(r.sample.laeq2sDb, s.baseThresholds, ts)
+        }
 
         if (s.chimeOnSad) {
             alerts.onMood(mood, ts)?.let { alertMood ->
@@ -170,11 +188,16 @@ class ListeningService : LifecycleService() {
         for (i in moodCounts.indices) if (moodCounts[i] > moodCounts[best]) best = i
         val dominant = Mood.values()[best]
         moodCounts.fill(0)
-        val calm = Unlocks.isCalmMinute(m, settings)
-        lifecycleScope.launch(Dispatchers.IO + NonCancellable) {
-            history.recordMinute(m, dominant)
-            if (calm) progress.addCalmMinutes(1)
-        }
+        lifecycleScope.launch(Dispatchers.IO + NonCancellable) { history.recordMinute(m, dominant) }
+        commitLedger()
+    }
+
+    /** Saves the ledger and credits what it earned; once a minute and on shutdown. */
+    private fun commitLedger() {
+        val state = ledger?.state ?: return
+        val earned = pendingCalmMinutes
+        pendingCalmMinutes = 0
+        lifecycleScope.launch(Dispatchers.IO + NonCancellable) { progress.commitLedger(earned, state) }
     }
 
     private fun onCaptureFailure() {
@@ -199,6 +222,8 @@ class ListeningService : LifecycleService() {
         running = false
         processor?.flushMinute()?.let { recordMinute(it) }
         processor = null
+        commitLedger()
+        ledger = null
         bus.clearLatest()
         bus.setState(finalState)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)

@@ -93,6 +93,8 @@ enum class Accessory(
 
 /** The rules for earning styles and accessories. Pure; unit-tested. */
 object Unlocks {
+    // Live earning is done by CalmLedger; these per-minute rules only remain for the one-off backfill from history.
+
     /** A recorded minute counts as calm when at least this much of it was listened to... */
     const val MIN_LISTENING_SECONDS = 30
     /** ...and its level stayed under the user's "worried" threshold. */
@@ -148,6 +150,15 @@ interface ProgressRepository {
     /** Adds calm minutes and unlocks whatever the new total earns, atomically. */
     suspend fun addCalmMinutes(minutes: Int)
 
+    /** The saved noise debt, for the listening service to pick up where it left off. */
+    suspend fun ledger(): LedgerState
+
+    /**
+     * Credits [earnedMinutes] (see [addCalmMinutes]) and saves [state], atomically. A state older than the
+     * saved one is ignored, so commits that land out of order can't bring back paid-off debt.
+     */
+    suspend fun commitLedger(earnedMinutes: Int, state: LedgerState)
+
     /**
      * Once per install: seeds the total from existing history (calm minutes still in the database plus
      * [Unlocks.CHALLENGE_BONUS_MINUTES] per won challenge) so early users get credit. No-op afterwards.
@@ -157,3 +168,14 @@ interface ProgressRepository {
     /** Marks rewards as celebrated so they are not announced again. */
     suspend fun markCelebrated(rewards: Collection<Reward>)
 }
+
+/**
+ * What CalmLedger carries between listening sessions, so pausing doesn't wipe noise debt.
+ * [calmMs] is calm time not yet worth a minute; [episodeStartsMs] are recent yelling episodes (wall clock).
+ */
+data class LedgerState(
+    val debtMs: Long = 0,
+    val calmMs: Long = 0,
+    val episodeStartsMs: List<Long> = emptyList(),
+    val updatedAtMs: Long = 0,
+)
