@@ -42,6 +42,8 @@ object KittenArt : AnimatedCharacterArt {
 
         override fun advance(dtSec: Float) = animator.advance(dtSec)
 
+        override fun poke() = animator.poke()
+
         override fun DrawScope.drawFrame(palette: Palette, accessories: Set<Accessory>) =
             drawKitten(animator.pose, animator.fx, palette, accessories)
     }

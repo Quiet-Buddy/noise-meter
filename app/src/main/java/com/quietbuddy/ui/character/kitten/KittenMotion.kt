@@ -1,6 +1,8 @@
 package com.quietbuddy.ui.character.kitten
 
 import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.character.PokeEnvelope
+import com.quietbuddy.ui.character.isCalm
 import kotlin.math.PI
 import kotlin.math.pow
 import kotlin.math.sin
@@ -100,6 +102,12 @@ data class KittenFx(
     val blink: Float = 0f,
     val twitchL: Float = 0f,
     val twitchR: Float = 0f,
+    /** Giggle after a poke, 0..1: eyes squeeze into happy arcs, cheeks glow, mouth opens. */
+    val giggle: Float = 0f,
+    /** Both ears flicking back after a poke, 0..1. */
+    val earFlick: Float = 0f,
+    /** Extra tail rotation in degrees for the swish after a poke. */
+    val tailSwish: Float = 0f,
 ) {
     companion object {
         val Still = KittenFx()
@@ -119,6 +127,12 @@ class KittenAnimator(initial: Mood?, private val random: Random = Random.Default
     private var twitchStart = -10f
     private var twitchLeft = true
     private var nextTwitch = 2f
+    private val giggleEnv = PokeEnvelope(attackSec = 0.06f, holdSec = 0.2f, releaseSec = 0.2f)
+    private val flickEnv = PokeEnvelope(attackSec = 0.05f, holdSec = 0.08f, releaseSec = 0.22f)
+    private val swishEnv = PokeEnvelope(attackSec = 0.05f, holdSec = 0.15f, releaseSec = 0.35f)
+
+    /** The giggle level as of the last [advance], 0..1. */
+    val giggle: Float get() = giggleEnv.value
 
     /** The pose being shown. */
     var pose: KittenPose = KittenPoses.of(initial)
@@ -139,6 +153,19 @@ class KittenAnimator(initial: Mood?, private val random: Random = Random.Default
             pose = target
         }
         mood = newMood
+        if (!newMood.isCalm) {
+            giggleEnv.release()
+            flickEnv.release()
+            swishEnv.release()
+        }
+    }
+
+    /** A pat: in a calm mood the kitten giggles, flicks its ears back and swishes its tail; otherwise nothing. */
+    fun poke() {
+        if (!mood.isCalm) return
+        giggleEnv.trigger()
+        flickEnv.trigger()
+        swishEnv.trigger()
     }
 
     /** Moves time on by [dtSec] and refreshes [pose] and [fx]. */
@@ -164,6 +191,20 @@ class KittenAnimator(initial: Mood?, private val random: Random = Random.Default
         }
         val tp = (clock - twitchStart) / 0.26f
         val tw = if (tp in 0f..1f) -14f * sin(PI.toFloat() * tp) else 0f
-        fx = KittenFx(clock, true, blink, if (twitchLeft) tw else 0f, if (twitchLeft) 0f else tw)
+        giggleEnv.advance(dtSec)
+        flickEnv.advance(dtSec)
+        swishEnv.advance(dtSec)
+        // The swish phase runs on the clock; its amplitude eases in and out, so re-pokes never jump.
+        val swish = 14f * swishEnv.value * sin(clock * PI.toFloat() * 2f * 2.6f)
+        fx = KittenFx(
+            time = clock,
+            idle = true,
+            blink = blink,
+            twitchL = if (twitchLeft) tw else 0f,
+            twitchR = if (twitchLeft) 0f else tw,
+            giggle = giggleEnv.value,
+            earFlick = flickEnv.value,
+            tailSwish = swish,
+        )
     }
 }

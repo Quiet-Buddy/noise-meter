@@ -13,6 +13,13 @@ import androidx.compose.animation.core.snap
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.ui.res.stringResource
 import com.quietbuddy.R
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.runtime.setValue
@@ -31,15 +38,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import android.Manifest
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.graphicsLayer
 import com.quietbuddy.ui.character.rememberAnimationsOff
-import kotlin.math.PI
-import kotlin.math.sin
 import android.app.Activity
 import android.content.Context
 import android.content.ContextWrapper
@@ -551,24 +551,23 @@ private fun Header(roomName: String, listening: Boolean, onToggle: () -> Unit, o
 private fun BuddyStage(mood: Mood?, db: Int?, size: Dp, tapCount: Int, onTap: () -> Unit) {
     val palette = LocalPalette.current
     val animationsOff = rememberAnimationsOff()
-    val squash = remember { Animatable(0f) }
-    val wobble = remember { Animatable(0f) }
     val calm = mood == Mood.HAPPY || mood == Mood.FINE
-    var seenTaps by remember { mutableIntStateOf(tapCount) }
-    // A new accepted tap (only ever in a calm room) plays one squash-and-stretch bounce.
-    LaunchedEffect(tapCount) {
-        if (tapCount == seenTaps) return@LaunchedEffect
-        seenTaps = tapCount
-        if (animationsOff) return@LaunchedEffect
-        squash.snapTo(0f)
-        squash.animateTo(1f, tween(350, easing = LinearEasing))
-    }
-    // A tap in a loud room gets no reply line, just a tiny gentle wobble.
-    var wobbles by remember { mutableIntStateOf(0) }
-    LaunchedEffect(wobbles) {
-        if (wobbles == 0 || animationsOff) return@LaunchedEffect
-        wobble.snapTo(0f)
-        wobble.animateTo(1f, tween(400, easing = LinearEasing))
+    val motion = rememberBuddyTapMotion()
+    val burst = rememberTapBurst()
+    val haptics = LocalHapticFeedback.current
+    val sizePx = with(LocalDensity.current) { size.toPx() }
+    // A calm pat is rewarded: a springy squash leaning away from the finger, hearts where it landed and a tick,
+    // building to hops on a streak. A pat in a loud room gets no reward, just a tiny sway.
+    val pat by rememberUpdatedState { at: Offset ->
+        val x = (at.x / sizePx * 2f - 1f).coerceIn(-1f, 1f)
+        if (!calm) {
+            if (!animationsOff) motion.wobble(x)
+        } else {
+            onTap()
+            val big = !animationsOff && motion.pat(x)
+            haptics.performHapticFeedback(if (big) HapticFeedbackType.Confirm else HapticFeedbackType.SegmentTick)
+            if (!animationsOff) burst.burst(at, big)
+        }
     }
     val target = if (mood == null || db == null) 0f else ((db - 30f) / 70f).coerceIn(0f, 1f)
     val progress by animateFloatAsState(target, tween(600), label = "glowProgress")
@@ -595,32 +594,22 @@ private fun BuddyStage(mood: Mood?, db: Int?, size: Dp, tapCount: Int, onTap: ()
         val patLabel = stringResource(R.string.home_pat_character)
         CharacterView(
             mood = mood,
+            // Taps are read before the motion layers, so the hit area stays put while the character bounces.
+            // detectTapGestures consumes the tap, so a parent's own click (full-screen exit) never sees it.
             modifier = Modifier
                 .size(size)
-                .graphicsLayer {
-                    // Squash down, stretch up, settle: scaleY 0.9 -> 1.08 -> 1 with scaleX the inverse.
-                    val t = squash.value
-                    val y = when {
-                        t <= 0f || t >= 1f -> 1f
-                        t < 0.3f -> 1f - 0.1f * (t / 0.3f)
-                        t < 0.65f -> 0.9f + 0.18f * ((t - 0.3f) / 0.35f)
-                        else -> 1.08f - 0.08f * ((t - 0.65f) / 0.35f)
+                .pointerInput(Unit) { detectTapGestures(onTap = { pat(it) }) }
+                .semantics(mergeDescendants = true) {
+                    role = Role.Button
+                    onClick(label = patLabel) {
+                        pat(Offset(sizePx / 2f, sizePx / 2f))
+                        true
                     }
-                    scaleY = y
-                    scaleX = 2f - y
-                    transformOrigin = TransformOrigin(0.5f, 0.9f)
-                    val w = wobble.value
-                    rotationZ = if (w in 0.001f..0.999f) 3f * sin(w * 2f * PI.toFloat()) * (1f - w) else 0f
                 }
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    role = Role.Button,
-                    onClickLabel = patLabel,
-                ) {
-                    if (calm) onTap() else wobbles++
-                },
+                .tapMotion(motion),
+            pokes = tapCount,
         )
+        TapBurstLayer(burst, Modifier.matchParentSize())
     }
 }
 

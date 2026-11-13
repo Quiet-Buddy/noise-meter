@@ -38,6 +38,7 @@ import com.quietbuddy.domain.character.Voices
  * Animated arts also blend between moods and idle (blink, sway, ...) while composed; pass [animated] false for a
  * still resting pose, e.g. small icons in a list. Idle motion is skipped when the system animation scale is 0.
  * The character wears what [LocalWardrobe] says unless [accessories] is given, e.g. to preview one.
+ * Each time [pokes] goes up the character reacts to being patted (see [CharacterAnimator.poke]).
  */
 @Composable
 fun CharacterView(
@@ -45,6 +46,7 @@ fun CharacterView(
     modifier: Modifier = Modifier,
     animated: Boolean = true,
     accessories: Set<Accessory>? = null,
+    pokes: Int = 0,
 ) {
     val character = LocalCharacter.current
     val worn = accessories ?: LocalWardrobe.current[character].orEmpty()
@@ -67,6 +69,15 @@ fun CharacterView(
     LaunchedEffect(animator, mood, animationsOff) {
         animator?.setMood(mood, animate = !animationsOff)
         frame++
+    }
+    // React when the poke count rises; the first value seen is the baseline, not a poke.
+    val seenPokes = remember { intArrayOf(pokes) }
+    LaunchedEffect(pokes) {
+        if (pokes > seenPokes[0] && animator != null && !animationsOff) {
+            animator.poke()
+            frame++
+        }
+        seenPokes[0] = pokes
     }
     if (animator != null && !animationsOff) {
         LaunchedEffect(animator) {
