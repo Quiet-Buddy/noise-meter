@@ -41,7 +41,7 @@ import com.quietbuddy.domain.character.Voices
 import com.quietbuddy.ui.SingleColumnMaxWidth
 import com.quietbuddy.ui.character.nameRes
 import com.quietbuddy.ui.theme.LocalPalette
-import java.time.ZoneId
+import java.time.LocalDate
 
 private val CardShape = RoundedCornerShape(20.dp)
 
@@ -69,10 +69,11 @@ fun CharactersScreen() {
 
             ProgressCard(calmMinutes = progress.calmMinutes)
 
-            // TODO(snowman): Stage 2 takes the clock from the view model.
-            val nowMs = System.currentTimeMillis()
-            val zone = ZoneId.systemDefault()
-            Character.entries.filter { LimitedEvents.isVisible(it, progress, LimitedEvents.scheduled, nowMs, zone) }.forEach { c ->
+            val nowMs = viewModel.clockMs()
+            val zone = viewModel.zone
+            val events = viewModel.events
+            Character.entries.filter { LimitedEvents.isVisible(it, progress, events, nowMs, zone) }.forEach { c ->
+                val daysLeft = LimitedEvents.activeFor(c, events, nowMs, zone)?.daysLeft(LocalDate.now(zone))
                 val unlocked = progress.isUnlocked(c)
                 val friend = CharacterStyle.defaultFor(c)
                 Column(
@@ -85,12 +86,22 @@ fun CharactersScreen() {
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.weight(1f),
                         )
+                        if (daysLeft != null) {
+                            Text(
+                                pluralStringResource(R.plurals.characters_ends_in_days, daysLeft, daysLeft),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.inkSoft,
+                                modifier = Modifier
+                                    .background(palette.line, RoundedCornerShape(50))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                            )
+                        }
                         if (!unlocked) {
                             Icon(Icons.Rounded.Lock, contentDescription = null, tint = palette.inkSoft, modifier = Modifier.size(16.dp))
                             Text(
                                 stringResource(
                                     R.string.style_progress,
-                                    progress.calmMinutes.coerceAtMost(friend.unlockAtCalmMinutes.toLong()),
+                                    LimitedEvents.minutesTowards(friend, progress, events, nowMs, zone).coerceAtMost(friend.unlockAtCalmMinutes.toLong()),
                                     friend.unlockAtCalmMinutes,
                                 ),
                                 style = MaterialTheme.typography.labelSmall,
@@ -111,6 +122,9 @@ fun CharactersScreen() {
                         character = c,
                         selectedStyle = if (settings.character == c) settings.styleFor(c) else null,
                         progress = progress,
+                        events = events,
+                        nowMs = nowMs,
+                        zone = zone,
                         onSelect = viewModel::select,
                     )
                     AccessoryTiles(
@@ -118,6 +132,9 @@ fun CharactersScreen() {
                         style = settings.styleFor(c),
                         worn = settings.accessoriesFor(c),
                         progress = progress,
+                        events = events,
+                        nowMs = nowMs,
+                        zone = zone,
                         onToggle = viewModel::toggle,
                     )
                 }

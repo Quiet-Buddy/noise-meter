@@ -111,4 +111,8 @@
     <string name="home_full_screen">Full screen</string>
     <string name="home_full_screen_exit_hint">Tap to exit</string>
     <string name="default_room_name">Living room</string>
+    <plurals name="characters_ends_in_days">
+        <item quantity="one">Ends in %1$d day</item>
+        <item quantity="other">Ends in %1$d days</item>
+    </plurals>
 </resources>

@@ -13,13 +13,14 @@ import com.quietbuddy.core.Thresholds
 import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.Reward
 import com.quietbuddy.core.SettingsRepository
-import com.quietbuddy.core.Unlocks
+import com.quietbuddy.core.LimitedEvents
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.domain.character.BuddyVoice
 import com.quietbuddy.domain.character.Voices
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.ZoneId
 import javax.inject.Inject
 import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
@@ -81,6 +82,10 @@ class HomeViewModel @Inject constructor(
     /** Wall clock, replaceable in tests so the cooldown needs no real waiting. */
     internal var clockMs: () -> Long = System::currentTimeMillis
 
+    /** Time zone and scheduled limited events, replaceable in tests. */
+    internal var zone: ZoneId = ZoneId.systemDefault()
+    internal var events = LimitedEvents.scheduled
+
     init {
         // Rotate the speech line every time the mood changes (the first value is not a change).
         viewModelScope.launch {
@@ -99,7 +104,7 @@ class HomeViewModel @Inject constructor(
         historyRepository.lastDays(1),
     ) { (settings, progress), latest, mood, listening, days ->
         val today = days.lastOrNull()
-        val next = Unlocks.next(progress.calmMinutes)
+        val next = LimitedEvents.next(progress, events, clockMs(), zone)
         Snapshot(
             roomName = settings.roomName,
             character = settings.character,
@@ -110,12 +115,9 @@ class HomeViewModel @Inject constructor(
             thresholds = settings.baseThresholds,
             calmMinutes = today?.calmMinutes ?: 0,
             pendingUnlocks = progress.pendingCelebration,
-            nextReward = next,
-            minutesToNext = next?.let { (it.unlockAtCalmMinutes - progress.calmMinutes).toInt().coerceAtLeast(1) } ?: 0,
-            nextRewardProgress = next?.let { n ->
-                val previous = Reward.all.map { it.unlockAtCalmMinutes }.filter { it < n.unlockAtCalmMinutes }.maxOrNull() ?: 0
-                ((progress.calmMinutes - previous).toFloat() / (n.unlockAtCalmMinutes - previous)).coerceIn(0f, 1f)
-            } ?: 0f,
+            nextReward = next?.reward,
+            minutesToNext = next?.minutesToGo ?: 0,
+            nextRewardProgress = next?.fraction ?: 0f,
         )
     }
 

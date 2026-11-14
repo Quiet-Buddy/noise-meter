@@ -49,6 +49,7 @@ class HomeViewModelTapTest {
 
     private val levels = FakeLevels()
     private var now = 10_000L
+    private var progress = Progress()
 
     @Before fun setUp() = Dispatchers.setMain(StandardTestDispatcher())
 
@@ -68,7 +69,7 @@ class HomeViewModelTapTest {
             override suspend fun prune(nowMs: Long) = Unit
         },
         object : ProgressRepository {
-            override val progress: Flow<Progress> = flowOf(Progress())
+            override val progress: Flow<Progress> = flowOf(this@HomeViewModelTapTest.progress)
             override suspend fun addCalmMinutes(minutes: Int) = Unit
             override suspend fun ledger() = LedgerState()
             override suspend fun commitLedger(earnedMinutes: Int, state: LedgerState) = Unit
@@ -159,5 +160,29 @@ class HomeViewModelTapTest {
         levels.mood.value = Mood.HAPPY
         runCurrent()
         assertFalse(vm.uiState.value.speechLine in BuddyVoice.tapLines())
+    }
+
+    @Test fun nextRewardComesFromAnActiveEventWhenItIsCloser() = runTest {
+        val zone = java.time.ZoneOffset.UTC
+        val event = com.quietbuddy.core.LimitedEvent(
+            "t", com.quietbuddy.core.Character.SNOWMAN, java.time.LocalDate.of(2026, 1, 1), java.time.LocalDate.of(2026, 1, 31),
+        )
+        now = java.time.LocalDate.of(2026, 1, 10).atStartOfDay(zone).toInstant().toEpochMilli()
+        progress = Progress(eventMinutes = mapOf("t" to 50L))
+        val vm = viewModel()
+        vm.zone = zone
+        vm.events = listOf(event)
+        runCurrent()
+        val state = vm.uiState.value
+        assertEquals(com.quietbuddy.core.CharacterStyle.SNOWMAN_FROST, state.nextReward)
+        assertEquals(10, state.minutesToNext)
+    }
+
+    @Test fun nextRewardIgnoresEventsThatAreNotActive() = runTest {
+        progress = Progress(eventMinutes = mapOf("t" to 50L))
+        val vm = viewModel()
+        vm.events = emptyList()
+        runCurrent()
+        assertTrue(vm.uiState.value.nextReward?.isLimited != true)
     }
 }
