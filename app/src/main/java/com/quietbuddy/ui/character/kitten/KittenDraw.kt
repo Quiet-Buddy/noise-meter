@@ -337,7 +337,7 @@ private fun anchors(p: KittenPose, poof: Float): AccessoryAnchors {
 private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette, accessories: Set<Accessory>) {
     val t = fx.time
     val idle = fx.idle
-    val sway = if (idle) p.sway * sin(t * PI.toFloat() * 2f * p.swayHz) else 0f
+    val sway = if (idle) p.sway * sin(fx.swayPhase) else 0f
     val tremble = if (idle) p.shake else 0f
     val poofJitter = tremble * 0.12f * sin(t * 47f)
     val poof = (p.poof + poofJitter).coerceIn(0f, 1.2f)

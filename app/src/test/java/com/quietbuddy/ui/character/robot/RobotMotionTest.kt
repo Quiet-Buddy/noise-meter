@@ -1,6 +1,7 @@
 package com.quietbuddy.ui.character.robot
 
 import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.character.assertIdleRhythmsNeverSkip
 import kotlin.random.Random
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -339,5 +340,17 @@ class RobotMotionTest {
         assertEquals(0f, fx.bank, 0f)
         assertTrue(fx.trail.isEmpty())
         assertEquals(0f, fx.yaw, 0f)
+    }
+
+    @Test
+    fun idleRhythmsNeverSkipOnAMoodChange() {
+        val a = RobotAnimator(Mood.FINE, Random(1))
+        // the fastest rhythm is the antenna rattle when too loud, at 9 Hz
+        assertIdleRhythmsNeverSkip(
+            setMood = { a.setMood(it) },
+            advance = { a.advance(it) },
+            angles = { with(a) { listOf(fx.hoverPhase, fx.swayPhase, fx.handPhase, fx.nodPhase, fx.antennaPhase) } },
+            maxHz = 9f,
+        )
     }
 }

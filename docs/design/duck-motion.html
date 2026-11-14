@@ -426,13 +426,12 @@ function bandana(c) {
 function render(p, fx) {
   const t = fx.time, idle = fx.idle;
   const tremble = idle ? p.shake : 0;
-  const rock = idle ? p.sway * Math.sin(t * Math.PI * 2 * p.swayHz) : 0;
-  const floatY = idle ? p.float * Math.sin(t * Math.PI * 2 * p.floatHz) : 0;
-  const wagHz = p.tailHz + fx.patWag * 3;
-  const wag = idle ? (p.tailWag + fx.patWag * 6) * Math.sin(t * Math.PI * 2 * wagHz) : 0;
-  const flap = idle ? p.flap * (0.5 + 0.5 * Math.sin(t * Math.PI * 2 * p.flapHz)) : 0;
-  const nod = idle ? p.nod * Math.sin(t * Math.PI * 2 * p.nodHz) : 0;
-  const kick = idle ? 16 * Math.sin(t * Math.PI * 2 * p.paddle) * clamp(p.paddle) : 0;
+  const rock = idle ? p.sway * Math.sin(fx.ph.sway) : 0;
+  const floatY = idle ? p.float * Math.sin(fx.ph.float) : 0;
+  const wag = idle ? (p.tailWag + fx.patWag * 6) * Math.sin(fx.ph.wag) : 0;
+  const flap = idle ? p.flap * (0.5 + 0.5 * Math.sin(fx.ph.flap)) : 0;
+  const nod = idle ? p.nod * Math.sin(fx.ph.nod) : 0;
+  const kick = idle ? 16 * Math.sin(fx.ph.paddle) * clamp(p.paddle) : 0;
   const cover = smooth(0, 1, p.cover);
   const head = S.head || S.body, headShade = S.headShade || S.shade, headShine = S.headShine || S.belly;
   Object.assign(C, BILL, S.bill ? { bill: S.bill, billLow: S.billLow, billTip: S.billTip } : {});
@@ -641,7 +640,7 @@ function render(p, fx) {
     + front + (fx.overlay || '');
 }
 
-const STATIC_FX = { time: 0, idle: false, blink: 0, twitch: 0, bounce: 1, squash: 0, patWag: 0, quack: -1, overlay: '' };
+const STATIC_FX = { time: 0, ph: {}, idle: false, blink: 0, twitch: 0, bounce: 1, squash: 0, patWag: 0, quack: -1, overlay: '' };
 
 // ---------- state ----------
 const svg = document.getElementById('duck');
@@ -656,6 +655,10 @@ const ctl = {
 };
 if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ctl.idle.checked = false;
 
+// Idle rhythms advance by each frame's own speed (see IdlePhase in the app), so a mood change
+// speeds them up or slows them down without the swing skipping.
+const PH = {};
+const advancePhase = (k, hz, dt) => { PH[k] = ((PH[k] || 0) + 2 * Math.PI * hz * dt) % (2 * Math.PI); };
 let clock = 0;                 // scaled time in seconds
 let current = clonePose(POSES.happy);
 let moodKey = 'happy';
@@ -744,8 +747,10 @@ function step(dt) {
   const patWag = ps >= 0 ? 1 - smooth(0.4, 1, ps) : 0;
   const shown = patFace > 0 ? lerpPose(current, PAT_FACE, () => patFace) : current;
   const idle = ctl.idle.checked;
+  for (const [k, hz] of [['sway', current.swayHz], ['float', current.floatHz], ['nod', current.nodHz], ['flap', current.flapHz],
+    ['paddle', current.paddle], ['wag', current.tailHz + patWag * 3]]) advancePhase(k, hz, dt);
   svg.innerHTML = render(shown, {
-    time: clock, idle, blink: idle ? blink : 0, twitch: idle ? tw : 0,
+    time: clock, idle, blink: idle ? blink : 0, twitch: idle ? tw : 0, ph: { ...PH },
     bounce, squash, patWag, quack: ps >= 0 && ps < 0.8 ? ps : -1, overlay: patOverlay(),
   });
 }

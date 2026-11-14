@@ -220,8 +220,8 @@ fun DrawScope.drawDuck(pose: DuckPose, fx: DuckFx, pal: Palette, accessories: Se
     val idle = fx.idle
     val tau = PI.toFloat() * 2f
 
-    val floatY = if (idle) p.float * sin(t * tau * p.floatHz) else 0f
-    val rock = if (idle) p.sway * sin(t * tau * p.swayHz) else 0f
+    val floatY = if (idle) p.float * sin(fx.floatPhase) else 0f
+    val rock = if (idle) p.sway * sin(fx.swayPhase) else 0f
     // Whole-body motion: tremble and breathing are weighted by the pose, so they ease in and out with it.
     val dx = if (idle) p.shake * 2.5f * sin(t * tau / 0.12f) else 0f
     val breath = if (idle) 1f + 0.02f * p.breathe * (0.5f - 0.5f * cos(t * PI.toFloat())) else 1f
@@ -254,7 +254,7 @@ private val HeadSlots = setOf(AccessorySlot.HEAD, AccessorySlot.FACE)
 
 /** Where the head sits this frame: its centre, tilt and the map from head units to design space. */
 private class Rig(p: DuckPose, fx: DuckFx) {
-    val nod = if (fx.idle) p.nod * sin(fx.time * PI.toFloat() * 2f * p.nodHz) else 0f
+    val nod = if (fx.idle) p.nod * sin(fx.nodPhase) else 0f
     val cx = DuckShapes.HEAD_CX + p.headDx
     val cy = DuckShapes.HEAD_CY + p.headDy + nod * 0.8f
     val tilt = p.tilt + fx.twitch
@@ -316,7 +316,7 @@ private fun DrawScope.drawWater(p: DuckPose, fx: DuckFx, pal: Palette) {
             alpha = clamp01((1f - ph) * 0.7f), style = Stroke(width = 2.5f),
         )
     }
-    val kick = if (fx.idle) 16f * sin(fx.time * PI.toFloat() * 2f * p.paddle) * clamp01(p.paddle) else 0f
+    val kick = if (fx.idle) 16f * sin(fx.paddlePhase) * clamp01(p.paddle) else 0f
     foot(pal, 76f, 186f, false, kick)
     foot(pal, 126f, 188f, true, -kick)
     oval(100f, 184f, 76f, 12f, Water, 0.16f)
@@ -339,8 +339,7 @@ private fun DrawScope.drawFarWing(p: DuckPose, pal: Palette, rig: Rig) {
 private fun DrawScope.drawBody(p: DuckPose, fx: DuckFx, pal: Palette) {
     val d = pal.duck
     val idle = fx.idle
-    val wagHz = p.tailHz + fx.patWag * 3f
-    val wag = if (idle) (p.tailWag + fx.patWag * 6f) * sin(fx.time * PI.toFloat() * 2f * wagHz) else 0f
+    val wag = if (idle) (p.tailWag + fx.patWag * 6f) * sin(fx.wagPhase) else 0f
     val td = p.tailDroop + wag
     val bodyD = Path().apply {
         moveTo(84f, 118f)
@@ -599,7 +598,7 @@ private const val ARC_DEG = 0.62f * 180f / PI.toFloat()
 private fun DrawScope.drawNearWing(p: DuckPose, fx: DuckFx, pal: Palette, rig: Rig) {
     val d = pal.duck
     val cover = smooth(0f, 1f, p.cover)
-    val flap = if (fx.idle) p.flap * (0.5f + 0.5f * sin(fx.time * PI.toFloat() * 2f * p.flapHz)) else 0f
+    val flap = if (fx.idle) p.flap * (0.5f + 0.5f * sin(fx.flapPhase)) else 0f
     val restAngle = (p.wing + flap) * (1f - cover)
     val rest = DuckShapes.WingRest
     val up = DuckShapes.WingCover

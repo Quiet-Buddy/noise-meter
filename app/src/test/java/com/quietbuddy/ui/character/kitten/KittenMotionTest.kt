@@ -1,6 +1,7 @@
 package com.quietbuddy.ui.character.kitten
 
 import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.character.assertIdleRhythmsNeverSkip
 import kotlin.random.Random
 import org.junit.Test
 import org.junit.Assert.assertEquals
@@ -91,5 +92,17 @@ class KittenMotionTest {
         assertEquals(KittenShapes.TailDown, mid.tail.map { Math.round(it * 10f) / 10f })
         assertEquals(0f, t.poseAt(0.3f).tailFront, 0f)
         assertEquals(1f, t.poseAt(1.0f).tailFront, 0f)
+    }
+
+    @Test
+    fun idleRhythmsNeverSkipOnAMoodChange() {
+        val a = KittenAnimator(Mood.FINE, Random(1))
+        // the fastest sway is the worried one, at 1.6 Hz
+        assertIdleRhythmsNeverSkip(
+            setMood = { a.setMood(it) },
+            advance = { a.advance(it) },
+            angles = { with(a) { listOf(fx.swayPhase) } },
+            maxHz = 1.6f,
+        )
     }
 }

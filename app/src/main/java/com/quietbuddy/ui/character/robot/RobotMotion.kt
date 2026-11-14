@@ -1,6 +1,7 @@
 package com.quietbuddy.ui.character.robot
 
 import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.character.IdlePhase
 import com.quietbuddy.ui.character.isCalm
 import kotlin.math.PI
 import kotlin.math.abs
@@ -122,6 +123,12 @@ data class RobotFx(
     val lapSpeed: Float = 0f,
     /** Progress 0..1 of the trick's sparkle burst, or negative when there is none. */
     val burst: Float = -1f,
+    /** Angles in radians of the idle rhythms; see [IdlePhase]. */
+    val hoverPhase: Float = 0f,
+    val swayPhase: Float = 0f,
+    val handPhase: Float = 0f,
+    val nodPhase: Float = 0f,
+    val antennaPhase: Float = 0f,
 ) {
     /** How far the body leans into the turn; follows the speed, so it is 0 when the lap starts and ends. */
     val bank: Float get() = orbit?.let { 14f * cos(it) * lapSpeed } ?: 0f
@@ -180,6 +187,12 @@ class RobotAnimator(initial: Mood?, private val random: Random = Random.Default)
     /** When the heart eyes start to fade: after the last pat, or after the move it started if that ends later. */
     private var faceHoldUntil = -10f
 
+    private val hoverPhase = IdlePhase()
+    private val swayPhase = IdlePhase()
+    private val handPhase = IdlePhase()
+    private val nodPhase = IdlePhase()
+    private val antennaPhase = IdlePhase()
+
     /** The pose being shown, before the pat's heart eyes are blended over it (that is [RobotFx.patFace]). */
     var pose: RobotPose = RobotPoses.of(initial)
         private set
@@ -235,6 +248,11 @@ class RobotAnimator(initial: Mood?, private val random: Random = Random.Default)
             pose = it.poseAt(clock)
             if (it.isFinished(clock)) transition = null
         }
+        hoverPhase.advance(pose.hoverHz, dtSec)
+        swayPhase.advance(pose.swayHz, dtSec)
+        handPhase.advance(pose.handHz, dtSec)
+        nodPhase.advance(pose.nodHz, dtSec)
+        antennaPhase.advance(pose.antennaHz, dtSec)
         if (clock > nextBlink) {
             blinkStart = clock
             nextBlink = clock + 2.2f + random.nextFloat() * 3.2f
@@ -306,6 +324,11 @@ class RobotAnimator(initial: Mood?, private val random: Random = Random.Default)
             orbit = orbit,
             lapSpeed = lapSpeed,
             burst = if (bk in 0f..1f) bk else -1f,
+            hoverPhase = hoverPhase.radians,
+            swayPhase = swayPhase.radians,
+            handPhase = handPhase.radians,
+            nodPhase = nodPhase.radians,
+            antennaPhase = antennaPhase.radians,
         )
     }
 

@@ -418,7 +418,7 @@ function eye(cx, cy, p, open) {
 // ---------- one full frame ----------
 function render(p, fx) {
   const t = fx.time;
-  const sway = fx.idle ? p.sway * Math.sin(t * Math.PI * 2 * p.swayHz) : 0;
+  const sway = fx.idle ? p.sway * Math.sin(fx.ph.sway) : 0;
   const tremble = fx.idle ? p.shake : 0;
   const poofJitter = tremble * 0.12 * Math.sin(t * 47);
   const poof = clamp(p.poof + poofJitter, 0, 1.2);
@@ -539,7 +539,7 @@ function render(p, fx) {
 
 let EYE = { s: 1.35, dx: 2, dy: -6 };
 const eyeFor = (pct, up) => { const k = pct / 100; return { s: k, dx: (k - 1) * 5.7, dy: (k - 1) * 5.7 - up }; };
-const STATIC_FX = { time: 0, idle: false, blink: 0, twitchL: 0, twitchR: 0, bounce: 1, shakeDx: 0 };
+const STATIC_FX = { time: 0, ph: {}, idle: false, blink: 0, twitchL: 0, twitchR: 0, bounce: 1, shakeDx: 0 };
 
 // ---------- state ----------
 const svg = document.getElementById('kitten');
@@ -552,6 +552,10 @@ const ctl = {
 };
 if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ctl.idle.checked = false;
 
+// Idle rhythms advance by each frame's own speed (see IdlePhase in the app), so a mood change
+// speeds them up or slows them down without the swing skipping.
+const PH = {};
+const advancePhase = (k, hz, dt) => { PH[k] = ((PH[k] || 0) + 2 * Math.PI * hz * dt) % (2 * Math.PI); };
 let clock = 0;                 // scaled time in seconds
 let current = clonePose(POSES.happy);
 let moodKey = 'happy';
@@ -620,8 +624,9 @@ function step(dt) {
   const bt = (clock - bounceStart) / 0.4;
   const bounce = bt >= 0 && bt <= 1 ? 1 + 0.06 * Math.sin(Math.PI * bt) : 1;
   const idle = ctl.idle.checked;
+  advancePhase('sway', current.swayHz, dt);
   svg.innerHTML = render(current, {
-    time: clock, idle, blink: idle ? blink : 0,
+    time: clock, idle, blink: idle ? blink : 0, ph: { ...PH },
     twitchL: idle && twitch.side === 'L' ? tw : 0, twitchR: idle && twitch.side === 'R' ? tw : 0,
     bounce, shakeDx: 0,
   });
