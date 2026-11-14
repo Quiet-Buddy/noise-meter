@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mari_name">Mari Domingi</string>
+    <string name="mari_listening_title">Mari Domingi entzuten ari da · %1$s</string>
+    <string name="mari_greeting">Kaixo, txikiak! Ni Mari Domingi naiz.</string>
+
+    <string name="mari_sleeping">Sutondoan lotan… sakatu mikrofonoa ni esnatzeko.</string>
+
+    <string name="mari_happy_1">Zein lasai eta isila. Ilargia irteten entzuten dut.</string>
+    <string name="mari_happy_2">Zein bakea, elurtutako gau bateko baserria bezala.</string>
+    <string name="mari_happy_3">Zer polita! Sagar errea merezi dugu.</string>
+    <string name="mari_fine_1">Ederki! Denak ahopeka berriketan ari dira.</string>
+    <string name="mari_fine_2">Zarata kopuru egokia, mendiko ardiak bezain lasai.</string>
+    <string name="mari_fine_3">Ondo hitz egin, ondo entzun. Nire sagarrak irribarrez daude.</string>
+    <string name="mari_worried_1">Mmm… zarata handitzen ari da hemen.</string>
+    <string name="mari_worried_2">Ardiak beldurtuko lirateke! Jaitsi dezakegu bolumena pixka bat?</string>
+    <string name="mari_worried_3">Jolas dezakegu isilago? Olentzerok ere entzungo gintuzke mendian.</string>
+    <string name="mari_sad_1">Ene… ahots baxuan hitz egin dezakegu?</string>
+    <string name="mari_sad_2">Zarata gehiegi dago. Nire belarri zaharrak nekatuta daude.</string>
+    <string name="mari_sad_3">Lagundu iezadazue isiltasuna aurkitzen, txikiak.</string>
+    <string name="mari_ears_1">Zarata handia! Nire sagarrak ihesi doaz, biraka!</string>
+    <string name="mari_ears_2">Ene! Eskuak belarrietan! Isilik egongo gara?</string>
+    <string name="mari_ears_3">Zarata handia! Egin dezagun atsedenaldi isil bat, Gabon gauean bezala.</string>
+
+    <string name="mari_asleep">Mari Domingi lo dago, tontor altua kulunkan, ilargi-erdi baten azpian</string>
+    <string name="mari_happy">Mari Domingi pozik dago eta sagar bat altxatzen du</string>
+    <string name="mari_fine">Mari Domingi ondo dago eta irribarre egiten du, saskia eskuan</string>
+    <string name="mari_worried">Mari Domingi kezkatuta dago eta eskua masailean jartzen du</string>
+    <string name="mari_sad">Mari Domingi triste dago, malko batekin eta burua makurtuta</string>
+    <string name="mari_ears">Mari Domingik belarriak eskuekin estaltzen ditu; saskia erori zaio eta sagarrak biraka doaz</string>
+
+    <string name="mari_tap_1">Hihi! Kilikatzen nauzu, laztana.</string>
+    <string name="mari_tap_2">Laztan leunak dira nire gogokoenak.</string>
+    <string name="mari_tap_3">Sagar bat nahi duzu? Hartu gorriena.</string>
+    <string name="mari_tap_4">Ixo, egon gaitezen isilik elkarrekin, izarrei begira.</string>
+    <string name="mari_tap_5">Laztan leunak, ahots leunak.</string>
+</resources>

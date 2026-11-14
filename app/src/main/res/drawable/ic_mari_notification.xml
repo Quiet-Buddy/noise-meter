@@ -1,0 +1,6 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <!-- Mari Domingi: head, shoulders, tall wrapped headdress and its curled tip wound clockwise (they merge); the eyes and the curl's hollow wound the other way cut out. -->
+    <path android:fillColor="#FFFFFFFF" android:fillType="nonZero"
+        android:pathData="M6.5,16.5A4.5,4.5 0 1,1 15.5,16.5A4.5,4.5 0 1,1 6.5,16.5Z M2.5,24C2.5,21 6,19.6 11,19.6C16,19.6 19.5,21 19.5,24Z M7.4,13.8L8.9,5.2L10.4,3L14,2.6L14.8,13.8Z M12.2,5A2.9,2.9 0 1,1 18,5A2.9,2.9 0 1,1 12.2,5Z M9.1,16.5A0.8,0.8 0 1,0 10.7,16.5A0.8,0.8 0 1,0 9.1,16.5Z M12,16.5A0.8,0.8 0 1,0 13.6,16.5A0.8,0.8 0 1,0 12,16.5Z M14.2,5.2A0.9,0.9 0 1,0 16,5.2A0.9,0.9 0 1,0 14.2,5.2Z"/>
+</vector>
