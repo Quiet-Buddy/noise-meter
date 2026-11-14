@@ -71,7 +71,7 @@ object AlertSounds {
         Character.DUCK -> duckSounds
         Character.ROBOT -> robotSounds
         Character.SNOWMAN -> snowmanSounds
-        Character.MARI_DOMINGI -> snowmanSounds // TODO(mari)
+        Character.MARI_DOMINGI -> mariSounds
     }
 
     private class Recipe(val seconds: Double, val gain: Double, val drive: Double, val draw: Buf.() -> Unit)
