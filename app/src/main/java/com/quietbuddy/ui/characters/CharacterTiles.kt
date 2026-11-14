@@ -120,9 +120,12 @@ internal fun AccessoryTiles(
 ) {
     val palette = LocalPalette.current
     val wornLabel = stringResource(R.string.accessory_worn)
+    val visible = Accessory.of(character).filter { LimitedEvents.isVisible(it, progress, events, nowMs, zone) }
+    // After a limited event, a character may keep none of its accessories: then there is no section at all.
+    if (visible.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(R.string.characters_accessories), style = MaterialTheme.typography.labelMedium, color = palette.inkSoft)
-        Accessory.of(character).filter { LimitedEvents.isVisible(it, progress, events, nowMs, zone) }.chunked(4).forEach { row ->
+        visible.chunked(4).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 row.forEach { accessory ->
                     val unlocked = progress.isUnlocked(accessory)
