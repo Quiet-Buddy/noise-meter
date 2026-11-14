@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="snowman_name">Snowy</string>
+    <string name="snowman_listening_title">Snowy is listening · %1$s</string>
+    <string name="snowman_greeting">Hello! I\'m Snowy.</string>
+
+    <string name="snowman_sleeping">Snoozing under the snow… tap the microphone to wake me up.</string>
+
+    <string name="snowman_happy_1">So calm and quiet. Just like fresh, fluffy snow.</string>
+    <string name="snowman_happy_2">I can hear the snowflakes landing. How peaceful!</string>
+    <string name="snowman_happy_3">Everything is cosy and calm. I love it.</string>
+    <string name="snowman_fine_1">Nice! Everyone is chatting softly.</string>
+    <string name="snowman_fine_2">Just the right amount of noise. Lovely.</string>
+    <string name="snowman_fine_3">Good talking, good listening. My carrot nose is smiling.</string>
+    <string name="snowman_worried_1">Hmm… it\'s getting a bit loud in here.</string>
+    <string name="snowman_worried_2">My scarf is wobbling. Can we turn it down a little?</string>
+    <string name="snowman_worried_3">Could we play a little more quietly?</string>
+    <string name="snowman_sad_1">Oh no… can we use our indoor voices?</string>
+    <string name="snowman_sad_2">That\'s a lot of noise. I\'m shivering.</string>
+    <string name="snowman_sad_3">Please help me find some quiet.</string>
+    <string name="snowman_ears_1">So loud! I\'m covering my ears!</string>
+    <string name="snowman_ears_2">Eek! Arms over my ears! Can we be quiet?</string>
+    <string name="snowman_ears_3">Big noise! Let\'s take a quiet break!</string>
+
+    <string name="snowman_asleep">Snowy is asleep</string>
+    <string name="snowman_happy">Snowy is happy</string>
+    <string name="snowman_fine">Snowy is fine</string>
+    <string name="snowman_worried">Snowy is worried</string>
+    <string name="snowman_sad">Snowy is sad</string>
+    <string name="snowman_ears">Snowy is covering its ears with its stick arms</string>
+
+    <string name="snowman_tap_1">Hehe! That tickles my snowy tummy.</string>
+    <string name="snowman_tap_2">Gentle pats are my favourite.</string>
+    <string name="snowman_tap_3">Hee hee! My carrot nose is wiggling!</string>
+    <string name="snowman_tap_4">Shh, let\'s be quiet together, like snow.</string>
+    <string name="snowman_tap_5">Soft pats, soft voices.</string>
+</resources>

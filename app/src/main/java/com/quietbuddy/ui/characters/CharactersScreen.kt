@@ -33,13 +33,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quietbuddy.R
 import com.quietbuddy.core.Accessory
-import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
-import com.quietbuddy.core.Unlocks
+import com.quietbuddy.core.LimitedEvents
+import com.quietbuddy.core.NextReward
 import com.quietbuddy.domain.character.Voices
 import com.quietbuddy.ui.SingleColumnMaxWidth
 import com.quietbuddy.ui.character.nameRes
 import com.quietbuddy.ui.theme.LocalPalette
+import java.time.LocalDate
 
 private val CardShape = RoundedCornerShape(20.dp)
 
@@ -65,9 +66,14 @@ fun CharactersScreen() {
                 Text(stringResource(R.string.characters_title), style = MaterialTheme.typography.headlineSmall)
             }
 
-            ProgressCard(calmMinutes = progress.calmMinutes)
+            val nowMs = viewModel.clockMs()
+            val zone = viewModel.zone
+            val events = viewModel.events
 
-            Character.entries.forEach { c ->
+            // Same next reward as Home, so a running event's reward is named here too.
+            ProgressCard(calmMinutes = progress.calmMinutes, nextReward = LimitedEvents.next(progress, events, nowMs, zone))
+            LimitedEvents.charactersInOrder(progress, events, nowMs, zone).forEach { c ->
+                val daysLeft = LimitedEvents.activeFor(c, events, nowMs, zone)?.daysLeft(LocalDate.now(zone))
                 val unlocked = progress.isUnlocked(c)
                 val friend = CharacterStyle.defaultFor(c)
                 Column(
@@ -80,12 +86,22 @@ fun CharactersScreen() {
                             style = MaterialTheme.typography.titleMedium,
                             modifier = Modifier.weight(1f),
                         )
+                        if (daysLeft != null) {
+                            Text(
+                                pluralStringResource(R.plurals.characters_ends_in_days, daysLeft, daysLeft),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = palette.inkSoft,
+                                modifier = Modifier
+                                    .background(palette.line, RoundedCornerShape(50))
+                                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                            )
+                        }
                         if (!unlocked) {
                             Icon(Icons.Rounded.Lock, contentDescription = null, tint = palette.inkSoft, modifier = Modifier.size(16.dp))
                             Text(
                                 stringResource(
                                     R.string.style_progress,
-                                    progress.calmMinutes.coerceAtMost(friend.unlockAtCalmMinutes.toLong()),
+                                    LimitedEvents.minutesTowards(friend, progress, events, nowMs, zone).coerceAtMost(friend.unlockAtCalmMinutes.toLong()),
                                     friend.unlockAtCalmMinutes,
                                 ),
                                 style = MaterialTheme.typography.labelSmall,
@@ -106,6 +122,9 @@ fun CharactersScreen() {
                         character = c,
                         selectedStyle = if (settings.character == c) settings.styleFor(c) else null,
                         progress = progress,
+                        events = events,
+                        nowMs = nowMs,
+                        zone = zone,
                         onSelect = viewModel::select,
                     )
                     AccessoryTiles(
@@ -113,6 +132,9 @@ fun CharactersScreen() {
                         style = settings.styleFor(c),
                         worn = settings.accessoriesFor(c),
                         progress = progress,
+                        events = events,
+                        nowMs = nowMs,
+                        zone = zone,
                         onToggle = viewModel::toggle,
                     )
                 }
@@ -122,13 +144,10 @@ fun CharactersScreen() {
 }
 
 @Composable
-private fun ProgressCard(calmMinutes: Long) {
+private fun ProgressCard(calmMinutes: Long, nextReward: NextReward?) {
     val palette = LocalPalette.current
-    val next = Unlocks.next(calmMinutes)
-    val previous = Unlocks.previousThreshold(calmMinutes)
-    val fraction = if (next == null) 1f else {
-        ((calmMinutes - previous).toFloat() / (next.unlockAtCalmMinutes - previous)).coerceIn(0f, 1f)
-    }
+    val next = nextReward?.reward
+    val fraction = nextReward?.fraction ?: 1f
     Column(
         modifier = Modifier.fillMaxWidth().background(palette.card, CardShape).padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -145,7 +164,7 @@ private fun ProgressCard(calmMinutes: Long) {
             if (next == null) {
                 stringResource(R.string.style_all_unlocked)
             } else {
-                val remaining = (next.unlockAtCalmMinutes - calmMinutes).toInt().coerceAtLeast(1)
+                val remaining = nextReward.minutesToGo
                 when {
                     next is CharacterStyle && next.isCharacterDefault ->
                         pluralStringResource(R.plurals.style_next_friend_hint, remaining, remaining, stringResource(Voices.of(next.character).name))

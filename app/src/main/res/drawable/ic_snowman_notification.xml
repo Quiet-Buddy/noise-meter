@@ -1,0 +1,6 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp" android:viewportWidth="24" android:viewportHeight="24">
+    <!-- Snowy: head and body circles wound clockwise (they merge); the eyes and buttons wound the other way cut out. -->
+    <path android:fillColor="#FFFFFFFF" android:fillType="nonZero"
+        android:pathData="M7.5,6.5A4.5,4.5 0 1,1 16.5,6.5A4.5,4.5 0 1,1 7.5,6.5Z M5.5,17A6.5,6.5 0 1,1 18.5,17A6.5,6.5 0 1,1 5.5,17Z M9.5,5.8A0.8,0.8 0 1,0 11.1,5.8A0.8,0.8 0 1,0 9.5,5.8Z M12.9,5.8A0.8,0.8 0 1,0 14.5,5.8A0.8,0.8 0 1,0 12.9,5.8Z M11.1,15A0.9,0.9 0 1,0 12.9,15A0.9,0.9 0 1,0 11.1,15Z M11.1,18.4A0.9,0.9 0 1,0 12.9,18.4A0.9,0.9 0 1,0 11.1,18.4Z"/>
+</vector>

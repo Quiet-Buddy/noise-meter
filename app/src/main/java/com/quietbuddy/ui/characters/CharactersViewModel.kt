@@ -5,10 +5,12 @@ import androidx.lifecycle.viewModelScope
 import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.CharacterStyle
+import com.quietbuddy.core.LimitedEvents
 import com.quietbuddy.core.Progress
 import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.SettingsRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import java.time.ZoneId
 import javax.inject.Inject
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -27,6 +29,11 @@ class CharactersViewModel @Inject constructor(
 
     val progress: StateFlow<Progress> = progressRepository.progress
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), Progress())
+
+    /** Wall clock, replaceable in tests. */
+    internal var clockMs: () -> Long = System::currentTimeMillis
+    internal var zone: ZoneId = ZoneId.systemDefault()
+    internal var events = LimitedEvents.scheduled
 
     /** Switches to [style]'s character and style, if it is unlocked. */
     fun select(style: CharacterStyle) {

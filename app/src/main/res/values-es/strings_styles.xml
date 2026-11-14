@@ -12,6 +12,8 @@
     <string name="style_robot_pearl">Astro Perla</string>
     <string name="style_robot_lilac">Astro Lila</string>
     <string name="style_robot_sky">Astro Cielo</string>
+    <string name="style_snowman_frost">Copito Escarcha</string>
+    <string name="style_snowman_dusk">Copito Atardecer</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, bloqueado. %2$s</string>
@@ -73,6 +75,8 @@
     <string name="acc_star_glasses">Gafas de estrella</string>
     <string name="acc_bow_tie">Pajarita</string>
     <string name="acc_planet_ring">Anillo planetario</string>
+    <string name="acc_scarf">Bufanda</string>
+    <string name="acc_beanie">Gorro</string>
 
     <plurals name="accessory_next_hint">
         <item quantity="one">Falta %1$d minuto en calma para desbloquear: %2$s</item>

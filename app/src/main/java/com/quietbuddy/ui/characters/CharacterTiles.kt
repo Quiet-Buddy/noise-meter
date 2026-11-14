@@ -41,6 +41,8 @@ import com.quietbuddy.R
 import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
+import com.quietbuddy.core.LimitedEvent
+import com.quietbuddy.core.LimitedEvents
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.Progress
 import com.quietbuddy.core.Reward
@@ -49,6 +51,7 @@ import com.quietbuddy.ui.character.LocalCharacter
 import com.quietbuddy.ui.character.LocalStyle
 import com.quietbuddy.ui.character.nameRes
 import com.quietbuddy.ui.theme.LocalPalette
+import java.time.ZoneId
 
 /** Wraps a character preview; when locked, overlays a lock icon (the preview itself is dimmed by the caller). */
 @Composable
@@ -67,13 +70,16 @@ internal fun StyleTiles(
     character: Character,
     selectedStyle: CharacterStyle?,
     progress: Progress,
+    events: List<LimitedEvent>,
+    nowMs: Long,
+    zone: ZoneId,
     onSelect: (CharacterStyle) -> Unit,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         modifier = Modifier.fillMaxWidth().selectableGroup(),
     ) {
-        CharacterStyle.of(character).forEach { style ->
+        CharacterStyle.of(character).filter { LimitedEvents.isVisible(it, progress, events, nowMs, zone) }.forEach { style ->
             val unlocked = progress.isUnlocked(style)
             val isSelected = style == selectedStyle
             RewardTile(
@@ -81,7 +87,7 @@ internal fun StyleTiles(
                 name = stringResource(style.nameRes),
                 unlocked = unlocked,
                 highlighted = isSelected,
-                calmMinutes = progress.calmMinutes,
+                calmMinutes = LimitedEvents.minutesTowards(style, progress, events, nowMs, zone),
                 interaction = Modifier.selectable(
                     selected = isSelected,
                     enabled = unlocked,
@@ -107,13 +113,19 @@ internal fun AccessoryTiles(
     style: CharacterStyle,
     worn: Set<Accessory>,
     progress: Progress,
+    events: List<LimitedEvent>,
+    nowMs: Long,
+    zone: ZoneId,
     onToggle: (Accessory) -> Unit,
 ) {
     val palette = LocalPalette.current
     val wornLabel = stringResource(R.string.accessory_worn)
+    val visible = Accessory.of(character).filter { LimitedEvents.isVisible(it, progress, events, nowMs, zone) }
+    // After a limited event, a character may keep none of its accessories: then there is no section at all.
+    if (visible.isEmpty()) return
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(stringResource(R.string.characters_accessories), style = MaterialTheme.typography.labelMedium, color = palette.inkSoft)
-        Accessory.of(character).chunked(4).forEach { row ->
+        visible.chunked(4).forEach { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 row.forEach { accessory ->
                     val unlocked = progress.isUnlocked(accessory)
@@ -123,7 +135,7 @@ internal fun AccessoryTiles(
                         name = stringResource(accessory.nameRes),
                         unlocked = unlocked,
                         highlighted = isWorn,
-                        calmMinutes = progress.calmMinutes,
+                        calmMinutes = LimitedEvents.minutesTowards(accessory, progress, events, nowMs, zone),
                         interaction = Modifier
                             .toggleable(value = isWorn, enabled = unlocked, role = Role.Checkbox, onValueChange = { onToggle(accessory) })
                             .semantics { if (isWorn) stateDescription = wornLabel },

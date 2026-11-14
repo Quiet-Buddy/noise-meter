@@ -111,4 +111,8 @@
     <string name="home_full_screen">Pantaila osoa</string>
     <string name="home_full_screen_exit_hint">Ukitu irteteko</string>
     <string name="default_room_name">Egongela</string>
+    <plurals name="characters_ends_in_days">
+        <item quantity="one">%1$d egun barru amaitzen da</item>
+        <item quantity="other">%1$d egun barru amaitzen da</item>
+    </plurals>
 </resources>

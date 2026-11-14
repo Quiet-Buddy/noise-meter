@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="snowman_name">Elurtxo</string>
+    <string name="snowman_listening_title">Elurtxo entzuten ari da · %1$s</string>
+    <string name="snowman_greeting">Kaixo! Ni Elurtxo naiz.</string>
+
+    <string name="snowman_sleeping">Elurraren azpian lo… sakatu mikrofonoa ni esnatzeko.</string>
+
+    <string name="snowman_happy_1">Zein lasai eta isila. Elur berria bezala.</string>
+    <string name="snowman_happy_2">Elur malutak erortzen entzuten ditut. Zein lasai!</string>
+    <string name="snowman_happy_3">Dena goxo eta lasai dago. Asko gustatzen zait.</string>
+    <string name="snowman_fine_1">Ederki! Denak ahopeka berriketan ari dira.</string>
+    <string name="snowman_fine_2">Zarata kopuru egokia. Polita!</string>
+    <string name="snowman_fine_3">Ondo hitz egin, ondo entzun. Nire azenario sudurra irribarrez dago.</string>
+    <string name="snowman_worried_1">Mmm… zarata handitzen ari da hemen.</string>
+    <string name="snowman_worried_2">Bufanda dardarka daukat. Jaitsi dezakegu bolumena pixka bat?</string>
+    <string name="snowman_worried_3">Jolas dezakegu pixka bat isilago?</string>
+    <string name="snowman_sad_1">Ene… ahots baxuan hitz egin dezakegu?</string>
+    <string name="snowman_sad_2">Zarata gehiegi dago. Hotzez ari naiz dardarka.</string>
+    <string name="snowman_sad_3">Mesedez, lagundu iezadazu isiltasuna aurkitzen.</string>
+    <string name="snowman_ears_1">Zarata handia! Belarriak estaltzen ditut!</string>
+    <string name="snowman_ears_2">Ene! Besoak belarrien gainean! Isilik egongo gara?</string>
+    <string name="snowman_ears_3">Zarata handia! Egin dezagun atsedenaldi isil bat!</string>
+
+    <string name="snowman_asleep">Elurtxo lo dago</string>
+    <string name="snowman_happy">Elurtxo pozik dago</string>
+    <string name="snowman_fine">Elurtxo ondo dago</string>
+    <string name="snowman_worried">Elurtxo kezkatuta dago</string>
+    <string name="snowman_sad">Elurtxo triste dago</string>
+    <string name="snowman_ears">Elurtxo belarriak makil-besoekin estaltzen ari da</string>
+
+    <string name="snowman_tap_1">Hihi! Elurrezko sabela kilikatzen didazu.</string>
+    <string name="snowman_tap_2">Laztan leunak dira nire gogokoenak.</string>
+    <string name="snowman_tap_3">Hihi! Mugi, mugi, nire azenario sudurra!</string>
+    <string name="snowman_tap_4">Ixo, egon gaitezen isilik elkarrekin, elurra bezala.</string>
+    <string name="snowman_tap_5">Laztan leunak, ahots leunak.</string>
+</resources>

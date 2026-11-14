@@ -9,6 +9,7 @@ import org.junit.Test
 class UnlocksTest {
 
     private val free = Progress.FREE
+    private val lifetimeRewards = Reward.all.filterNot { it.isLimited }.toSet()
 
     @Test
     fun earnedByThresholds() {
@@ -21,8 +22,8 @@ class UnlocksTest {
         assertTrue(Accessory.SUNGLASSES in Unlocks.earnedBy(60))
         assertFalse(Accessory.CROWN in Unlocks.earnedBy(999))
         assertTrue(Accessory.CROWN in Unlocks.earnedBy(1000))
-        assertEquals(Reward.all.toSet() - CharacterStyle.ROBOT_SKY, Unlocks.earnedBy(2399))
-        assertEquals(Reward.all.toSet(), Unlocks.earnedBy(2400))
+        assertEquals(lifetimeRewards - CharacterStyle.ROBOT_SKY, Unlocks.earnedBy(2399))
+        assertEquals(lifetimeRewards, Unlocks.earnedBy(2400))
     }
 
     @Test

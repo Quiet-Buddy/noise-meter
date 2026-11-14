@@ -111,4 +111,9 @@
     <string name="home_full_screen">Pantalla completa</string>
     <string name="home_full_screen_exit_hint">Toca para salir</string>
     <string name="default_room_name">Salón</string>
+    <plurals name="characters_ends_in_days">
+        <item quantity="one">Termina en %1$d día</item>
+        <item quantity="many">Termina en %1$d días</item>
+        <item quantity="other">Termina en %1$d días</item>
+    </plurals>
 </resources>

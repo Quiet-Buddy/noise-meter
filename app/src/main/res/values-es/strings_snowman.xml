@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="snowman_name">Copito</string>
+    <string name="snowman_listening_title">Copito está escuchando · %1$s</string>
+    <string name="snowman_greeting">¡Hola! Soy Copito.</string>
+
+    <string name="snowman_sleeping">Dormido bajo la nieve… toca el micrófono para despertarme.</string>
+
+    <string name="snowman_happy_1">Qué tranquilo y silencioso. Como la nieve recién caída.</string>
+    <string name="snowman_happy_2">Oigo cómo caen los copos de nieve. ¡Qué paz!</string>
+    <string name="snowman_happy_3">Todo está calentito y en calma. Me encanta.</string>
+    <string name="snowman_fine_1">¡Qué bien! Todos charlan bajito.</string>
+    <string name="snowman_fine_2">Justo la cantidad de ruido adecuada. Qué bien.</string>
+    <string name="snowman_fine_3">Hablar bien, escuchar bien. Mi nariz de zanahoria sonríe.</string>
+    <string name="snowman_worried_1">Mmm… se está poniendo algo ruidoso aquí.</string>
+    <string name="snowman_worried_2">Me tiembla la bufanda. ¿Bajamos un poquito el volumen?</string>
+    <string name="snowman_worried_3">¿Podemos jugar un poco más bajito?</string>
+    <string name="snowman_sad_1">Ay… ¿podemos hablar más bajito?</string>
+    <string name="snowman_sad_2">Hay mucho ruido. Estoy temblando de frío.</string>
+    <string name="snowman_sad_3">Por favor, ayúdame a encontrar un poco de calma.</string>
+    <string name="snowman_ears_1">¡Qué ruido! ¡Me tapo las orejas!</string>
+    <string name="snowman_ears_2">¡Uy! ¡Me tapo las orejas con mis bracitos! ¿Hacemos silencio?</string>
+    <string name="snowman_ears_3">¡Qué ruidazo! ¡Hagamos una pausa tranquila!</string>
+
+    <string name="snowman_asleep">Copito está dormido</string>
+    <string name="snowman_happy">Copito está contento</string>
+    <string name="snowman_fine">Copito está bien</string>
+    <string name="snowman_worried">Copito está preocupado</string>
+    <string name="snowman_sad">Copito está triste</string>
+    <string name="snowman_ears">Copito se tapa las orejas con sus bracitos de ramita</string>
+
+    <string name="snowman_tap_1">¡Jiji! Me haces cosquillas en la barriga de nieve.</string>
+    <string name="snowman_tap_2">Las caricias suaves me encantan.</string>
+    <string name="snowman_tap_3">¡Jiji! ¡Mira cómo se mueve mi nariz de zanahoria!</string>
+    <string name="snowman_tap_4">Shh, estemos calladitos juntos, como la nieve.</string>
+    <string name="snowman_tap_5">Caricias suaves, voces suaves.</string>
+</resources>
