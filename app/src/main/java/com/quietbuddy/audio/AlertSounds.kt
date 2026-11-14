@@ -41,6 +41,11 @@ import kotlin.random.Random
  * - Sad: three falling chimes, a cold wind sighing downwards, two "pff" puffs and a sagging note.
  * - Too loud: a frantic jingle of chimes, heavy stomps in the snow, a blustery gust with bell clangs.
  *
+ * Mari Domingi's set is Basque folk (txalaparta plank knocks, pandero jingles, a soft txistu flute, a little bell):
+ * - Worried: a hesitant two-note txistu phrase, two uneven plank knocks then a questioning note, a soft pandero shake and a bell.
+ * - Sad: a slow falling txistu phrase, a lone bell and a sagging flute note, two slow knocks and a drooping flute.
+ * - Too loud: fast urgent txalaparta knocks with jingles, a rolling knock run ending in a bell, a jingle-topped flurry of knocks.
+ *
  * Timbres are rich in harmonics in the 1–4 kHz range, where phone speakers and ears are most
  * sensitive, and are gently saturated so they sound loud and cut through a noisy room.
  * Pure Kotlin so it can be unit-tested off-device.
@@ -402,6 +407,89 @@ object AlertSounds {
             },
         ),
     )
+
+    private val mariSounds: Map<Mood, List<Recipe>> = mapOf(
+        Mood.WORRIED to listOf(
+            // A hesitant two-note txistu phrase: a note, a pause, a higher unsure note.
+            Recipe(0.9, gain = 0.75, drive = 1.5) {
+                tone(0.0, 0.25, { 880.0 }, harmonics = 3, attack = 0.04, release = 0.08, vibratoHz = 5.5, vibratoDepth = 0.01)
+                tone(0.4, 0.45, { t -> glide(988.0, 1_047.0, t / 0.4) }, harmonics = 3, attack = 0.05, release = 0.15,
+                    vibratoHz = 6.0, vibratoDepth = 0.015)
+            },
+            // Two uneven txalaparta knocks, then a questioning flute note.
+            Recipe(0.9, gain = 0.75, drive = 1.5) {
+                knock(0.0, 330.0)
+                knock(0.17, 262.0)
+                tone(0.5, 0.35, { t -> glide(784.0, 988.0, t / 0.3) }, harmonics = 3, attack = 0.04, release = 0.12,
+                    vibratoHz = 6.0, vibratoDepth = 0.012)
+            },
+            // A soft pandero shake, then a small bell.
+            Recipe(0.8, gain = 0.75, drive = 1.5) {
+                for (i in 0..2) jingle(i * 0.07, 0.12)
+                tone(0.4, 0.4, { 1_568.0 }, harmonics = 4, decay = 5.0, attack = 0.004, release = 0.1)
+            },
+        ),
+        Mood.SAD to listOf(
+            // A slow falling txistu phrase.
+            Recipe(1.7, gain = 0.9, drive = 2.0) {
+                val hz = doubleArrayOf(988.0, 784.0, 659.0)
+                val len = doubleArrayOf(0.4, 0.4, 0.7)
+                for (i in 0..2) {
+                    tone(i * 0.5, len[i], { t -> hz[i] * (1 - 0.04 * t / len[i]) }, harmonics = 3, attack = 0.06,
+                        release = 0.15, vibratoHz = 5.5, vibratoDepth = 0.02)
+                }
+            },
+            // A lone bell, then a sagging flute note.
+            Recipe(1.4, gain = 0.9, drive = 2.0) {
+                tone(0.0, 0.8, { 1_319.0 }, harmonics = 4, decay = 3.5, attack = 0.005, release = 0.15)
+                tone(0.55, 0.8, { t -> glide(880.0, 587.0, t / 0.7) }, harmonics = 3, attack = 0.08, release = 0.2,
+                    vibratoHz = 5.5, vibratoDepth = 0.02)
+            },
+            // Two slow tired knocks and a drooping flute.
+            Recipe(1.3, gain = 0.9, drive = 2.0) {
+                knock(0.0, 247.0)
+                knock(0.45, 196.0)
+                tone(0.85, 0.45, { t -> glide(740.0, 494.0, t / 0.4) }, harmonics = 3, attack = 0.06, release = 0.15,
+                    vibratoHz = 5.5, vibratoDepth = 0.02)
+            },
+        ),
+        Mood.EARS_COVERED to listOf(
+            // Fast urgent txalaparta knocks with jingles.
+            Recipe(1.2, gain = 1.0, drive = 3.0) {
+                for (i in 0 until 8) {
+                    knock(i * 0.13, if (i % 2 == 0) 330.0 else 247.0)
+                    if (i % 2 == 0) jingle(i * 0.13, 0.1)
+                }
+            },
+            // A rolling run of knocks ending in a bright bell.
+            Recipe(1.2, gain = 1.0, drive = 3.0) {
+                for (i in 0 until 6) knock(i * 0.1, 220.0 + 25.0 * i)
+                for (i in 0..1) tone(0.65 + i * 0.25, 0.45, { 1_760.0 }, harmonics = 5, oddOnly = true, decay = 4.0,
+                    attack = 0.003, release = 0.08)
+            },
+            // A flurry of paired knocks with pandero jingles on top.
+            Recipe(1.1, gain = 1.0, drive = 3.0) {
+                for (i in 0 until 4) {
+                    knock(i * 0.24, 300.0)
+                    knock(i * 0.24 + 0.09, 240.0)
+                    jingle(i * 0.24 + 0.12, 0.1)
+                }
+            },
+        ),
+    )
+
+    /** A txalaparta plank knock: a dry woody thump with a short click, at about [hz]. */
+    private fun Buf.knock(at: Double, hz: Double) {
+        tone(at, 0.14, { t -> hz * (1 - 0.25 * min(1.0, t / 0.05)) }, harmonics = 4, decay = 22.0, attack = 0.002,
+            release = 0.04)
+        noise(at, 0.03, lowHz = 1_000.0, highHz = 4_500.0, attack = 0.001, release = 0.02)
+    }
+
+    /** A pandero jingle: a short burst of bright metallic noise and a high ring. */
+    private fun Buf.jingle(at: Double, dur: Double) {
+        noise(at, dur, lowHz = 4_000.0, highHz = 9_000.0, attack = 0.003, release = dur * 0.7)
+        tone(at, dur, { 3_136.0 }, harmonics = 2, decay = 20.0, attack = 0.002, release = 0.04)
+    }
 
     /** A meow's pitch contour as [x] goes 0..1: [from] Hz up to [peak] at [peakAt], then down to [to]. */
     private fun meow(x: Double, from: Double, peak: Double, to: Double, peakAt: Double = 0.35): Double =
