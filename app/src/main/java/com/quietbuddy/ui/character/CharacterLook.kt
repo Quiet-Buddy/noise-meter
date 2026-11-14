@@ -130,6 +130,8 @@ object CharacterLooks {
             CharacterStyle.ROBOT_SKY -> RobotSkyPalette
             CharacterStyle.SNOWMAN_FROST -> SnowmanPalette
             CharacterStyle.SNOWMAN_DUSK -> SnowmanDuskPalette
+            // TODO(mari): her own art and palettes.
+            CharacterStyle.MARI_AMONA, CharacterStyle.MARI_MOREA, CharacterStyle.MARI_URDINA -> SnowmanPalette
         }
         CharacterLook(
             art = when (style.character) {
@@ -138,6 +140,7 @@ object CharacterLooks {
                 Character.DUCK -> DuckArt
                 Character.ROBOT -> RobotArt
                 Character.SNOWMAN -> SnowmanArt
+                Character.MARI_DOMINGI -> SnowmanArt // TODO(mari)
             },
             palette = palette,
         )

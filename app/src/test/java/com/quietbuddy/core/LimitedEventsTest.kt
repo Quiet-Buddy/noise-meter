@@ -223,4 +223,39 @@ class LimitedEventsTest {
         val p = progress(calm = 0, eventMinutes = mapOf(event.key to 59L))
         assertEquals(1, LimitedEvents.next(p, events, during, zone)!!.minutesToGo)
     }
+    @Test
+    fun mariDomingiVisitsFromDecemberFirstToTheTwentySixthEveryYear() {
+        val christmas = LimitedEvents.scheduled.filter { it.key.matches(Regex("mari_domingi_\\d{4}")) }
+        for (year in listOf(2026, 2027, 2035)) {
+            val opens = ms(LocalDate.of(year, 12, 1))
+            val closes = ms(LocalDate.of(year, 12, 27))
+            assertNull(LimitedEvents.activeFor(Character.MARI_DOMINGI, christmas, opens - 1, zone))
+            assertEquals("mari_domingi_$year", LimitedEvents.activeFor(Character.MARI_DOMINGI, christmas, opens, zone)?.key)
+            assertEquals("mari_domingi_$year", LimitedEvents.activeFor(Character.MARI_DOMINGI, christmas, closes - 1, zone)?.key)
+            assertNull(LimitedEvents.activeFor(Character.MARI_DOMINGI, christmas, closes, zone))
+        }
+    }
+
+    @Test
+    fun scheduledEventsOfOneCharacterNeverOverlapAndHaveUniqueKeys() {
+        val scheduled = LimitedEvents.scheduled
+        assertEquals(scheduled.size, scheduled.map { it.key }.toSet().size)
+        scheduled.groupBy { it.character }.values.forEach { same ->
+            same.sortedBy { it.from }.zipWithNext().forEach { (a, b) -> assertTrue("${a.key} overlaps ${b.key}", a.until < b.from) }
+        }
+    }
+
+    @Test
+    fun mariDomingiRewardsUnlockOnHerEventMinutes() {
+        val mari = LimitedEvent("m", Character.MARI_DOMINGI, LocalDate.of(2026, 12, 1), LocalDate.of(2026, 12, 26))
+        assertEquals(emptySet<Reward>(), LimitedEvents.earnedIn(mari, 59))
+        assertEquals(setOf(CharacterStyle.MARI_AMONA), LimitedEvents.earnedIn(mari, 60))
+        assertEquals(
+            setOf(
+                CharacterStyle.MARI_AMONA, CharacterStyle.MARI_MOREA, CharacterStyle.MARI_URDINA,
+                Accessory.EGUZKILORE, Accessory.ZAPIA, Accessory.LANTERN, Accessory.ROBIN,
+            ),
+            LimitedEvents.earnedIn(mari, 300),
+        )
+    }
 }

@@ -45,5 +45,6 @@ object Voices {
         Character.DUCK -> DuckVoice
         Character.ROBOT -> RobotVoice
         Character.SNOWMAN -> SnowmanVoice
+        Character.MARI_DOMINGI -> SnowmanVoice // TODO(mari)
     }
 }

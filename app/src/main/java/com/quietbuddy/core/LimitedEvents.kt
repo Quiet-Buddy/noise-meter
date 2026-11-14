@@ -39,8 +39,30 @@ object LimitedEvents {
         until = LocalDate.of(2026, 12, 5),
     )
 
-    /** Release builds schedule nothing; the snowman validation event only runs in debug builds. */
-    val scheduled: List<LimitedEvent> = if (BuildConfig.DEBUG) listOf(SNOWMAN_TEST) else emptyList()
+    /**
+     * Mari Domingi visits every Christmas from December 1 to 26. Each year is its own event, so a class that missed
+     * some of her rewards can earn them the next December.
+     */
+    private val MARI_DOMINGI_CHRISTMAS = (2026..2040).map { year ->
+        LimitedEvent(
+            key = "mari_domingi_$year",
+            character = Character.MARI_DOMINGI,
+            from = LocalDate.of(year, 12, 1),
+            until = LocalDate.of(year, 12, 26),
+        )
+    }
+
+    /** Lets debug builds try Mari Domingi before her first December; it ends the day before the real event starts. */
+    private val MARI_DOMINGI_TEST = LimitedEvent(
+        key = "mari_domingi_test_2026",
+        character = Character.MARI_DOMINGI,
+        from = LocalDate.of(2026, 11, 14),
+        until = LocalDate.of(2026, 11, 30),
+    )
+
+    /** The snowman and Mari's early test events only run in debug builds. */
+    val scheduled: List<LimitedEvent> =
+        MARI_DOMINGI_CHRISTMAS + if (BuildConfig.DEBUG) listOf(SNOWMAN_TEST, MARI_DOMINGI_TEST) else emptyList()
 
     fun active(events: List<LimitedEvent>, nowMs: Long, zone: ZoneId): List<LimitedEvent> =
         events.filter { it.isActive(nowMs, zone) }

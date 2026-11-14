@@ -113,6 +113,8 @@ fun DrawScope.drawAccessories(
             Accessory.PROPELLER_CAP, Accessory.STAR_GLASSES, Accessory.BOW_TIE, Accessory.PLANET_RING -> Unit
             // Snowy draws its own scarf and beanie, see SnowmanArt.
             Accessory.SCARF, Accessory.BEANIE -> Unit
+            // Mari Domingi draws her own, in her own front/back order.
+            Accessory.EGUZKILORE, Accessory.ZAPIA, Accessory.LANTERN, Accessory.ROBIN -> Unit
         }
     }
 }

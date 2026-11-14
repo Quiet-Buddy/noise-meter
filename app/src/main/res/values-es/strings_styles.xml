@@ -13,6 +13,9 @@
     <string name="style_robot_lilac">Astro Lila</string>
     <string name="style_robot_sky">Astro Cielo</string>
     <string name="style_snowman_frost">Copito Escarcha</string>
+    <string name="style_mari_amona">Mari Abuela</string>
+    <string name="style_mari_morea">Mari Violeta</string>
+    <string name="style_mari_urdina">Mari Azul</string>
     <string name="style_snowman_dusk">Copito Atardecer</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
@@ -76,6 +79,10 @@
     <string name="acc_bow_tie">Pajarita</string>
     <string name="acc_planet_ring">Anillo planetario</string>
     <string name="acc_scarf">Bufanda</string>
+    <string name="acc_eguzkilore">Eguzkilore</string>
+    <string name="acc_zapia">Pañuelo</string>
+    <string name="acc_lantern">Farol</string>
+    <string name="acc_robin">Petirrojo</string>
     <string name="acc_beanie">Gorro</string>
 
     <plurals name="accessory_next_hint">
