@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mari_name">Mari Domingi</string>
+    <string name="mari_listening_title">Mari Domingi is listening · %1$s</string>
+    <string name="mari_greeting">Hello, little ones! I\'m Mari Domingi.</string>
+
+    <string name="mari_sleeping">Dozing by the fire… tap the microphone to wake me up.</string>
+
+    <string name="mari_happy_1">So quiet and calm. I can hear the moon rising.</string>
+    <string name="mari_happy_2">Peace and quiet, like the farmhouse on a snowy night.</string>
+    <string name="mari_happy_3">How lovely! This calls for a roasted apple.</string>
+    <string name="mari_fine_1">Nice! Everyone is chatting softly.</string>
+    <string name="mari_fine_2">Just the right amount of noise, like sheep humming on the hill.</string>
+    <string name="mari_fine_3">Good talking, good listening. My apples are smiling.</string>
+    <string name="mari_worried_1">Hmm… it\'s getting a bit loud in here.</string>
+    <string name="mari_worried_2">The sheep would be startled! Can we turn it down a little?</string>
+    <string name="mari_worried_3">Could we play more quietly? Even Olentzero would hear us from the mountain.</string>
+    <string name="mari_sad_1">Oh dear… can we use our indoor voices?</string>
+    <string name="mari_sad_2">That\'s a lot of noise. My old ears are tired.</string>
+    <string name="mari_sad_3">Please help me find some quiet, little ones.</string>
+    <string name="mari_ears_1">So loud! My apples are rolling away!</string>
+    <string name="mari_ears_2">Goodness! Hands over my ears! Can we be quiet?</string>
+    <string name="mari_ears_3">Big noise! Let\'s take a quiet break, like on Christmas Eve.</string>
+
+    <string name="mari_asleep">Mari Domingi is asleep, her tall headdress nodding under a crescent moon</string>
+    <string name="mari_happy">Mari Domingi is happy and holds up an apple</string>
+    <string name="mari_fine">Mari Domingi is fine and smiles, holding her basket</string>
+    <string name="mari_worried">Mari Domingi is worried and puts a hand to her cheek</string>
+    <string name="mari_sad">Mari Domingi is sad, with a tear and her head lowered</string>
+    <string name="mari_ears">Mari Domingi covers her ears with her hands, her basket dropped and apples rolling away</string>
+
+    <string name="mari_tap_1">Hehe! That tickles, dear.</string>
+    <string name="mari_tap_2">Gentle pats are my favourite.</string>
+    <string name="mari_tap_3">Want an apple? Take the reddest one.</string>
+    <string name="mari_tap_4">Shh, let\'s be quiet together and look at the stars.</string>
+    <string name="mari_tap_5">Soft pats, soft voices.</string>
+</resources>
