@@ -13,6 +13,9 @@
     <string name="style_robot_lilac">Astro Lila</string>
     <string name="style_robot_sky">Astro Zerua</string>
     <string name="style_snowman_frost">Elurtxo Izoztua</string>
+    <string name="style_mari_amona">Mari Amona</string>
+    <string name="style_mari_morea">Mari Morea</string>
+    <string name="style_mari_urdina">Mari Urdina</string>
     <string name="style_snowman_dusk">Elurtxo Ilunabarra</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
@@ -71,6 +74,10 @@
     <string name="acc_bow_tie">Tximeleta-gorbata</string>
     <string name="acc_planet_ring">Planeta-eraztuna</string>
     <string name="acc_scarf">Bufanda</string>
+    <string name="acc_eguzkilore">Eguzkilorea</string>
+    <string name="acc_zapia">Sorbalda-zapia</string>
+    <string name="acc_lantern">Farola</string>
+    <string name="acc_robin">Txantxangorria</string>
     <string name="acc_beanie">Txanoa</string>
 
     <plurals name="accessory_next_hint">

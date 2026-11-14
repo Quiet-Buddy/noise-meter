@@ -11,6 +11,7 @@ import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.duck.DuckArt
 import com.quietbuddy.ui.character.kitten.KittenArt
+import com.quietbuddy.ui.character.mari.MariArt
 import com.quietbuddy.ui.character.robot.RobotArt
 import com.quietbuddy.ui.character.snowman.SnowmanArt
 import com.quietbuddy.ui.theme.SnowmanDuskPalette
@@ -24,6 +25,9 @@ import com.quietbuddy.ui.theme.DuckPalette
 import com.quietbuddy.ui.theme.KittenGreyPalette
 import com.quietbuddy.ui.theme.KittenSnowPalette
 import com.quietbuddy.ui.theme.KittenPalette
+import com.quietbuddy.ui.theme.MariMoreaPalette
+import com.quietbuddy.ui.theme.MariPalette
+import com.quietbuddy.ui.theme.MariUrdinaPalette
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.RobotLilacPalette
 import com.quietbuddy.ui.theme.RobotPalette
@@ -130,6 +134,9 @@ object CharacterLooks {
             CharacterStyle.ROBOT_SKY -> RobotSkyPalette
             CharacterStyle.SNOWMAN_FROST -> SnowmanPalette
             CharacterStyle.SNOWMAN_DUSK -> SnowmanDuskPalette
+            CharacterStyle.MARI_AMONA -> MariPalette
+            CharacterStyle.MARI_MOREA -> MariMoreaPalette
+            CharacterStyle.MARI_URDINA -> MariUrdinaPalette
         }
         CharacterLook(
             art = when (style.character) {
@@ -138,6 +145,7 @@ object CharacterLooks {
                 Character.DUCK -> DuckArt
                 Character.ROBOT -> RobotArt
                 Character.SNOWMAN -> SnowmanArt
+                Character.MARI_DOMINGI -> MariArt
             },
             palette = palette,
         )

@@ -11,9 +11,15 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.StrokeJoin
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.drawscope.withTransform
+import androidx.compose.ui.graphics.vector.PathParser
 import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.AccessorySlot
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.max
+import kotlin.math.sin
 
 // Accessory colours are the same in every style; only the outline follows the palette.
 private val HatFelt = Color(0xFF3A3346)
@@ -113,6 +119,9 @@ fun DrawScope.drawAccessories(
             Accessory.PROPELLER_CAP, Accessory.STAR_GLASSES, Accessory.BOW_TIE, Accessory.PLANET_RING -> Unit
             // Snowy draws its own scarf and beanie, see SnowmanArt.
             Accessory.SCARF, Accessory.BEANIE -> Unit
+            // Mari Domingi draws her own, in her own front/back order, see drawEguzkilore, drawZapia, drawLantern
+            // and drawRobin.
+            Accessory.EGUZKILORE, Accessory.ZAPIA, Accessory.LANTERN, Accessory.ROBIN -> Unit
         }
     }
 }
@@ -549,6 +558,195 @@ fun DrawScope.drawPlanetRing(outline: Color, front: Boolean, at: Offset) {
                 quadraticTo(at.x - rx * 0.45f, at.y + ry * 0.99f, at.x - rx * 0.2f, at.y + ry * 0.96f)
             }
             drawPath(glint, Color.White, alpha = 0.75f, style = stroke(2f))
+        }
+    }
+}
+
+// Mari Domingi's accessories, from docs/design/mari-domingi-motion.html. Like Astro's, they are not placed from
+// anchors: her art draws each one in its own front/back order, in the prototype's coordinates (before MariDraw scales
+// her into the design space), and drives them with her mood.
+private val BractSilver = Color(0xFFF1ECDF)
+private val ThistleHeart = Color(0xFFD9A43A)
+private val ThistleDot = Color(0xFF9C6B22)
+private val ZapiaGround = Color(0xFFF2E3BD)
+private val PaisleyInk = Color(0xFF2E2A35)
+private val PaisleyGold = Color(0xFFC8902E)
+private val PaisleyRust = Color(0xFF9E2B2F)
+private val LanternIron = Color(0xFF3A3A44)
+private val LanternGlass = Color(0xFFFFF1C4)
+private val LanternFlame = Color(0xFFFFB347)
+private val LanternGlow = Color(0xFFFFD978)
+private val RobinBrown = Color(0xFF8B6B4E)
+private val RobinWing = Color(0xFF6E5440)
+private val RobinBreast = Color(0xFFE8743B)
+private val RobinLegs = Color(0xFF4A3A30)
+private val RobinBeak = Color(0xFF3A2E2A)
+
+private fun svg(d: String): Path = PathParser().parsePathString(d).toPath()
+
+/**
+ * The eguzkilore (Carlina acaulis), the silvery thistle nailed to Basque doors: a ring of thin bracts round a golden
+ * heart, centred at ([x], [y]). [open] 0 closes the bracts into an upright tuft, 1 opens them in a full ring (more
+ * makes them longer); [spin] turns the open ring a little, in radians.
+ */
+fun DrawScope.drawEguzkilore(outline: Color, x: Float, y: Float, open: Float, spin: Float) {
+    val n = 18
+    val k = open.coerceIn(0f, 1f)
+    val len = 5f + 8f * open
+    val bracts = Path()
+    for (i in 0 until n) {
+        val aOpen = i.toFloat() / n * 2f * PI.toFloat() + spin
+        val aShut = -PI.toFloat() / 2f + (i.toFloat() / (n - 1) - 0.5f) * 1.1f
+        val a = aShut + (aOpen - aShut) * k
+        bracts.moveTo(x, y)
+        bracts.lineTo(x + cos(a) * len, y + sin(a) * len * 0.85f)
+    }
+    drawPath(bracts, outline, style = stroke(4.4f))
+    drawPath(bracts, BractSilver, style = stroke(2.4f))
+    val hr = 3.6f + 1.6f * k
+    ovalOutlined(x, y, hr, hr, ThistleHeart, outline, 2.5f)
+    for ((dx, dy) in listOf(-1.4f to -1f, 1.3f to -0.6f, 0f to 1.4f)) drawCircle(ThistleDot, 0.8f, Offset(x + dx * k, y + dy * k))
+}
+
+/**
+ * The zapia's cream paisley print: a 13-unit tile turned -18 degrees, laid out once over the area the kerchief covers
+ * (its ends swing inside their own rotated group, so the print moves with the cloth).
+ */
+private object PaisleyPrint {
+    private const val TILE = 13f
+    private val tear = svg("M4 8.5 C1.5 6 3 2.2 6.6 2.8 C9.6 3.4 9.4 7.2 6.6 8.4 C5.4 9 5.6 11 7.6 11.4 C4.8 12.4 3 10.8 4 8.5 Z")
+    val ink = Path()
+    val gold = Path()
+    val rust = Path()
+
+    // In the print's own (rotated) frame the kerchief spans about x -15..73 and y 196..271.
+    val area = Rect(-3 * TILE, 14 * TILE, 7 * TILE, 22 * TILE)
+
+    init {
+        for (i in -3..6) for (j in 14..21) {
+            val o = Offset(i * TILE, j * TILE)
+            ink.addPath(tear, o)
+            gold.addOval(Rect(Offset(o.x + 6.3f, o.y + 5.4f), 1.2f))
+            gold.addOval(Rect(Offset(o.x + 10.6f, o.y + 10.2f), 0.8f))
+            rust.addOval(Rect(Offset(o.x + 11f, o.y + 3.2f), 1f))
+        }
+    }
+}
+
+private fun DrawScope.printed(shape: Path, outline: Color, w: Float) {
+    clipPath(shape) {
+        withTransform({ rotate(-18f, Offset.Zero) }) {
+            drawRect(ZapiaGround, PaisleyPrint.area.topLeft, PaisleyPrint.area.size)
+            drawPath(PaisleyPrint.ink, PaisleyInk)
+            drawPath(PaisleyPrint.gold, PaisleyGold)
+            drawPath(PaisleyPrint.rust, PaisleyRust)
+        }
+    }
+    drawPath(shape, outline, style = stroke(w))
+}
+
+private val ZapiaTips = listOf(svg("M98 222 L90 236 Q95 237 100 230 Z"), svg("M102 222 L111 235 Q106 237 100 230 Z"))
+private val ZapiaBands = listOf(-1f, 1f).map { sd ->
+    fun x(v: Float) = 100f + sd * v
+    svg(
+        "M${x(19f)} 187 C${x(30f)} 186 ${x(36f)} 192 ${x(37f)} 201 C${x(30f)} 210 ${x(14f)} 218 ${x(3f)} 224 " +
+            "L${x(1f)} 216 C${x(9f)} 210 ${x(18f)} 203 ${x(21f)} 196 C${x(21f)} 192 ${x(20f)} 189 ${x(19f)} 187 Z",
+    ) to svg("M${x(34f)} 197 C${x(28f)} 207 ${x(14f)} 215 ${x(4f)} 220")
+}
+private val ZapiaKnot = svg("M95 218 Q100 214 105 218 Q107 224 100 227 Q93 224 95 218 Z")
+
+/**
+ * The women's zapia, in Mari Domingi's coordinates: a cream paisley kerchief folded into a triangle and laid over the
+ * shoulders, its two ends crossing down the front in a V and knotted at the bodice. The little ends below the knot
+ * swing by [tailAngle] degrees, so they flutter when she moves.
+ */
+fun DrawScope.drawZapia(outline: Color, tailAngle: Float) {
+    withTransform({ rotate(tailAngle, Offset(100f, 222f)) }) {
+        for (tip in ZapiaTips) printed(tip, outline, 2.8f)
+    }
+    for ((band, border) in ZapiaBands) {
+        printed(band, outline, 3.4f)
+        drawPath(border, PaisleyRust, alpha = 0.85f, style = stroke(1.8f))
+    }
+    printed(ZapiaKnot, outline, 3f)
+}
+
+private val LanternHook = svg("M0 0 L0 5")
+private val LanternCap = svg("M-6 5 L6 5 L8.5 9 L-8.5 9 Z")
+private val LanternBar = svg("M0 9 L0 25")
+private val LanternFlamePath = svg("M0 13.5 C3 17 2.5 21 0 21 C-2.5 21 -3 17 0 13.5 Z")
+private val LanternBase = svg("M-8 25 L8 25 L6.5 28.5 L-6.5 28.5 Z")
+
+/**
+ * A small iron lantern hanging from its ring at ([x], [y]) and swinging by [angle] degrees. [glow] 0..1 lights the
+ * glass, the flame and the warm halo around it.
+ */
+fun DrawScope.drawLantern(outline: Color, x: Float, y: Float, glow: Float, angle: Float) {
+    val g = max(0f, glow)
+    drawCircle(LanternGlow, 10f + 26f * g, Offset(x, y + 16f), alpha = (0.16f * g).coerceIn(0f, 1f))
+    drawCircle(LanternGlow, 7f + 8f * g, Offset(x, y + 16f), alpha = (0.3f * g).coerceIn(0f, 1f))
+    withTransform({
+        translate(x, y)
+        rotate(angle, Offset.Zero)
+    }) {
+        drawPath(LanternHook, LanternIron, style = stroke(2.4f))
+        drawCircle(LanternIron, 2.2f, Offset(0f, -1.5f), style = Stroke(1.8f))
+        outlined(LanternCap, LanternIron, outline, 2.4f)
+        val glassTl = Offset(-7f, 9f)
+        val glassSize = Size(14f, 16f)
+        drawRoundRect(LanternGlass, glassTl, glassSize, CornerRadius(2f), alpha = (0.45f + 0.55f * g).coerceIn(0f, 1f))
+        drawRoundRect(outline, glassTl, glassSize, CornerRadius(2f), style = Stroke(2.6f))
+        drawPath(LanternBar, LanternIron, alpha = 0.7f, style = stroke(1.6f))
+        drawPath(LanternFlamePath, LanternFlame, alpha = (0.35f + 0.65f * g).coerceIn(0f, 1f))
+        outlined(LanternBase, LanternIron, outline, 2.4f)
+    }
+}
+
+private val RobinTail = svg("M-6 1 L-14 -3 L-13 3 Z")
+private val RobinLegsPath = svg("M-1 6 L-2 10 M2.5 6 L2.5 10")
+private val RobinWingPath = svg("M-5 -2 Q1 -5 4 0 Q-1 3 -6 2 Z")
+
+/**
+ * The txantxangorria (robin) at ([x], [y]), facing right, or left when [dir] is -1. [wing] is the wing's angle in
+ * degrees while flying, or null when perched (then its legs show). [sleep] 0..1 tucks its head in and shuts its eye.
+ */
+fun DrawScope.drawRobin(outline: Color, x: Float, y: Float, dir: Float, wing: Float?, sleep: Float, alpha: Float = 1f) {
+    val a = alpha.coerceIn(0f, 1f)
+    withTransform({
+        translate(x, y)
+        scale(1.4f * dir, 1.4f, Offset.Zero)
+    }) {
+        drawPath(RobinTail, RobinWing, alpha = a)
+        drawPath(RobinTail, outline, alpha = a, style = stroke(2.4f))
+        if (wing == null) drawPath(RobinLegsPath, RobinLegs, alpha = a, style = stroke(1.8f))
+        drawOval(RobinBrown, Offset(-7.5f, -6.5f), Size(15f, 13f), alpha = a)
+        drawOval(outline, Offset(-7.5f, -6.5f), Size(15f, 13f), alpha = a, style = Stroke(2.6f))
+        drawOval(RobinBreast, Offset(3f - 4.6f, 1.6f - 4.3f), Size(9.2f, 8.6f), alpha = a)
+        val hx = 4.6f - 1.8f * sleep
+        val hy = -5.6f + 2.4f * sleep
+        drawCircle(RobinBrown, 4.5f, Offset(hx, hy), alpha = a)
+        drawCircle(outline, 4.5f, Offset(hx, hy), alpha = a, style = Stroke(2.4f))
+        drawCircle(RobinBreast, 2.4f, Offset(hx + 2f, hy + 1.1f), alpha = a)
+        if (sleep > 0.5f) {
+            val shut = Path().apply {
+                moveTo(hx + 0.4f, hy - 0.6f)
+                quadraticTo(hx + 1.7f, hy + 0.4f, hx + 3f, hy - 0.6f)
+            }
+            drawPath(shut, outline, alpha = a, style = stroke(1.3f))
+        } else {
+            drawCircle(outline, 1.15f, Offset(hx + 1.5f, hy - 1f), alpha = a)
+            drawCircle(Color.White, 0.4f, Offset(hx + 1.8f, hy - 1.4f), alpha = a)
+        }
+        val beak = Path().apply {
+            moveTo(hx + 4.2f, hy - 0.2f)
+            lineTo(hx + 7.4f, hy + 0.6f)
+            lineTo(hx + 4.2f, hy + 1.5f)
+            close()
+        }
+        drawPath(beak, RobinBeak, alpha = a)
+        withTransform({ rotate(-(wing ?: 0f), Offset(-1f, -1f)) }) {
+            drawPath(RobinWingPath, RobinWing, alpha = a)
+            drawPath(RobinWingPath, outline, alpha = a, style = stroke(2f))
         }
     }
 }

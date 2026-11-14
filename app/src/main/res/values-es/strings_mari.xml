@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="mari_name">Mari Domingi</string>
+    <string name="mari_listening_title">Mari Domingi está escuchando · %1$s</string>
+    <string name="mari_greeting">¡Hola, pequeños! Soy Mari Domingi.</string>
+
+    <string name="mari_sleeping">Dormitando junto al fuego… toca el micrófono para despertarme.</string>
+
+    <string name="mari_happy_1">Qué calma y qué silencio. Oigo salir la luna.</string>
+    <string name="mari_happy_2">Qué paz, como en el caserío en una noche de nieve.</string>
+    <string name="mari_happy_3">¡Qué bonito! Esto merece una manzana asada.</string>
+    <string name="mari_fine_1">¡Qué bien! Todos charlan bajito.</string>
+    <string name="mari_fine_2">Justo el ruido adecuado, como las ovejas tarareando en el monte.</string>
+    <string name="mari_fine_3">Hablar bien, escuchar bien. Mis manzanas sonríen.</string>
+    <string name="mari_worried_1">Mmm… se está poniendo algo ruidoso aquí.</string>
+    <string name="mari_worried_2">¡Las ovejas se asustarían! ¿Bajamos un poquito el volumen?</string>
+    <string name="mari_worried_3">¿Jugamos más bajito? Hasta Olentzero nos oiría desde la montaña.</string>
+    <string name="mari_sad_1">Ay, ay… ¿podemos hablar más bajito?</string>
+    <string name="mari_sad_2">Hay mucho ruido. Mis viejos oídos están cansados.</string>
+    <string name="mari_sad_3">Ayudadme a encontrar un poco de calma, pequeños.</string>
+    <string name="mari_ears_1">¡Qué ruido! ¡Mis manzanas se escapan rodando!</string>
+    <string name="mari_ears_2">¡Madre mía! ¡Me tapo las orejas! ¿Hacemos silencio?</string>
+    <string name="mari_ears_3">¡Qué ruidazo! Hagamos una pausa tranquila, como en Nochebuena.</string>
+
+    <string name="mari_asleep">Mari Domingi está dormida, con su alto tocado cabeceando bajo una luna creciente</string>
+    <string name="mari_happy">Mari Domingi está contenta y levanta una manzana</string>
+    <string name="mari_fine">Mari Domingi está bien y sonríe con su cesta</string>
+    <string name="mari_worried">Mari Domingi está preocupada y se lleva la mano a la mejilla</string>
+    <string name="mari_sad">Mari Domingi está triste, con una lágrima y la cabeza baja</string>
+    <string name="mari_ears">Mari Domingi se tapa las orejas con las manos; se le ha caído la cesta y las manzanas ruedan</string>
+
+    <string name="mari_tap_1">¡Jiji! Me haces cosquillas, cariño.</string>
+    <string name="mari_tap_2">Las caricias suaves me encantan.</string>
+    <string name="mari_tap_3">¿Quieres una manzana? Coge la más roja.</string>
+    <string name="mari_tap_4">Shh, estemos calladitos juntos, mirando las estrellas.</string>
+    <string name="mari_tap_5">Caricias suaves, voces suaves.</string>
+</resources>

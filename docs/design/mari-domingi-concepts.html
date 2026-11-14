@@ -1,0 +1,774 @@
+<title>Mari Domingi Concepts</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700&family=Nunito:wght@400;600;700&display=swap">
+<style>
+/* Layout: concept sheet — brief, three direction cards (hero pose + four mood thumbs), palette row, notes. Same tokens as the kitten/duck/robot prototypes. */
+:root {
+  --bg: #F4F8FB;
+  --card: #FFFFFF;
+  --ink: #1F2A37;
+  --ink-soft: #5B6B7A;
+  --line: #E3EBF2;
+  --accent: #2E6FBF;
+  --accent-soft: #E7F0FA;
+  --calm: #2E9F6E;   --calm-soft: #DDF3E8;
+  --loud: #C98512;   --loud-soft: #FDE8C4;
+  --too: #D9513F;    --too-soft: #FAD6CF;
+  --sleep: #5A6C8C;  --sleep-soft: #E4E9F3;
+  --stage: #FBF6EE;
+  --pat-soft: #FBE0EA;
+  --font-display: "Baloo 2", "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-body: "Nunito", ui-rounded, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #10161D; --card: #18212B; --ink: #E8EEF4; --ink-soft: #9DAEBF; --line: #2A3643;
+    --accent: #86B4EE; --accent-soft: #1F2E40;
+    --calm: #5CC79A; --calm-soft: #CFE7DB; --loud: #E6B04F; --loud-soft: #F3DDB6;
+    --too: #F07D6C; --too-soft: #F1CBC3; --sleep: #9FB0CF; --sleep-soft: #D7DEEA;
+    --stage: #EFE7DA; --pat-soft: #F3D3DF;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #10161D; --card: #18212B; --ink: #E8EEF4; --ink-soft: #9DAEBF; --line: #2A3643;
+  --accent: #86B4EE; --accent-soft: #1F2E40;
+  --calm: #5CC79A; --calm-soft: #CFE7DB; --loud: #E6B04F; --loud-soft: #F3DDB6;
+  --too: #F07D6C; --too-soft: #F1CBC3; --sleep: #9FB0CF; --sleep-soft: #D7DEEA;
+  --stage: #EFE7DA; --pat-soft: #F3D3DF;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.5;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 40px;
+}
+.wrap { max-width: 1080px; margin: 0 auto; display: grid; gap: 24px; }
+header { display: grid; gap: 6px; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.15; margin: 0; text-wrap: balance; }
+h1 { font-size: 2.1rem; }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.15rem; }
+p { margin: 0; max-width: 68ch; }
+.lede { color: var(--ink-soft); }
+.facts { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 6px 0 0; list-style: none; }
+.facts li { background: var(--accent-soft); color: var(--ink); border-radius: 999px; padding: 3px 12px; font-size: .85rem; font-weight: 600; }
+.dirs { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 18px; }
+.dir { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 16px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.dir-head { display: flex; align-items: baseline; gap: 10px; }
+.tag { font-family: var(--font-display); font-weight: 700; color: var(--accent); font-size: 1.25rem; }
+.hero { background: var(--stage); border-radius: 14px; aspect-ratio: 1 / 1.05; max-width: 100%; display: grid; place-items: center; }
+.hero svg { width: 88%; height: 88%; }
+.moods { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.mood { border-radius: 10px; display: grid; gap: 2px; justify-items: center; padding: 4px 2px 6px; }
+.mood svg { width: 100%; aspect-ratio: 220 / 300; height: auto; }
+.mood span { font-size: .72rem; font-weight: 700; color: #33404D; }
+.m-calm { background: var(--calm-soft); } .m-loud { background: var(--loud-soft); }
+.m-too { background: var(--too-soft); } .m-sleep { background: var(--sleep-soft); }
+.m-pat { background: var(--pat-soft); }
+.moods.seven { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+.dir ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.dir li { color: var(--ink); }
+.pro { color: var(--calm); font-weight: 700; } .con { color: var(--too); font-weight: 700; }
+section { display: grid; gap: 12px; }
+.styles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+.style { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 10px; display: grid; gap: 4px; justify-items: center; text-align: center; }
+.style svg { width: 70%; aspect-ratio: 220 / 300; height: auto; background: var(--stage); border-radius: 10px; }
+.style b { font-family: var(--font-display); font-size: 1.05rem; }
+.style small { color: var(--ink-soft); }
+.notes { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+.note { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; display: grid; gap: 8px; align-content: start; }
+.note ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.feature { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 18px; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.feature-art, .feature-text { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.hero.big { aspect-ratio: 1 / 1.1; }
+.hero.big svg { width: 92%; height: 92%; }
+.anatomy { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.sil { display: flex; align-items: flex-end; gap: 18px; flex-wrap: wrap; background: var(--stage); border-radius: 12px; padding: 14px; }
+.sil svg { height: auto; }
+.sil svg * { fill: #2A2F3A !important; stroke: #2A2F3A !important; }
+@media (max-width: 760px) { .feature { grid-template-columns: 1fr; } }
+@media (max-width: 420px) { h1 { font-size: 1.75rem; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Mari Domingi</h1>
+    <p class="lede">Directions for the fifth character, drawn in the same chunky-outline style as Buddy, Mochi, Pip and Astro. Each shows how she reacts to the noise level, without any words. E, built from your reference images, is the newest.</p>
+    <ul class="facts" aria-label="What the designs draw on">
+      <li>Wrapped tontorra with a curled hook</li>
+      <li>Laced bodice, white apron, red skirt</li>
+      <li>Apples, ideally roasted</li>
+      <li>Shepherdess who reads the moon</li>
+      <li>Olentzero's equal, not his wife</li>
+    </ul>
+  </header>
+
+  <article class="feature">
+    <div class="feature-art">
+      <div class="hero big" role="img" aria-label="Direction E, Mari Domingi happy, holding up an apple, in her wrapped tontorra" id="d-hero"></div>
+      <div class="moods seven" id="d-moods"></div>
+    </div>
+    <div class="feature-text">
+      <div class="dir-head"><span class="tag">E</span><h2>From the references</h2></div>
+      <p>Built on nine reference images: parade costumes, posters, storybook and cartoon versions, and a sewn toca on a mannequin. This is what they have in common.</p>
+      <ul class="anatomy">
+        <li><b>Wrapped tontorra:</b> white cloth wound round her head in a few chunky bands that spiral upwards. It sits low and wide over her forehead and rounds off gently instead of narrowing to a point.</li>
+        <li><b>Curled hook:</b> the last of the cloth rises out of the top and curls forward into a spiral. That hook is the single most recognisable part.</li>
+        <li><b>Hair:</b> most versions show her as a warm, grandmotherly figure, with grey hair peeking out under the toca. Some wrap her face completely; that's kept as a variant.</li>
+        <li><b>Outfit:</b> the most common one is a laced burgundy bodice over a white blouse, a long white apron and a red skirt. Abarkak laced up the leg in every version.</li>
+        <li><b>Basket:</b> on her arm, full of apples.</li>
+      </ul>
+      <h3>Moods</h3>
+      <ul class="anatomy">
+        <li><b>Happy:</b> holds up an apple, eyes squeezed in a big smile, hook curled tight, apple-blossom petals.</li>
+        <li><b>Fine:</b> basket on her arm, gentle smile.</li>
+        <li><b>Worried:</b> hand to her cheek, raised brows, a bead of sweat; the hook starts to straighten.</li>
+        <li><b>Sad:</b> a tear, head and basket sink, and the hook flops over limp.</li>
+        <li><b>Too loud:</b> hands over her ears, the hook shoots straight up, and the basket drops with apples rolling out.</li>
+        <li><b>Asleep:</b> eyes closed, the tontorra nods forward, moon and stars.</li>
+        <li><b>Pat:</b> eyes shut with delight, deep blush, floating hearts.</li>
+      </ul>
+      <h3>Silhouette test</h3>
+      <p class="lede">Filled in solid at app-icon sizes. Nothing else in the cast has this outline.</p>
+      <div class="sil" id="d-sil"></div>
+    </div>
+  </article>
+
+  <section>
+    <h2>E variants</h2>
+    <p class="lede">The references differ on her age, how much hair shows and her colours. The toca and the apple basket stay the same in all of them.</p>
+    <div class="styles" id="e-vars"></div>
+  </section>
+
+  <h2>Earlier directions</h2>
+  <div class="dirs" id="dirs"></div>
+
+  <section>
+    <h2>Style ideas (on direction A)</h2>
+    <p class="lede">Unlockable outfits, like the other characters have. The headdress stays white in all of them so she's always recognisable.</p>
+    <div class="styles" id="styles"></div>
+  </section>
+
+  <section class="notes">
+    <div class="note">
+      <h3>The headdress does the acting</h3>
+      <ul>
+        <li>The folded tip works like the kitten's ears: it perks up when it's getting loud, shoots straight up at too loud, and flops over when she sleeps.</li>
+        <li>It's also her silhouette. Even as a tiny icon, nobody else in the app has that shape.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>Wordless cues</h3>
+      <ul>
+        <li>Too loud: hands over ears, red sound waves.</li>
+        <li>Asleep: crescent moon and stars, since she reads the moon.</li>
+        <li>Pat or reward: a roasted apple with a curl of steam, or apple-blossom petals.</li>
+      </ul>
+    </div>
+    <div class="note">
+      <h3>To decide</h3>
+      <ul>
+        <li>Which direction (A, B or C).</li>
+        <li>Name: "Mari Domingi" in all three languages, or a short pet form?</li>
+        <li>A small lamb sidekick for the shepherdess side, used for idle animations only?</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<script>
+const f = n => Math.round(n * 10) / 10;
+const C = {
+  outline: '#3B2A20', skin: '#F7D3B5', cheek: '#F29A8C', hair: '#5B3A27',
+  linen: '#FDFAF3', linenShade: '#E6DDCC', apple: '#E2463A', appleHi: '#F7A69B',
+  leaf: '#5FA54B', stem: '#6B4428', shoe: '#8A5A3A', mouth: '#7A2E2A',
+  wave: '#D9513F', amber: '#C98512', moon: '#F3C64B', spark: '#2E9F6E',
+};
+const PALETTES = {
+  txurigorri: { skirt: '#D4483B', skirtDark: '#A8332A', bodice: '#2F2A2C', apron: '#FFFFFF', ribbon: '#D4483B' },
+  mendia:     { skirt: '#4F8A4B', skirtDark: '#3B6B38', bodice: '#6B4428', apron: '#FFF8E8', ribbon: '#E2A13A' },
+  ilargia:    { skirt: '#3F4F8C', skirtDark: '#2F3B6B', bodice: '#2F2A2C', apron: '#F2F4FF', ribbon: '#F3C64B' },
+  sagarra:    { skirt: '#E07A3A', skirtDark: '#B85E28', bodice: '#5B3A27', apron: '#FFFFFF', ribbon: '#5FA54B' },
+};
+
+const shape = (d, fill, w = 4, extra = '') =>
+  `<path d="${d}" fill="${fill}" stroke="${C.outline}" stroke-width="${w}" stroke-linejoin="round" stroke-linecap="round" ${extra}/>`;
+const line = (d, w = 4, color = C.outline, extra = '') =>
+  `<path d="${d}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+const circ = (cx, cy, r, fill, w = 4) =>
+  `<circle cx="${f(cx)}" cy="${f(cy)}" r="${f(r)}" fill="${fill}" stroke="${C.outline}" stroke-width="${w}"/>`;
+const ell = (cx, cy, rx, ry, fill, extra = '') =>
+  `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="${f(rx)}" ry="${f(ry)}" fill="${fill}" ${extra}/>`;
+const limb = (x1, y1, x2, y2, color) =>
+  line(`M${x1} ${y1} L${x2} ${y2}`, 14) + line(`M${x1} ${y1} L${x2} ${y2}`, 7, color);
+
+// How far the headdress tip swings for each mood (degrees).
+const FLAP = { calm: 0, loud: -20, too: -52, sleep: 66 };
+
+function headdress(cx, baseY, s, mood) {
+  // A horn of folded linen that rises from the back of the head and leans forward,
+  // ending in a soft beak-like fold (the "crane's neck and beak" of 15th–16th c. accounts).
+  const stem = 'M-36 0 C-40 -36 -30 -70 -4 -92 C2 -97 8 -100 14 -102 L34 -84 C24 -70 26 -40 34 0 Z';
+  const fold = 'M-8 -6 C-12 -34 -6 -64 12 -90';
+  const flap = 'M10 -101 C24 -116 54 -114 64 -96 C70 -86 64 -76 56 -78 C48 -80 42 -84 34 -84 Z';
+  const crease = 'M24 -100 C38 -104 52 -100 58 -90';
+  return `<g transform="translate(${cx} ${baseY}) scale(${s})">
+    ${shape(stem, C.linen)}
+    ${line(fold, 3, C.linenShade)}
+    <g transform="rotate(${FLAP[mood]} 24 -93)">${shape(flap, C.linen)}${line(crease, 3, C.linenShade)}</g>
+    ${line('M-34 -8 Q0 -16 34 -8', 3, C.linenShade)}
+  </g>`;
+}
+
+// Head-top linen band with a dark fringe of hair below it.
+function coif(cx, cy, r) {
+  const o = r + 3;
+  const hair = `M${f(cx - o)} ${f(cy - 2)} A${o} ${o} 0 0 1 ${f(cx + o)} ${f(cy - 2)} Q${cx} ${f(cy - r * 0.3)} ${f(cx - o)} ${f(cy - 2)} Z`;
+  const band = `M${f(cx - o)} ${f(cy - 6)} A${o} ${o} 0 0 1 ${f(cx + o)} ${f(cy - 6)} Q${cx} ${f(cy - r * 0.72)} ${f(cx - o)} ${f(cy - 6)} Z`;
+  return shape(hair, C.hair, 4) + shape(band, C.linen, 4);
+}
+
+function face(cx, cy, r, mood, cheek = C.cheek) {
+  const ey = cy + r * 0.14, dx = r * 0.36, my = cy + r * 0.46;
+  let out = '';
+  if (mood !== 'too') {
+    out += ell(cx - r * 0.6, cy + r * 0.38, r * 0.14, r * 0.09, cheek, 'opacity="0.75"');
+    out += ell(cx + r * 0.6, cy + r * 0.38, r * 0.14, r * 0.09, cheek, 'opacity="0.75"');
+  }
+  for (const side of [-1, 1]) {
+    const ex = cx + side * dx;
+    if (mood === 'calm' || mood === 'loud') {
+      out += ell(ex, ey, r * 0.1, r * 0.13, C.outline);
+      out += ell(ex + r * 0.03, ey - r * 0.05, r * 0.035, r * 0.035, '#FFFFFF');
+      if (mood === 'loud') out += line(`M${f(ex - side * 8)} ${f(ey - r * 0.27)} L${f(ex + side * 6)} ${f(ey - r * 0.37)}`, 3.5);
+    } else if (mood === 'too') {
+      out += line(`M${f(ex - side * 7)} ${f(ey - 7)} L${f(ex + side * 5)} ${f(ey)} L${f(ex - side * 7)} ${f(ey + 7)}`, 4);
+    } else {
+      out += line(`M${f(ex - 8)} ${f(ey)} Q${f(ex)} ${f(ey + 7)} ${f(ex + 8)} ${f(ey)}`, 4);
+    }
+  }
+  if (mood === 'calm') out += line(`M${f(cx - 9)} ${f(my)} Q${cx} ${f(my + 9)} ${f(cx + 9)} ${f(my)}`, 4);
+  if (mood === 'loud') out += line(`M${f(cx - 9)} ${f(my + 3)} q4.5 -5 9 0 t9 0`, 3.5);
+  if (mood === 'too') out += ell(cx, my + 3, 6, 8, C.mouth, `stroke="${C.outline}" stroke-width="3.5"`);
+  if (mood === 'sleep') out += line(`M${f(cx - 5)} ${f(my + 2)} Q${cx} ${f(my + 6)} ${f(cx + 5)} ${f(my + 2)}`, 3.5);
+  return out;
+}
+
+function apple(x, y, s = 1) {
+  return `<g transform="translate(${x} ${y}) scale(${s})">
+    ${shape('M0 -8 C6 -14 16 -12 16 0 C16 12 7 16 3 15 C1 14.5 -1 14.5 -3 15 C-7 16 -16 12 -16 0 C-16 -12 -6 -14 0 -8 Z', C.apple, 3.5)}
+    ${ell(-8, -2, 3, 4.5, C.appleHi, 'opacity="0.9"')}
+    ${line('M0 -8 L1 -15', 3.5, C.stem)}
+    ${shape('M2 -13 C6 -19 13 -18 14 -15 C10 -11 5 -11 2 -13 Z', C.leaf, 2.5)}
+  </g>`;
+}
+
+function star(x, y, s, color) {
+  return `<path d="M${x} ${y - s} Q${x + s * 0.2} ${y - s * 0.2} ${x + s} ${y} Q${x + s * 0.2} ${y + s * 0.2} ${x} ${y + s} Q${x - s * 0.2} ${y + s * 0.2} ${x - s} ${y} Q${x - s * 0.2} ${y - s * 0.2} ${x} ${y - s} Z" fill="${color}"/>`;
+}
+
+function fx(mood, cx, cy, r) {
+  let out = '';
+  if (mood === 'too') {
+    for (const side of [-1, 1]) for (let i = 0; i < 3; i++) {
+      const x = cx + side * (r + 22 + i * 9), h = 12 + i * 6;
+      out += line(`M${f(x)} ${f(cy - h)} Q${f(x + side * 9)} ${cy} ${f(x)} ${f(cy + h)}`, 4, C.wave);
+    }
+  } else if (mood === 'loud') {
+    for (let i = 0; i < 2; i++) {
+      const x = cx + r + 20 + i * 9, h = 10 + i * 6;
+      out += line(`M${f(x)} ${f(cy - h)} Q${f(x + 8)} ${cy} ${f(x)} ${f(cy + h)}`, 4, C.amber);
+    }
+  } else if (mood === 'sleep') {
+    const x = cx + r + 22, y = cy - r - 6;
+    out += `<path d="M${x} ${y - 13} A13 13 0 1 0 ${x} ${y + 13} A16 16 0 0 1 ${x} ${y - 13} Z" fill="${C.moon}" stroke="${C.outline}" stroke-width="3"/>`;
+    out += star(x - 30, y + 2, 5, C.moon) + star(x + 4, y + 26, 4, C.moon);
+  } else {
+    out += star(cx + r + 18, cy - r + 4, 6, C.spark) + star(cx - r - 16, cy - 6, 4, C.spark);
+  }
+  return out;
+}
+
+function braid(x, y, P) {
+  let out = '';
+  for (let i = 0; i < 3; i++) out += shape(`M${x - 7} ${y + i * 11} a7 6.5 0 1 0 14 0 a7 6.5 0 1 0 -14 0`, C.hair, 3.5);
+  out += shape(`M${x} ${y + 30} l-9 -5 l0 10 Z M${x} ${y + 30} l9 -5 l0 10 Z`, P.ribbon, 3);
+  return out;
+}
+
+/* ---------- A · Chibi shepherdess: full body, red skirt, black bodice, apron ---------- */
+function drawA(mood, P = PALETTES.txurigorri) {
+  const cx = 100, cy = 138, r = 42;
+  const sh = { L: [76, 184], R: [124, 184] };
+  const hands = {
+    calm: [[87, 198], [113, 198]], loud: [[95, 196], [105, 196]],
+    too: [[57, 142], [143, 142]], sleep: [[93, 216], [107, 216]],
+  }[mood];
+  let s = '';
+  s += braid(cx - r + 4, cy + 14, P);
+  s += ell(88, 250, 11, 6, C.shoe, `stroke="${C.outline}" stroke-width="3.5"`) + ell(112, 250, 11, 6, C.shoe, `stroke="${C.outline}" stroke-width="3.5"`);
+  s += shape('M62 246 C66 222 72 202 77 196 L123 196 C128 202 134 222 138 246 Q100 256 62 246 Z', P.skirt);
+  s += line('M70 236 Q100 244 130 236', 3, P.skirtDark);
+  s += shape('M84 199 L116 199 L121 238 Q100 245 79 238 Z', P.apron, 3.5);
+  s += shape('M74 196 C74 184 82 174 100 174 C118 174 126 184 126 196 Z', P.bodice);
+  s += line('M96 180 L104 186 M104 180 L96 186 M96 188 L104 194 M104 188 L96 194', 2, '#FFFFFF');
+  s += limb(sh.L[0], sh.L[1], hands[0][0], hands[0][1], C.linen) + limb(sh.R[0], sh.R[1], hands[1][0], hands[1][1], C.linen);
+  s += circ(72, 182, 9, C.linen, 3.5) + circ(128, 182, 9, C.linen, 3.5);
+  s += circ(cx, cy, r, C.skin) + coif(cx, cy, r) + face(cx, cy, r, mood);
+  s += headdress(cx, cy - r * 0.82, 0.95, mood);
+  if (mood === 'calm') s += apple(100, 190, 1);
+  s += circ(hands[0][0], hands[0][1], 6.5, C.skin, 3) + circ(hands[1][0], hands[1][1], 6.5, C.skin, 3);
+  s += fx(mood, cx, cy, r);
+  return s;
+}
+
+/* ---------- B · Peg doll: one rounded capsule, sways instead of walking ---------- */
+let clipN = 0;
+function drawB(mood, P = PALETTES.txurigorri) {
+  const id = 'pegclip' + (++clipN);
+  const body = 'M100 92 C140 92 150 128 148 166 C146 204 156 238 148 250 Q100 264 52 250 C44 238 54 204 52 166 C50 128 60 92 100 92 Z';
+  const cx = 100, cy = 136, r = 34;
+  const hands = { calm: [[84, 196], [116, 196]], loud: [[94, 190], [106, 190]], too: [[60, 140], [140, 140]], sleep: [[92, 212], [108, 212]] }[mood];
+  let s = `<defs><clipPath id="${id}"><path d="${body}"/></clipPath></defs>`;
+  s += `<path d="${body}" fill="${P.skirt}"/>`;
+  s += `<g clip-path="url(#${id})">
+      <rect x="40" y="168" width="120" height="26" fill="${P.bodice}"/>
+      ${shape('M80 194 L120 194 L126 270 L74 270 Z', P.apron, 3.5)}
+      ${line('M50 236 Q100 248 150 236', 3, P.skirtDark)}
+    </g>`;
+  s += `<path d="${body}" fill="none" stroke="${C.outline}" stroke-width="4" stroke-linejoin="round"/>`;
+  s += ell(cx, cy - 2, r + 11, r + 10, C.linen, `stroke="${C.outline}" stroke-width="4"`);
+  s += ell(cx, cy + 2, r, r - 1, C.skin, `stroke="${C.outline}" stroke-width="4"`);
+  s += shape(`M${cx - r + 4} ${cy - 8} Q${cx} ${cy - r - 6} ${cx + r - 4} ${cy - 8} Q${cx + 12} ${cy - 18} ${cx} ${cy - 14} Q${cx - 12} ${cy - 18} ${cx - r + 4} ${cy - 8} Z`, C.hair, 3.5);
+  s += face(cx, cy + 4, r, mood);
+  s += headdress(cx, cy - r - 4, 0.82, mood);
+  if (mood === 'calm') s += apple(100, 190, 0.95);
+  s += circ(hands[0][0], hands[0][1], 7, C.skin, 3) + circ(hands[1][0], hands[1][1], 7, C.skin, 3);
+  s += fx(mood, cx, cy, r + 10);
+  return s;
+}
+
+/* ---------- C · Apple sprite: a living apple wearing the headdress ---------- */
+function drawC(mood) {
+  const cx = 100, cy = 172, r = 40;
+  const appleBody = 'M100 116 C120 98 162 102 162 164 C162 214 132 244 113 240 C107 238 93 238 87 240 C68 244 38 214 38 164 C38 102 80 98 100 116 Z';
+  const leaves = {
+    calm: [[38, 178, -30], [162, 178, 210]], loud: [[44, 192, -60], [156, 192, 240]],
+    too: [[44, 150, 20], [156, 150, 160]], sleep: [[48, 200, -80], [152, 200, 260]],
+  }[mood];
+  let s = '';
+  s += ell(88, 244, 10, 5.5, C.shoe, `stroke="${C.outline}" stroke-width="3.5"`) + ell(112, 244, 10, 5.5, C.shoe, `stroke="${C.outline}" stroke-width="3.5"`);
+  for (const [x, y, a] of leaves)
+    s += `<g transform="translate(${x} ${y}) rotate(${a})">${shape('M0 0 C-6 -10 -22 -10 -26 0 C-22 10 -6 10 0 0 Z', C.leaf, 3.5)}${line('M-3 0 L-20 0', 2, '#3E7A33')}</g>`;
+  s += shape(appleBody, C.apple);
+  s += ell(66, 146, 8, 14, C.appleHi, 'opacity="0.8" transform="rotate(20 66 146)"');
+  s += shape('M80 210 Q100 205 120 210 L116 232 Q100 238 84 232 Z', '#FFFFFF', 3.5);
+  s += face(cx, cy - 6, r, mood, '#FFB3A8');
+  s += headdress(cx, 116, 0.72, mood);
+  s += fx(mood, cx, cy - 10, r + 20);
+  return s;
+}
+
+/* ---------- D · Toca first: crane's chest, neck and beak ---------- */
+const NECK = { calm: 0, loud: -14, too: -40, sleep: 58 };
+
+function tocaTails(cx, baseY, s) {
+  return `<g transform="translate(${cx} ${baseY}) scale(${s})">
+    ${shape('M-34 -4 C-52 14 -46 44 -58 76 L-42 74 C-38 46 -36 20 -22 4 Z', C.linen, 4)}
+    ${shape('M-44 -2 C-64 18 -62 40 -72 62 L-58 64 C-52 42 -48 24 -34 6 Z', C.linenShade, 4)}
+  </g>`;
+}
+
+function toca(cx, baseY, s, mood) {
+  const dome = 'M-50 -2 C-58 -30 -46 -64 -14 -76 C16 -86 54 -78 60 -48 C64 -28 56 -14 50 -2 Z';
+  const domeShade = 'M36 -8 C42 -28 48 -46 52 -62 C62 -46 60 -24 50 -4 Z';
+  const pleats = ['M-32 -8 C-38 -30 -30 -52 -14 -66', 'M-8 -8 C-8 -34 0 -56 14 -74', 'M18 -8 C24 -28 34 -48 44 -64'];
+  const neck = 'M-22 -66 C-28 -120 8 -154 48 -144 L54 -124 C30 -128 24 -104 30 -68 Z';
+  const neckShade = 'M30 -130 C40 -133 48 -132 54 -124 L50 -140 C42 -142 34 -138 30 -130 Z';
+  const beak = 'M44 -147 C66 -155 88 -144 94 -124 C78 -126 64 -123 52 -122 Z';
+  const crease = 'M54 -140 C66 -142 78 -136 86 -128';
+  const band = 'M-54 2 C-52 -16 52 -16 54 2 C54 15 -54 15 -54 2 Z';
+  return `<g transform="translate(${cx} ${baseY}) scale(${s})">
+    <g transform="rotate(${NECK[mood]} 4 -74)">
+      ${shape(neck, C.linen)}
+      <path d="${neckShade}" fill="${C.linenShade}"/>
+      ${line('M-4 -84 C-6 -110 12 -132 40 -136', 3, C.linenShade)}
+      ${shape(beak, C.linen)}
+      ${line(crease, 3, C.linenShade)}
+    </g>
+    <path d="${dome}" fill="${C.linen}"/>
+    <path d="${domeShade}" fill="${C.linenShade}"/>
+    ${pleats.map(p => line(p, 3, C.linenShade)).join('')}
+    <path d="${dome}" fill="none" stroke="${C.outline}" stroke-width="4" stroke-linejoin="round"/>
+    ${shape(band, C.linen)}
+    ${line('M-48 3 C-20 -5 20 -5 48 3', 3, C.linenShade)}
+    ${line('M-40 9 C-14 4 14 4 40 9', 2.5, C.linenShade)}
+  </g>`;
+}
+
+function hairCap(cx, cy, r) {
+  const o = r + 3;
+  return shape(`M${f(cx - o)} ${f(cy - 2)} A${o} ${o} 0 0 1 ${f(cx + o)} ${f(cy - 2)} Q${cx} ${f(cy - r * 0.3)} ${f(cx - o)} ${f(cy - 2)} Z`, C.hair, 4);
+}
+
+function drawD(mood, P = PALETTES.txurigorri) {
+  const cx = 100, cy = 150, r = 40;
+  const sh = { L: [77, 194], R: [123, 194] };
+  const hands = {
+    calm: [[88, 208], [112, 208]], loud: [[95, 206], [105, 206]],
+    too: [[59, 154], [141, 154]], sleep: [[93, 224], [107, 224]],
+  }[mood];
+  const tocaY = cy - r * 0.55, ts = 0.92;
+  let s = '';
+  s += tocaTails(cx, tocaY, ts);
+  s += braid(cx - r + 6, cy + 14, P);
+  s += ell(89, 258, 10, 5.5, C.shoe, `stroke="${C.outline}" stroke-width="3.5"`) + ell(111, 258, 10, 5.5, C.shoe, `stroke="${C.outline}" stroke-width="3.5"`);
+  s += shape('M65 254 C68 232 73 212 78 206 L122 206 C127 212 132 232 135 254 Q100 263 65 254 Z', P.skirt);
+  s += line('M72 245 Q100 252 128 245', 3, P.skirtDark);
+  s += shape('M85 209 L115 209 L119 246 Q100 252 81 246 Z', P.apron, 3.5);
+  s += shape('M76 206 C76 194 84 185 100 185 C116 185 124 194 124 206 Z', P.bodice);
+  s += line('M96 191 L104 196 M104 191 L96 196 M96 199 L104 204 M104 199 L96 204', 2, '#FFFFFF');
+  s += limb(sh.L[0], sh.L[1], hands[0][0], hands[0][1], C.linen) + limb(sh.R[0], sh.R[1], hands[1][0], hands[1][1], C.linen);
+  s += circ(73, 192, 8.5, C.linen, 3.5) + circ(127, 192, 8.5, C.linen, 3.5);
+  s += circ(cx, cy, r, C.skin) + hairCap(cx, cy, r) + face(cx, cy + 2, r, mood);
+  s += toca(cx, tocaY, ts, mood);
+  if (mood === 'calm') s += apple(100, 200, 0.95);
+  s += circ(hands[0][0], hands[0][1], 6.5, C.skin, 3) + circ(hands[1][0], hands[1][1], 6.5, C.skin, 3);
+  if (mood === 'sleep') {
+    const x = cx - r - 26, y = cy - r - 14;
+    s += `<path d="M${x} ${y - 13} A13 13 0 1 0 ${x} ${y + 13} A16 16 0 0 1 ${x} ${y - 13} Z" fill="${C.moon}" stroke="${C.outline}" stroke-width="3"/>`;
+    s += star(x + 22, y - 18, 5, C.moon) + star(x - 6, y + 26, 4, C.moon);
+  } else {
+    s += fx(mood, cx, cy, r);
+  }
+  return s;
+}
+
+/* ---------- E · From the references: wrapped cone toca with a rolled curl ---------- */
+const E = {
+  dress: '#2F5FA8', dressDark: '#1F3E73', hem: '#1C2D55', apron: '#FBF4E6', stripe: '#C8463B',
+  basket: '#C99A5E', weave: '#8A6235', strap: '#7A4E2E', sock: '#FFFFFF',
+};
+// lean tilts the cone back; bend curls the top forward (degrees, spread over the rolls).
+const TONTORRA = {
+  happy: { lean: 4, bend: 22, curl: 1.2 }, fine: { lean: 2, bend: 14, curl: 1 }, worried: { lean: 0, bend: 6, curl: 0.6 },
+  sad: { lean: -6, bend: 70, curl: 1.4 }, covered: { lean: 0, bend: 0, curl: 0.1 }, asleep: { lean: 6, bend: 60, curl: 1.2 },
+  pat: { lean: -4, bend: 8, curl: 1.3 },
+};
+Object.assign(TONTORRA, { calm: TONTORRA.fine, loud: TONTORRA.worried, too: TONTORRA.covered, sleep: TONTORRA.asleep });
+
+const pt = p => `${f(p.x)} ${f(p.y)}`;
+const mid = (a, b) => ({ x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 });
+// Smooth curve through points using midpoint quadratics.
+function smoothThrough(ps, move) {
+  let d = `${move ? 'M' : 'L'}${pt(ps[0])}`;
+  for (let i = 1; i < ps.length - 1; i++) d += ` Q${pt(ps[i])} ${pt(mid(ps[i], ps[i + 1]))}`;
+  return d + ` L${pt(ps[ps.length - 1])}`;
+}
+
+function tocaE(cx, baseY, mood) {
+  // A low, wide wrapped tontorra: puffy cloth bands that spiral upwards (each one bulges
+  // and pinches where the next starts), ending in a curled hook that bends forward.
+  const P = TONTORRA[mood], N = 4, seg = 17, W0 = 98, WT = 48;
+  const spine = [{ x: cx, y: baseY, a: (-90 + P.lean) * Math.PI / 180, w: W0 }];
+  let x = cx, y = baseY;
+  for (let i = 0; i < N; i++) {
+    const a = (-90 + P.lean + P.bend * Math.pow((i + 1) / N, 2)) * Math.PI / 180;
+    x += seg * Math.cos(a); y += seg * Math.sin(a);
+    const t = (i + 1) / N;
+    spine.push({ x, y, a, w: W0 - (W0 - WT) * Math.pow(t, 2) });
+  }
+  const sp = t => {
+    const i = Math.min(Math.floor(t), N - 1), k = t - i, A = spine[i], B = spine[i + 1];
+    return { x: A.x + (B.x - A.x) * k, y: A.y + (B.y - A.y) * k, a: A.a + (B.a - A.a) * k, w: A.w + (B.w - A.w) * k };
+  };
+  const side = (t, off, dir) => { const p = sp(t), h = p.w / 2 + off; return { x: p.x + dir * Math.cos(p.a + Math.PI / 2) * h, y: p.y + dir * Math.sin(p.a + Math.PI / 2) * h }; };
+  // The right side is offset half a band up, so the wraps spiral.
+  const edge = (dir, shift) => {
+    const pts = [side(0, 0, dir)];
+    for (let k = 1; k <= 2 * N; k++) {
+      const t = Math.min(N, k / 2 + (k % 2 === 0 ? shift : shift));
+      pts.push(side(t, k % 2 === 1 ? 6 : -4, dir));
+    }
+    return pts;
+  };
+  const Lp = edge(-1, 0), Rp = edge(1, 0);
+  const tip = spine[N];
+  const u = { x: Math.cos(tip.a), y: Math.sin(tip.a) }, v = { x: Math.cos(tip.a + Math.PI / 2), y: Math.sin(tip.a + Math.PI / 2) };
+  const at = (du, dv) => ({ x: tip.x + u.x * du + v.x * dv, y: tip.y + u.y * du + v.y * dv });
+  const c = P.curl;
+  const hook = [at(-10, -4), at(14, -6), at(28, 10 * c), at(24 - 12 * c, 28 * c + 2)];
+  const end = hook[3];
+  let s = '';
+  s += line(smoothThrough(hook, true), 36);
+  s += circ(end.x, end.y, 14, C.linen, 4);
+  s += line(smoothThrough(hook, true), 28, C.linen);
+  const lastL = Lp[Lp.length - 1], lastR = Rp[Rp.length - 1];
+  const body = smoothThrough(Lp, true) + ` Q${pt(at(14, 0))} ${pt(lastR)} `
+    + smoothThrough([...Rp].reverse(), false).slice(1).replace(/^/, 'L')
+    + ` Q${cx} ${f(baseY + 10)} ${pt(Lp[0])} Z`;
+  s += `<path d="${body}" fill="${C.linen}"/>`;
+  // each band: a soft shade along its lower edge, then the wrap line (pinch to pinch, rising left to right)
+  for (let i = 1; i <= N; i++) {
+    const a = side(i - 1, -4, -1), b = side(Math.min(N, i), -4, 1);
+    const m = sp(i - 0.5);
+    const ctl = { x: m.x - Math.cos(m.a) * 2, y: m.y - Math.sin(m.a) * 2 };
+    const sh = { x: ctl.x + Math.cos(m.a) * 4, y: ctl.y + Math.sin(m.a) * 4 };
+    if (i > 1) s += line(`M${pt({ x: a.x + Math.cos(m.a) * 4, y: a.y + Math.sin(m.a) * 4 })} Q${pt(sh)} ${pt({ x: b.x + Math.cos(m.a) * 4, y: b.y + Math.sin(m.a) * 4 })}`, 5, C.linenShade, 'opacity="0.8"');
+    if (i > 1 && i < N) s += line(`M${pt(a)} Q${pt(ctl)} ${pt(b)}`, 3, C.outline);
+  }
+  s += `<path d="${body}" fill="none" stroke="${C.outline}" stroke-width="4" stroke-linejoin="round"/>`;
+  s += line(smoothThrough(hook.slice(0, 3), true), 27, C.linen);
+  { const j = at(4, -3); s += `<circle cx="${f(j.x)}" cy="${f(j.y)}" r="13" fill="${C.linen}"/>`; }
+  // curled end: the cloth rolls into a spiral rather than ending in a disc
+  const kr = 14;
+  s += line(`M${f(end.x - kr + 1)} ${f(end.y + 2)} A${kr - 4} ${kr - 4} 0 1 1 ${f(end.x + 3)} ${f(end.y + kr - 4)} A6 6 0 0 1 ${f(end.x - 4)} ${f(end.y + 1)} A3 3 0 0 1 ${f(end.x + 1)} ${f(end.y - 2)}`, 3, C.outline, 'opacity="0.7"');
+  return s;
+}
+
+function basket(x, y, withHandle = true) {
+  return `<g transform="translate(${x} ${y})">
+    ${withHandle ? line('M-15 -8 C-14 -30 14 -30 15 -8', 8) + line('M-15 -8 C-14 -30 14 -30 15 -8', 3.5, E.basket) : ''}
+    ${apple(-7, -11, 0.6)}${apple(7, -12, 0.6)}
+    ${shape('M-19 -9 L19 -9 L15 12 Q0 17 -15 12 Z', E.basket, 3.5)}
+    ${line('M-17 -2 L17 -2 M-16 5 L16 5', 2.5, E.weave)}
+    ${line('M-8 -9 L-7 14 M0 -9 L0 15 M8 -9 L7 14', 2.5, E.weave)}
+  </g>`;
+}
+
+function whirl(x, y) {
+  return `<circle cx="${x}" cy="${y}" r="3.2" fill="none" stroke="#FFFFFF" stroke-width="1.3"/>` +
+    line(`M${x} ${y} q2 -2.4 0 -3.2 M${x} ${y} q2.4 2 3.2 0 M${x} ${y} q-2 2.4 0 3.2 M${x} ${y} q-2.4 -2 -3.2 0`, 1.1, '#FFFFFF');
+}
+
+const OUTFITS = {
+  gorria: { skirt: '#B23A3F', skirtDark: '#86262C', bodice: '#8C2632', sleeve: C.linen, hem: null, stripe: null, shawl: false, laces: true },
+  urdina: { skirt: E.dress, skirtDark: E.dressDark, bodice: E.dress, sleeve: E.dress, hem: E.hem, stripe: E.stripe, shawl: true, laces: false },
+};
+const HAIR = { grey: { fill: '#CFCAC6', shade: '#A9A29C' }, brown: { fill: '#6B4630', shade: '#4E3222' } };
+
+const E_ALIAS = { calm: 'fine', loud: 'worried', too: 'covered', sleep: 'asleep' };
+const E_HANDS = {
+  happy: [[95, 220], [139, 180]], fine: [[95, 220], [105, 220]], worried: [[95, 220], [125, 172]],
+  sad: [[93, 233], [107, 233]], covered: [[57, 150], [143, 150]], asleep: [[95, 230], [105, 230]],
+  pat: [[93, 213], [107, 213]],
+};
+const TEAR = '#8FC8FF', HEART = '#FF6B8B', PETAL = '#F7B7C8';
+
+function drop(x, y, s = 1) {
+  return `<path d="M${x} ${y - 7 * s} C${x + 5 * s} ${y - 1 * s} ${x + 5 * s} ${y + 5 * s} ${x} ${y + 5 * s} C${x - 5 * s} ${y + 5 * s} ${x - 5 * s} ${y - 1 * s} ${x} ${y - 7 * s} Z" fill="${TEAR}" stroke="${C.outline}" stroke-width="2.5"/>`;
+}
+function heart(x, y, s = 1) {
+  return `<path d="M${x} ${y + 7 * s} C${x - 11 * s} ${y - 1 * s} ${x - 7 * s} ${y - 10 * s} ${x} ${y - 4 * s} C${x + 7 * s} ${y - 10 * s} ${x + 11 * s} ${y - 1 * s} ${x} ${y + 7 * s} Z" fill="${HEART}" stroke="${C.outline}" stroke-width="2.5"/>`;
+}
+function petal(x, y, a) {
+  return `<ellipse cx="${x}" cy="${y}" rx="4.5" ry="2.6" fill="${PETAL}" transform="rotate(${a} ${x} ${y})"/>`;
+}
+
+function faceE(cx, cy, r, mood) {
+  const ey = cy + r * 0.14, dx = r * 0.36, my = cy + r * 0.46;
+  let o = '';
+  if (mood !== 'covered') {
+    const k = mood === 'pat' || mood === 'happy' ? 1.3 : 1;
+    o += ell(cx - r * 0.6, cy + r * 0.38, r * 0.14 * k, r * 0.09 * k, C.cheek, `opacity="${mood === 'pat' ? 0.95 : 0.75}"`);
+    o += ell(cx + r * 0.6, cy + r * 0.38, r * 0.14 * k, r * 0.09 * k, C.cheek, `opacity="${mood === 'pat' ? 0.95 : 0.75}"`);
+  }
+  for (const sd of [-1, 1]) {
+    const ex = cx + sd * dx;
+    if (mood === 'happy' || mood === 'pat') {
+      o += line(`M${f(ex - 7)} ${f(ey + 3)} Q${f(ex)} ${f(ey - 7)} ${f(ex + 7)} ${f(ey + 3)}`, 4);
+    } else if (mood === 'fine' || mood === 'worried' || mood === 'sad') {
+      const sz = mood === 'fine' ? 1 : 0.9, look = mood === 'sad' ? 2 : 0;
+      o += ell(ex, ey + look, r * 0.1 * sz, r * 0.13 * sz, C.outline);
+      o += ell(ex + r * 0.03, ey + look - r * 0.05, r * 0.035, r * 0.035, '#FFFFFF');
+      if (mood !== 'fine') {
+        const lift = mood === 'sad' ? 6 : 4;
+        o += line(`M${f(ex - sd * 8)} ${f(ey - r * 0.28)} L${f(ex + sd * 6)} ${f(ey - r * 0.28 - lift)}`, 3.5);
+      }
+    } else if (mood === 'covered') {
+      o += line(`M${f(ex - sd * 7)} ${f(ey - 7)} L${f(ex + sd * 5)} ${f(ey)} L${f(ex - sd * 7)} ${f(ey + 7)}`, 4);
+    } else {
+      o += line(`M${f(ex - 8)} ${f(ey)} Q${f(ex)} ${f(ey + 7)} ${f(ex + 8)} ${f(ey)}`, 4);
+    }
+  }
+  if (mood === 'happy') {
+    o += shape(`M${f(cx - 11)} ${f(my - 2)} Q${cx} ${f(my - 3)} ${f(cx + 11)} ${f(my - 2)} Q${cx} ${f(my + 16)} ${f(cx - 11)} ${f(my - 2)} Z`, C.mouth, 3.5);
+    o += ell(cx, my + 6, 5, 3, '#F08A8A');
+  }
+  if (mood === 'pat') o += shape(`M${f(cx - 7)} ${f(my)} Q${cx} ${f(my + 10)} ${f(cx + 7)} ${f(my)} Z`, C.mouth, 3);
+  if (mood === 'fine') o += line(`M${f(cx - 9)} ${f(my)} Q${cx} ${f(my + 9)} ${f(cx + 9)} ${f(my)}`, 4);
+  if (mood === 'worried') o += line(`M${f(cx - 9)} ${f(my + 3)} q4.5 -5 9 0 t9 0`, 3.5);
+  if (mood === 'sad') {
+    o += line(`M${f(cx - 8)} ${f(my + 6)} Q${cx} ${f(my - 2)} ${f(cx + 8)} ${f(my + 6)}`, 4);
+    o += drop(cx - dx - 2, ey + 13, 0.9);
+  }
+  if (mood === 'covered') o += shape(`M${f(cx - 10)} ${f(my)} q2.5 -4 5 0 t5 0 t5 0 t5 0 L${f(cx + 10)} ${f(my + 7)} q-2.5 4 -5 0 t-5 0 t-5 0 t-5 0 Z`, C.mouth, 3);
+  if (mood === 'asleep') o += ell(cx, my + 3, 3.2, 2.6, C.mouth);
+  return o;
+}
+
+function fxE(mood, cx, cy, r) {
+  let s = '';
+  if (mood === 'happy') {
+    s += star(cx + r + 22, cy - r - 4, 7, C.spark) + star(cx - r - 18, cy - 10, 5, C.spark);
+    s += petal(cx - r - 10, cy - r - 8, 30) + petal(cx + r + 8, cy + 14, -20) + petal(cx - r - 24, cy + 20, 60);
+  } else if (mood === 'fine') {
+    s += star(cx + r + 18, cy - r + 6, 5, C.spark);
+  } else if (mood === 'worried') {
+    for (let i = 0; i < 2; i++) {
+      const x = cx - r - 16 - i * 9, h = 10 + i * 6;
+      s += line(`M${f(x)} ${f(cy - h)} Q${f(x - 8)} ${cy} ${f(x)} ${f(cy + h)}`, 4, C.amber);
+    }
+    s += drop(cx + r + 12, cy - r + 2, 1);
+  } else if (mood === 'covered') {
+    for (const sd of [-1, 1]) for (let i = 0; i < 3; i++) {
+      const x = cx + sd * (r + 26 + i * 9), h = 12 + i * 6;
+      s += line(`M${f(x)} ${f(cy - h)} Q${f(x + sd * 9)} ${cy} ${f(x)} ${f(cy + h)}`, 4, C.wave);
+    }
+  } else if (mood === 'asleep') {
+    const x = cx - r - 30, y = cy - r - 22;
+    s += `<path d="M${x} ${y - 13} A13 13 0 1 0 ${x} ${y + 13} A16 16 0 0 1 ${x} ${y - 13} Z" fill="${C.moon}" stroke="${C.outline}" stroke-width="3"/>`;
+    s += star(x + 22, y - 18, 5, C.moon) + star(x - 6, y + 26, 4, C.moon);
+  } else if (mood === 'pat') {
+    s += heart(cx + r + 20, cy - r, 1.1) + heart(cx - r - 18, cy - r + 14, 0.8) + heart(cx + r + 10, cy + 18, 0.7);
+  }
+  return s;
+}
+
+// A soft, bent arm: a curve from shoulder to hand whose elbow pushes outward.
+function arm(sx, sy, hx, hy, color, sideX) {
+  const dx = hx - sx, dy = hy - sy, len = Math.hypot(dx, dy) || 1;
+  let nx = -dy / len, ny = dx / len;
+  if (nx * sideX < 0) { nx = -nx; ny = -ny; }
+  const bend = Math.min(12, len * 0.24);
+  const ctl = { x: (sx + hx) / 2 + nx * bend * 2, y: (sy + hy) / 2 + ny * bend * 2 };
+  const d = `M${f(sx)} ${f(sy)} Q${f(ctl.x)} ${f(ctl.y)} ${f(hx)} ${f(hy)}`;
+  return line(d, 16) + line(d, 9, color);
+}
+
+function drawE(moodIn, opt = {}) {
+  const mood = E_ALIAS[moodIn] || moodIn;
+  const { hair = 'grey', outfit = 'gorria' } = opt;
+  const O = OUTFITS[outfit], wrap = hair === 'wrap';
+  const cx = 100, cy = 150, r = 36;
+  const sh = { L: [77, 204], R: [123, 204] };
+  const hands = E_HANDS[mood];
+  const onGround = mood === 'covered' || mood === 'asleep';
+  let s = '';
+  if (onGround) {
+    s += basket(48, 262, true);
+    if (mood === 'covered') s += apple(20, 276, 0.7) + apple(152, 278, 0.6);
+  }
+  // legs: white stockings laced with abarka straps
+  for (const lx of [90, 110]) {
+    s += shape(`M${lx - 6} 258 L${lx + 6} 258 L${lx + 6} 278 L${lx - 6} 278 Z`, E.sock, 3);
+    s += line(`M${lx - 6} 263 L${lx + 6} 270 M${lx + 6} 263 L${lx - 6} 270 M${lx - 6} 271 L${lx + 6} 277`, 2.2, E.strap);
+    s += ell(lx + 1, 281, 10, 5.5, C.shoe, `stroke="${C.outline}" stroke-width="3.5"`);
+  }
+  s += shape('M63 262 C66 240 72 220 77 212 L123 212 C128 220 134 240 137 262 Q100 271 63 262 Z', O.skirt);
+  if (O.hem) {
+    s += shape('M65 247 Q100 256 135 247 L136.5 258 Q100 267 63.5 258 Z', O.hem, 3);
+    s += whirl(78, 254) + whirl(93, 257) + whirl(108, 257) + whirl(123, 254);
+  } else {
+    s += line('M66 252 Q100 260 134 252', 3, O.skirtDark);
+  }
+  s += shape('M83 212 L117 212 L122 250 Q100 256 78 250 Z', E.apron, 3.5);
+  if (O.stripe) s += line('M80.5 242 Q100 246 119.5 242', 1.8, O.stripe) + line('M80 246 Q100 250 120 246', 1.8, O.stripe);
+  else s += line('M80 244 Q100 248 120 244', 2, C.linenShade);
+  s += shape('M74 214 C74 201 84 192 100 192 C116 192 126 201 126 214 Z', C.linen);
+  if (O.laces) {
+    s += shape('M78 214 C78 204 82 198 88 196 L92 214 Z M122 214 C122 204 118 198 112 196 L108 214 Z', O.bodice, 3.5);
+    s += shape('M90 200 L110 200 L111 214 L89 214 Z', O.bodice, 3.5);
+    s += line('M95 202 L105 207 M105 202 L95 207 M95 208 L105 213 M105 208 L95 213', 1.8, '#F3E6D0');
+  } else {
+    s += shape('M74 214 C74 201 84 192 100 192 C116 192 126 201 126 214 Z', O.bodice);
+  }
+  if (O.shawl) {
+    s += shape('M77 199 L90 196 L106 220 L97 224 Z', C.linen, 3);
+    s += shape('M123 199 L110 196 L94 220 L103 224 Z', C.linen, 3);
+  }
+  s += arm(sh.L[0], sh.L[1], hands[0][0], hands[0][1], O.sleeve, -1) + arm(sh.R[0], sh.R[1], hands[1][0], hands[1][1], O.sleeve, 1);
+  s += circ(sh.L[0] - 1, sh.L[1] - 2, 8, O.sleeve, 3.5) + circ(sh.R[0] + 1, sh.R[1] - 2, 8, O.sleeve, 3.5);
+  if (!onGround) s += mood === 'sad' ? basket(74, 246, true) : basket(72, 232, true);
+  // head; it sinks a little when she's sad
+  const hy = mood === 'sad' ? cy + 3 : cy;
+  if (wrap) {
+    s += ell(cx, hy + 5, r + 9, r + 11, C.linen, `stroke="${C.outline}" stroke-width="4"`);
+    s += line(`M${cx - 18} ${hy + r + 10} Q${cx} ${hy + r + 16} ${cx + 18} ${hy + r + 10}`, 3, C.linenShade);
+    s += ell(cx, hy + 5, r - 2, r - 1, C.skin, `stroke="${C.outline}" stroke-width="3.5"`);
+    s += faceE(cx, hy + 5, r - 2, mood);
+    s += tocaE(cx, hy - r * 0.55, mood);
+  } else {
+    const H = HAIR[hair];
+    s += shape(`M${cx} ${cy + r - 2} C${cx - 8} ${cy + r + 2} ${cx - 20} ${cy + r + 2} ${cx - 22} ${cy + r + 8} C${cx - 14} ${cy + r + 14} ${cx - 4} ${cy + r + 12} ${cx} ${cy + r + 6} C${cx + 4} ${cy + r + 12} ${cx + 14} ${cy + r + 14} ${cx + 22} ${cy + r + 8} C${cx + 20} ${cy + r + 2} ${cx + 8} ${cy + r + 2} ${cx} ${cy + r - 2} Z`, C.linen, 3.5);
+    s += ell(cx, hy - 4, r + 7, r + 2, H.fill, `stroke="${C.outline}" stroke-width="4"`);
+    s += circ(cx, hy + 2, r, C.skin);
+    s += shape(`M${cx - r + 1} ${hy - 2} C${cx - r + 2} ${hy - r + 2} ${cx - 10} ${hy - r - 2} ${cx} ${hy - r + 4} C${cx + 10} ${hy - r - 2} ${cx + r - 2} ${hy - r + 2} ${cx + r - 1} ${hy - 2} C${cx + r - 8} ${hy - r * 0.45} ${cx + 10} ${hy - r * 0.62} ${cx} ${hy - r * 0.5} C${cx - 10} ${hy - r * 0.62} ${cx - r + 8} ${hy - r * 0.45} ${cx - r + 1} ${hy - 2} Z`, H.fill, 3.5);
+    s += line(`M${cx - 6} ${hy - r * 0.62} C${cx - 14} ${hy - r * 0.7} ${cx - 22} ${hy - r * 0.55} ${cx - r + 6} ${hy - 8} M${cx + 6} ${hy - r * 0.62} C${cx + 14} ${hy - r * 0.7} ${cx + 22} ${hy - r * 0.55} ${cx + r - 6} ${hy - 8}`, 2.5, H.shade);
+    for (const sd of [-1, 1]) s += shape(`M${cx + sd * (r - 3)} ${hy - 10} C${cx + sd * (r + 9)} ${hy - 2} ${cx + sd * (r + 8)} ${hy + 16} ${cx + sd * (r - 1)} ${hy + 22} C${cx + sd * (r + 1)} ${hy + 12} ${cx + sd * (r - 1)} ${hy + 2} ${cx + sd * (r - 6)} ${hy - 4} Z`, H.fill, 3.5);
+    s += faceE(cx, hy + 4, r, mood);
+    s += tocaE(cx, hy - r * 0.45, mood);
+  }
+  if (mood === 'happy') s += apple(hands[1][0], hands[1][1] - 9, 0.95);
+  s += circ(hands[0][0], hands[0][1], 6.5, C.skin, 3) + circ(hands[1][0], hands[1][1], 6.5, C.skin, 3);
+  s += fxE(mood, cx, cy + 6, r + 8);
+  return s;
+}
+
+const svgD = (inner) => `<svg viewBox="-20 -60 240 330" aria-hidden="true">${inner}</svg>`;
+const svgE = (inner) => `<svg viewBox="-20 -50 240 340" aria-hidden="true">${inner}</svg>`;
+document.getElementById('d-hero').innerHTML = svgE(drawE('happy'));
+document.getElementById('d-moods').innerHTML = [['happy', 'm-calm', 'Happy'], ['fine', 'm-calm', 'Fine'], ['worried', 'm-loud', 'Worried'], ['sad', 'm-too', 'Sad'], ['covered', 'm-too', 'Too loud'], ['asleep', 'm-sleep', 'Asleep'], ['pat', 'm-pat', 'Pat']]
+  .map(([m, cls, label]) => `<div class="mood ${cls}">${svgE(drawE(m))}<span>${label}</span></div>`).join('');
+document.getElementById('e-vars').innerHTML = [
+  [{ hair: 'grey', outfit: 'gorria' }, 'Amona', 'Grey hair, burgundy bodice, red skirt. Default; closest to most references.'],
+  [{ hair: 'brown', outfit: 'gorria' }, 'Gaztea', 'Same outfit, younger, with brown hair.'],
+  [{ hair: 'grey', outfit: 'urdina' }, 'Urdina', 'Blue dress, crossed shawl, hem band with whirls.'],
+  [{ hair: 'wrap', outfit: 'urdina' }, 'Bilduta', 'Face fully wrapped in white, like the parade costume drawing.'],
+].map(([o, name, note]) => `<div class="style">${svgE(drawE('calm', o))}<b>${name}</b><small>${note}</small></div>`).join('');
+document.getElementById('d-sil').innerHTML = [96, 64, 40, 28]
+  .map(w => svgE(drawE('fine')).replace('<svg ', `<svg width="${w}" `)).join('');
+
+const svg = (inner, cls = '', vb = '-10 -40 220 300') => `<svg viewBox="${vb}" class="${cls}" aria-hidden="true">${inner}</svg>`;
+
+const DIRS = [
+  { key: 'A', name: 'Chibi shepherdess', draw: drawA,
+    blurb: 'A little person with arms, legs and a full outfit: black laced bodice, white blouse and apron, red skirt, a braid with a ribbon.',
+    pros: ['Reads clearly as Mari Domingi, matching the parade costume.', 'Lots to animate: arms, braid, apron.'],
+    cons: ['Most detailed of the five characters; needs care to stay legible small.'] },
+  { key: 'B', name: 'Peg doll', draw: drawB,
+    blurb: 'One rounded capsule like a wooden peg doll: face framed by a linen coif, with the outfit painted on. No legs; she sways and hops.',
+    pros: ['Same simple blob logic as Buddy, so it sits well next to him.', 'Cheapest to animate.'],
+    cons: ['Can look like a toy or a nun at a glance; the headdress has to carry it.'] },
+  { key: 'C', name: 'Apple sprite', draw: drawC,
+    blurb: 'A friendly apple wearing her headdress, with leaf arms and a small apron. Leans on the myth side and her love of apples.',
+    pros: ['Very iconic and playful; kids get it instantly.', 'Sits naturally with the animal and robot cast.'],
+    cons: ['Furthest from the human figure people know from the parades.'] },
+];
+DIRS.unshift({ key: 'D', name: 'Crane toca', draw: drawD, vb: '-20 -60 240 330',
+  blurb: 'An oversized toca drawn from the 1520s description of a crane\'s chest, neck and beak: a pleated dome, a neck that arcs forward and a folded tip.',
+  pros: ['Very distinctive silhouette.', 'The neck acts like ears.'],
+  cons: ['Doesn\'t match how she looks in parades and books today; the references show a wrapped cone with a rolled curl.'] });
+const MOODS = [['calm', 'm-calm', 'Calm'], ['loud', 'm-loud', 'Loud'], ['too', 'm-too', 'Too loud'], ['sleep', 'm-sleep', 'Asleep']];
+
+document.getElementById('dirs').innerHTML = DIRS.map(d => `
+  <article class="dir">
+    <div class="dir-head"><span class="tag">${d.key}</span><h2>${d.name}</h2></div>
+    <div class="hero" role="img" aria-label="Direction ${d.key}, ${d.name}, calm and holding an apple">${svg(d.draw('calm'), '', d.vb)}</div>
+    <div class="moods">${MOODS.map(([m, cls, label]) => `<div class="mood ${cls}">${svg(d.draw(m), '', d.vb)}<span>${label}</span></div>`).join('')}</div>
+    <p>${d.blurb}</p>
+    <ul>${d.pros.map(p => `<li><span class="pro">+</span> ${p}</li>`).join('')}${d.cons.map(c => `<li><span class="con">−</span> ${c}</li>`).join('')}</ul>
+  </article>`).join('');
+
+const STYLES = [
+  ['txurigorri', 'Txuri-gorri', 'Red and white, the parade look. Default.'],
+  ['mendia', 'Mendia', 'Mountain green and brown, for the shepherdess.'],
+  ['ilargia', 'Ilargia', 'Night indigo with a moon-gold ribbon.'],
+  ['sagarra', 'Sagarra', 'Orchard orange with a leaf-green ribbon.'],
+];
+document.getElementById('styles').innerHTML = STYLES.map(([k, name, note]) =>
+  `<div class="style">${svg(drawA('calm', PALETTES[k]))}<b>${name}</b><small>${note}</small></div>`).join('');
+</script>

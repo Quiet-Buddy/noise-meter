@@ -16,7 +16,8 @@ enum class Character(val key: String, val isLimited: Boolean = false) {
     KITTEN("kitten"),
     DUCK("duck"),
     ROBOT("robot"),
-    SNOWMAN("snowman", isLimited = true);
+    SNOWMAN("snowman", isLimited = true),
+    MARI_DOMINGI("mari_domingi", isLimited = true);
 
     companion object {
         val DEFAULT = BUDDY

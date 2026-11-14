@@ -50,7 +50,10 @@ enum class CharacterStyle(
     ROBOT_LILAC("robot_lilac", Character.ROBOT, 2000),
     ROBOT_SKY("robot_sky", Character.ROBOT, 2400),
     SNOWMAN_FROST("snowman_frost", Character.SNOWMAN, 60),
-    SNOWMAN_DUSK("snowman_dusk", Character.SNOWMAN, 170);
+    SNOWMAN_DUSK("snowman_dusk", Character.SNOWMAN, 170),
+    MARI_AMONA("mari_amona", Character.MARI_DOMINGI, 60),
+    MARI_MOREA("mari_morea", Character.MARI_DOMINGI, 140),
+    MARI_URDINA("mari_urdina", Character.MARI_DOMINGI, 260);
 
     val isFree: Boolean get() = unlockAtCalmMinutes == 0
 
@@ -64,6 +67,7 @@ enum class CharacterStyle(
             Character.DUCK -> DUCK_LEMON
             Character.ROBOT -> ROBOT_PEARL
             Character.SNOWMAN -> SNOWMAN_FROST
+            Character.MARI_DOMINGI -> MARI_AMONA
         }
 
         fun of(character: Character): List<CharacterStyle> = entries.filter { it.character == character }
@@ -104,7 +108,11 @@ enum class Accessory(
     BOW_TIE("acc_bow_tie", Character.ROBOT, AccessorySlot.NECK, 2250),
     PLANET_RING("acc_planet_ring", Character.ROBOT, AccessorySlot.BODY, 2300),
     SCARF("acc_scarf", Character.SNOWMAN, AccessorySlot.NECK, 120),
-    BEANIE("acc_beanie", Character.SNOWMAN, AccessorySlot.HEAD, 225);
+    BEANIE("acc_beanie", Character.SNOWMAN, AccessorySlot.HEAD, 225),
+    EGUZKILORE("acc_eguzkilore", Character.MARI_DOMINGI, AccessorySlot.HEAD, 100),
+    ZAPIA("acc_zapia", Character.MARI_DOMINGI, AccessorySlot.NECK, 180),
+    LANTERN("acc_lantern", Character.MARI_DOMINGI, AccessorySlot.BODY, 220),
+    ROBIN("acc_robin", Character.MARI_DOMINGI, AccessorySlot.HEAD, 300);
 
     companion object {
         fun fromKey(key: String?): Accessory? = entries.firstOrNull { it.key == key }
