@@ -125,6 +125,8 @@ object CharacterLooks {
             CharacterStyle.ROBOT_PEARL -> RobotPalette
             CharacterStyle.ROBOT_LILAC -> RobotLilacPalette
             CharacterStyle.ROBOT_SKY -> RobotSkyPalette
+            // TODO(snowman): Snowy's own palettes.
+            CharacterStyle.SNOWMAN_FROST, CharacterStyle.SNOWMAN_DUSK -> BuddyPalette
         }
         CharacterLook(
             art = when (style.character) {
@@ -132,6 +134,7 @@ object CharacterLooks {
                 Character.KITTEN -> KittenArt
                 Character.DUCK -> DuckArt
                 Character.ROBOT -> RobotArt
+                Character.SNOWMAN -> BuddyArt // TODO(snowman)
             },
             palette = palette,
         )

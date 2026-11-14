@@ -35,11 +35,13 @@ import com.quietbuddy.R
 import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
+import com.quietbuddy.core.LimitedEvents
 import com.quietbuddy.core.Unlocks
 import com.quietbuddy.domain.character.Voices
 import com.quietbuddy.ui.SingleColumnMaxWidth
 import com.quietbuddy.ui.character.nameRes
 import com.quietbuddy.ui.theme.LocalPalette
+import java.time.ZoneId
 
 private val CardShape = RoundedCornerShape(20.dp)
 
@@ -67,7 +69,10 @@ fun CharactersScreen() {
 
             ProgressCard(calmMinutes = progress.calmMinutes)
 
-            Character.entries.forEach { c ->
+            // TODO(snowman): Stage 2 takes the clock from the view model.
+            val nowMs = System.currentTimeMillis()
+            val zone = ZoneId.systemDefault()
+            Character.entries.filter { LimitedEvents.isVisible(it, progress, LimitedEvents.scheduled, nowMs, zone) }.forEach { c ->
                 val unlocked = progress.isUnlocked(c)
                 val friend = CharacterStyle.defaultFor(c)
                 Column(

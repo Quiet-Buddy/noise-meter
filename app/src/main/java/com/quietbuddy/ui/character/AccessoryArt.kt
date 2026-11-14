@@ -111,6 +111,8 @@ fun DrawScope.drawAccessories(
             // Astro's four turn with it when it spins, so RobotArt draws them itself, see drawPropellerCap,
             // drawStarGlasses, drawBowTie and drawPlanetRing.
             Accessory.PROPELLER_CAP, Accessory.STAR_GLASSES, Accessory.BOW_TIE, Accessory.PLANET_RING -> Unit
+            // TODO(snowman): Snowy's art will draw its scarf and beanie itself.
+            Accessory.SCARF, Accessory.BEANIE -> Unit
         }
     }
 }

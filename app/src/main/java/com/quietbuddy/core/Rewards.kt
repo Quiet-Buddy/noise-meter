@@ -8,7 +8,16 @@ import kotlinx.coroutines.flow.Flow
  */
 sealed interface Reward {
     val key: String
+    val character: Character
+
+    /**
+     * Calm minutes needed. For a limited character's rewards this counts minutes since its event started,
+     * not the lifetime total (see [LimitedEvents]).
+     */
     val unlockAtCalmMinutes: Int
+
+    /** True when only earnable during a limited event. */
+    val isLimited: Boolean get() = character.isLimited
 
     companion object {
         val all: List<Reward> get() = CharacterStyle.entries + Accessory.entries
@@ -25,7 +34,7 @@ sealed interface Reward {
  */
 enum class CharacterStyle(
     override val key: String,
-    val character: Character,
+    override val character: Character,
     override val unlockAtCalmMinutes: Int,
 ) : Reward {
     BUDDY_SUNNY("buddy_sunny", Character.BUDDY, 0),
@@ -39,7 +48,9 @@ enum class CharacterStyle(
     DUCK_HAZEL("duck_hazel", Character.DUCK, 1500),
     ROBOT_PEARL("robot_pearl", Character.ROBOT, 1700),
     ROBOT_LILAC("robot_lilac", Character.ROBOT, 2000),
-    ROBOT_SKY("robot_sky", Character.ROBOT, 2400);
+    ROBOT_SKY("robot_sky", Character.ROBOT, 2400),
+    SNOWMAN_FROST("snowman_frost", Character.SNOWMAN, 60),
+    SNOWMAN_DUSK("snowman_dusk", Character.SNOWMAN, 170);
 
     val isFree: Boolean get() = unlockAtCalmMinutes == 0
 
@@ -52,6 +63,7 @@ enum class CharacterStyle(
             Character.KITTEN -> KITTEN_GINGER
             Character.DUCK -> DUCK_LEMON
             Character.ROBOT -> ROBOT_PEARL
+            Character.SNOWMAN -> SNOWMAN_FROST
         }
 
         fun of(character: Character): List<CharacterStyle> = entries.filter { it.character == character }
@@ -71,7 +83,7 @@ enum class AccessorySlot { HEAD, FACE, NECK, FEET, BODY }
  */
 enum class Accessory(
     override val key: String,
-    val character: Character,
+    override val character: Character,
     val slot: AccessorySlot,
     override val unlockAtCalmMinutes: Int,
 ) : Reward {
@@ -90,7 +102,9 @@ enum class Accessory(
     PROPELLER_CAP("acc_propeller_cap", Character.ROBOT, AccessorySlot.HEAD, 1800),
     STAR_GLASSES("acc_star_glasses", Character.ROBOT, AccessorySlot.FACE, 2100),
     BOW_TIE("acc_bow_tie", Character.ROBOT, AccessorySlot.NECK, 2250),
-    PLANET_RING("acc_planet_ring", Character.ROBOT, AccessorySlot.BODY, 2300);
+    PLANET_RING("acc_planet_ring", Character.ROBOT, AccessorySlot.BODY, 2300),
+    SCARF("acc_scarf", Character.SNOWMAN, AccessorySlot.NECK, 120),
+    BEANIE("acc_beanie", Character.SNOWMAN, AccessorySlot.HEAD, 225);
 
     companion object {
         fun fromKey(key: String?): Accessory? = entries.firstOrNull { it.key == key }
@@ -109,28 +123,33 @@ object Unlocks {
     fun isCalmMinute(minute: MinuteAggregate, settings: AppSettings): Boolean =
         minute.listeningSeconds >= MIN_LISTENING_SECONDS && minute.laeqDb < settings.worriedFromDb
 
-    /** Rewards earned by [calmMinutes], free ones included. */
+    /** The rewards on the lifetime ladder; limited ones are earned by [LimitedEvents] instead. */
+    private val lifetime: List<Reward> get() = Reward.all.filter { !it.isLimited }
+
+    /** Rewards earned by the lifetime [calmMinutes], free ones included. Limited rewards are never earned this way. */
     fun earnedBy(calmMinutes: Long): Set<Reward> =
-        Reward.all.filter { calmMinutes >= it.unlockAtCalmMinutes }.toSet()
+        lifetime.filter { calmMinutes >= it.unlockAtCalmMinutes }.toSet()
 
-    /** The cheapest reward not yet earned, or null when everything is earned. */
+    /** The cheapest lifetime reward not yet earned, or null when everything is earned. */
     fun next(calmMinutes: Long): Reward? =
-        Reward.all.filter { calmMinutes < it.unlockAtCalmMinutes }.minByOrNull { it.unlockAtCalmMinutes }
+        lifetime.filter { calmMinutes < it.unlockAtCalmMinutes }.minByOrNull { it.unlockAtCalmMinutes }
 
-    /** The threshold of the most expensive reward already earned (0 when none), for progress bars. */
+    /** The threshold of the most expensive lifetime reward already earned (0 when none), for progress bars. */
     fun previousThreshold(calmMinutes: Long): Int =
-        Reward.all.filter { it.unlockAtCalmMinutes <= calmMinutes }.maxOfOrNull { it.unlockAtCalmMinutes } ?: 0
+        lifetime.filter { it.unlockAtCalmMinutes <= calmMinutes }.maxOfOrNull { it.unlockAtCalmMinutes } ?: 0
 }
 
 /**
  * Lifetime reward progress. Kept apart from history, which is pruned.
  * [unlocked] only grows: a reward stays unlocked even if the thresholds change later.
  * [celebrated] are the unlocked rewards the user has already been told about.
+ * [eventMinutes] are the calm minutes earned inside each limited event's window, by event key.
  */
 data class Progress(
     val calmMinutes: Long = 0,
     val unlocked: Set<Reward> = FREE,
     val celebrated: Set<Reward> = FREE,
+    val eventMinutes: Map<String, Long> = emptyMap(),
 ) {
     /** Newly unlocked rewards waiting for a celebration, cheapest first. */
     val pendingCelebration: List<Reward>
@@ -143,8 +162,8 @@ data class Progress(
         isUnlocked(CharacterStyle.defaultFor(character))
 
     companion object {
-        /** Rewards everyone starts with. */
-        val FREE: Set<Reward> = Reward.all.filter { it.unlockAtCalmMinutes == 0 }.toSet()
+        /** Rewards everyone starts with; limited rewards are never free. */
+        val FREE: Set<Reward> = Reward.all.filter { !it.isLimited && it.unlockAtCalmMinutes == 0 }.toSet()
     }
 }
 

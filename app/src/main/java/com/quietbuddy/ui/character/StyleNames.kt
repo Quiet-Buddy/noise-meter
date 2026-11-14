@@ -22,6 +22,8 @@ val CharacterStyle.nameRes: Int
         CharacterStyle.ROBOT_PEARL -> R.string.style_robot_pearl
         CharacterStyle.ROBOT_LILAC -> R.string.style_robot_lilac
         CharacterStyle.ROBOT_SKY -> R.string.style_robot_sky
+        CharacterStyle.SNOWMAN_FROST -> R.string.style_snowman_frost
+        CharacterStyle.SNOWMAN_DUSK -> R.string.style_snowman_dusk
     }
 
 /** The display name of an accessory, e.g. "Top hat". */
@@ -44,6 +46,8 @@ val Accessory.nameRes: Int
         Accessory.STAR_GLASSES -> R.string.acc_star_glasses
         Accessory.BOW_TIE -> R.string.acc_bow_tie
         Accessory.PLANET_RING -> R.string.acc_planet_ring
+        Accessory.SCARF -> R.string.acc_scarf
+        Accessory.BEANIE -> R.string.acc_beanie
     }
 
 /** The display name of any reward. */

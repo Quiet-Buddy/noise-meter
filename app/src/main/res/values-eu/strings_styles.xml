@@ -12,6 +12,8 @@
     <string name="style_robot_pearl">Astro Perla</string>
     <string name="style_robot_lilac">Astro Lila</string>
     <string name="style_robot_sky">Astro Zerua</string>
+    <string name="style_snowman_frost">Elurtxo Izoztua</string>
+    <string name="style_snowman_dusk">Elurtxo Ilunabarra</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, blokeatuta. %2$s</string>
@@ -68,6 +70,8 @@
     <string name="acc_star_glasses">Izar-betaurrekoak</string>
     <string name="acc_bow_tie">Tximeleta-gorbata</string>
     <string name="acc_planet_ring">Planeta-eraztuna</string>
+    <string name="acc_scarf">Bufanda</string>
+    <string name="acc_beanie">Txanoa</string>
 
     <plurals name="accessory_next_hint">
         <item quantity="one">Minutu lasai %1$d falta da %2$s desblokeatzeko</item>

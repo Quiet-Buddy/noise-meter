@@ -44,5 +44,6 @@ object Voices {
         Character.KITTEN -> KittenVoice
         Character.DUCK -> DuckVoice
         Character.ROBOT -> RobotVoice
+        Character.SNOWMAN -> BuddyVoice // TODO(snowman)
     }
 }

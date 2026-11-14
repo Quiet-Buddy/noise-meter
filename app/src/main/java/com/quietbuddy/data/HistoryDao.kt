@@ -19,6 +19,13 @@ interface HistoryDao {
     @Query("SELECT COUNT(*) FROM level_minute WHERE laeqDb < :belowDb AND listeningSeconds >= :minSeconds")
     suspend fun countCalmMinutes(belowDb: Float, minSeconds: Int): Int
 
+    /** Calm minutes (same rules as [countCalmMinutes]) with fromMs <= minuteStartMs < toMs; used to backfill a limited event. */
+    @Query(
+        "SELECT COUNT(*) FROM level_minute WHERE laeqDb < :belowDb AND listeningSeconds >= :minSeconds " +
+            "AND minuteStartMs >= :fromMs AND minuteStartMs < :toMs"
+    )
+    suspend fun countCalmMinutesBetween(belowDb: Float, minSeconds: Int, fromMs: Long, toMs: Long): Int
+
     @Query("DELETE FROM level_minute WHERE minuteStartMs < :beforeMs")
     suspend fun deleteMinutesBefore(beforeMs: Long): Int
 }

@@ -12,6 +12,8 @@
     <string name="style_robot_pearl">Pearl Astro</string>
     <string name="style_robot_lilac">Lilac Astro</string>
     <string name="style_robot_sky">Sky Astro</string>
+    <string name="style_snowman_frost">Frosty Snowy</string>
+    <string name="style_snowman_dusk">Dusk Snowy</string>
 
     <string name="style_progress">%1$d / %2$d min</string>
     <string name="style_locked_desc">%1$s, locked. %2$s</string>
@@ -68,6 +70,8 @@
     <string name="acc_star_glasses">Star glasses</string>
     <string name="acc_bow_tie">Bow tie</string>
     <string name="acc_planet_ring">Planet ring</string>
+    <string name="acc_scarf">Scarf</string>
+    <string name="acc_beanie">Beanie</string>
 
     <plurals name="accessory_next_hint">
         <item quantity="one">%1$d more calm minute to unlock the %2$s</item>
