@@ -36,6 +36,11 @@ import kotlin.random.Random
  * - Sad: a slow falling "boop... boop... booop", a power-down slide with a slowing wobble, a sad three-note falling bleep.
  * - Too loud: a rapid alarm-ish "beep-beep-beep!", a frantic warbling bleep-bloop run, a glitchy stutter of short beeps.
  *
+ * Snowy the snowman's set is wind chimes and snow (bell-like decaying tones, puffs of wind, crunchy steps):
+ * - Worried: a questioning two-note chime, a "fff?" puff then a rising chime, three soft crunchy steps.
+ * - Sad: three falling chimes, a cold wind sighing downwards, two "pff" puffs and a sagging note.
+ * - Too loud: a frantic jingle of chimes, heavy stomps in the snow, a blustery gust with bell clangs.
+ *
  * Timbres are rich in harmonics in the 1–4 kHz range, where phone speakers and ears are most
  * sensitive, and are gently saturated so they sound loud and cut through a noisy room.
  * Pure Kotlin so it can be unit-tested off-device.
@@ -60,7 +65,7 @@ object AlertSounds {
         Character.KITTEN -> kittenSounds
         Character.DUCK -> duckSounds
         Character.ROBOT -> robotSounds
-        Character.SNOWMAN -> buddySounds // TODO(snowman)
+        Character.SNOWMAN -> snowmanSounds
     }
 
     private class Recipe(val seconds: Double, val gain: Double, val drive: Double, val draw: Buf.() -> Unit)
@@ -249,6 +254,71 @@ object AlertSounds {
                 for (i in 0..1) {
                     tone(i * 0.5, 0.45, { t -> meow(t / 0.45, 600.0, 800.0 - 60.0 * i, 330.0, peakAt = 0.15) },
                         harmonics = 14, oddOnly = true, attack = 0.012, release = 0.1, vibratoHz = 48.0, vibratoDepth = 0.04)
+                }
+            },
+        ),
+    )
+
+    private val snowmanSounds: Map<Mood, List<Recipe>> = mapOf(
+        Mood.WORRIED to listOf(
+            // A questioning two-note wind chime.
+            Recipe(0.9, gain = 0.75, drive = 1.5) {
+                tone(0.0, 0.5, { 1_568.0 }, harmonics = 4, decay = 5.0, attack = 0.004, release = 0.1)
+                tone(0.25, 0.6, { 1_976.0 }, harmonics = 4, decay = 5.0, attack = 0.004, release = 0.1)
+            },
+            // A "fff?" puff of wind, then a small rising chime.
+            Recipe(0.9, gain = 0.75, drive = 1.5) {
+                noise(0.0, 0.45, lowHz = 800.0, highHz = 4_500.0, attack = 0.12, release = 0.25)
+                tone(0.5, 0.35, { t -> glide(1_175.0, 1_568.0, t / 0.25) }, harmonics = 4, decay = 4.0, release = 0.1)
+            },
+            // Three soft crunchy steps in the snow.
+            Recipe(0.7, gain = 0.75, drive = 1.5) {
+                for (i in 0..2) noise(i * 0.2, 0.12, lowHz = 1_500.0, highHz = 7_000.0, attack = 0.004, release = 0.08)
+            },
+        ),
+        Mood.SAD to listOf(
+            // Three falling chimes.
+            Recipe(1.7, gain = 0.9, drive = 2.0) {
+                val hz = doubleArrayOf(1_319.0, 1_047.0, 784.0)
+                hz.forEachIndexed { i, f ->
+                    tone(i * 0.45, 0.8, { f }, harmonics = 4, decay = 3.5, attack = 0.005, release = 0.15)
+                }
+            },
+            // A cold wind sighing downwards.
+            Recipe(1.4, gain = 0.9, drive = 2.0) {
+                noise(0.0, 1.3, lowHz = 300.0, highHz = 2_200.0, attack = 0.3, release = 0.6)
+                tone(0.1, 1.2, { t -> glide(700.0, 330.0, t / 1.1) }, harmonics = 3, attack = 0.2, release = 0.4,
+                    vibratoHz = 5.0, vibratoDepth = 0.02)
+            },
+            // "Pff... pff...", then a sagging note.
+            Recipe(1.3, gain = 0.9, drive = 2.0) {
+                noise(0.0, 0.25, lowHz = 600.0, highHz = 3_500.0, attack = 0.05, release = 0.15)
+                noise(0.4, 0.25, lowHz = 600.0, highHz = 3_500.0, attack = 0.05, release = 0.15)
+                tone(0.8, 0.5, { t -> glide(880.0, 520.0, t / 0.45) }, harmonics = 4, decay = 2.5, release = 0.15)
+            },
+        ),
+        Mood.EARS_COVERED to listOf(
+            // A frantic jingle of chimes.
+            Recipe(1.2, gain = 1.0, drive = 3.0) {
+                for (i in 0 until 8) {
+                    tone(i * 0.12, 0.3, { if (i % 2 == 0) 2_093.0 else 1_760.0 }, harmonics = 5, decay = 6.0,
+                        attack = 0.003, release = 0.05)
+                }
+            },
+            // Heavy stomps crunching in the snow.
+            Recipe(1.1, gain = 1.0, drive = 3.0) {
+                for (i in 0 until 5) {
+                    noise(i * 0.2, 0.16, lowHz = 1_200.0, highHz = 7_500.0, attack = 0.003, release = 0.1)
+                    tone(i * 0.2, 0.15, { t -> glide(220.0, 110.0, t / 0.12) }, harmonics = 3, attack = 0.004,
+                        release = 0.08)
+                }
+            },
+            // A blustery gust with two bell clangs.
+            Recipe(1.2, gain = 1.0, drive = 3.0) {
+                noise(0.0, 1.1, lowHz = 500.0, highHz = 6_000.0, attack = 0.2, release = 0.4)
+                for (i in 0..1) {
+                    tone(0.3 + i * 0.45, 0.6, { 1_480.0 }, harmonics = 6, oddOnly = true, decay = 4.0, attack = 0.003,
+                        release = 0.1)
                 }
             },
         ),

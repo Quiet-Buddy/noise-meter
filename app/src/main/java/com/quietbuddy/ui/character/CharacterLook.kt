@@ -12,6 +12,9 @@ import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.duck.DuckArt
 import com.quietbuddy.ui.character.kitten.KittenArt
 import com.quietbuddy.ui.character.robot.RobotArt
+import com.quietbuddy.ui.character.snowman.SnowmanArt
+import com.quietbuddy.ui.theme.SnowmanDuskPalette
+import com.quietbuddy.ui.theme.SnowmanPalette
 import com.quietbuddy.ui.theme.BuddyBerryPalette
 import com.quietbuddy.ui.theme.BuddyMintPalette
 import com.quietbuddy.ui.theme.BuddyPalette
@@ -125,8 +128,8 @@ object CharacterLooks {
             CharacterStyle.ROBOT_PEARL -> RobotPalette
             CharacterStyle.ROBOT_LILAC -> RobotLilacPalette
             CharacterStyle.ROBOT_SKY -> RobotSkyPalette
-            // TODO(snowman): Snowy's own palettes.
-            CharacterStyle.SNOWMAN_FROST, CharacterStyle.SNOWMAN_DUSK -> BuddyPalette
+            CharacterStyle.SNOWMAN_FROST -> SnowmanPalette
+            CharacterStyle.SNOWMAN_DUSK -> SnowmanDuskPalette
         }
         CharacterLook(
             art = when (style.character) {
@@ -134,7 +137,7 @@ object CharacterLooks {
                 Character.KITTEN -> KittenArt
                 Character.DUCK -> DuckArt
                 Character.ROBOT -> RobotArt
-                Character.SNOWMAN -> BuddyArt // TODO(snowman)
+                Character.SNOWMAN -> SnowmanArt
             },
             palette = palette,
         )
