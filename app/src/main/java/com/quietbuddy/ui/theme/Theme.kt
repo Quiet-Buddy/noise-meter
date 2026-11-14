@@ -40,6 +40,8 @@ data class Palette(
     val duck: DuckColors = DuckColors.Lemon,
     /** Astro's shell, screen and glow colours. Unused by the other characters. */
     val robot: RobotColors = RobotColors.Pearl,
+    /** Mari Domingi's hair and outfit colours. Unused by the other characters. */
+    val mari: MariColors = MariColors.Amona,
 )
 
 /** Colours from the mockups. Use these, not hard-coded hex values. */
