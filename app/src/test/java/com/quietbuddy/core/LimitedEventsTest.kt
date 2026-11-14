@@ -33,6 +33,17 @@ class LimitedEventsTest {
     )
 
     @Test
+    fun activeEventCharacterListedFirstThenBackInPlace() {
+        val usual = listOf(Character.BUDDY, Character.KITTEN, Character.DUCK, Character.ROBOT)
+        assertEquals(usual, LimitedEvents.charactersInOrder(progress(), events, before, zone))
+        assertEquals(listOf(Character.SNOWMAN) + usual, LimitedEvents.charactersInOrder(progress(), events, during, zone))
+        // Missed: gone. Kept: back at the end, in its usual place.
+        assertEquals(usual, LimitedEvents.charactersInOrder(progress(), events, after, zone))
+        val kept = progress(extra = setOf(CharacterStyle.SNOWMAN_FROST))
+        assertEquals(usual + Character.SNOWMAN, LimitedEvents.charactersInOrder(kept, events, after, zone))
+    }
+
+    @Test
     fun windowBoundaries() {
         val start = event.startMs(zone)
         assertFalse(event.isActive(start - 1, zone))

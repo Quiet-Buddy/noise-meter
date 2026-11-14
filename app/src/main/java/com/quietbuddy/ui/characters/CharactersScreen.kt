@@ -33,7 +33,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quietbuddy.R
 import com.quietbuddy.core.Accessory
-import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.LimitedEvents
 import com.quietbuddy.core.Unlocks
@@ -72,7 +71,7 @@ fun CharactersScreen() {
             val nowMs = viewModel.clockMs()
             val zone = viewModel.zone
             val events = viewModel.events
-            Character.entries.filter { LimitedEvents.isVisible(it, progress, events, nowMs, zone) }.forEach { c ->
+            LimitedEvents.charactersInOrder(progress, events, nowMs, zone).forEach { c ->
                 val daysLeft = LimitedEvents.activeFor(c, events, nowMs, zone)?.daysLeft(LocalDate.now(zone))
                 val unlocked = progress.isUnlocked(c)
                 val friend = CharacterStyle.defaultFor(c)

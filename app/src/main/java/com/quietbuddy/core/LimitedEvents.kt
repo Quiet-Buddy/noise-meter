@@ -60,6 +60,15 @@ object LimitedEvents {
     fun isVisible(character: Character, progress: Progress, events: List<LimitedEvent>, nowMs: Long, zone: ZoneId): Boolean =
         !character.isLimited || progress.isUnlocked(character) || activeFor(character, events, nowMs, zone) != null
 
+    /**
+     * The characters the Characters page lists, in order: those with an active event first (they have a deadline),
+     * then the rest in their usual order. Once its event ends, a kept limited character goes back to its usual place.
+     */
+    fun charactersInOrder(progress: Progress, events: List<LimitedEvent>, nowMs: Long, zone: ZoneId): List<Character> =
+        Character.entries
+            .filter { isVisible(it, progress, events, nowMs, zone) }
+            .sortedBy { if (activeFor(it, events, nowMs, zone) != null) 0 else 1 }
+
     /** Minutes counted towards [reward]: the lifetime total, or the active event's minutes (0 if none) for limited rewards. */
     fun minutesTowards(reward: Reward, progress: Progress, events: List<LimitedEvent>, nowMs: Long, zone: ZoneId): Long {
         if (!reward.isLimited) return progress.calmMinutes
