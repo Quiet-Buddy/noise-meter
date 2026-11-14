@@ -1,6 +1,7 @@
 package com.quietbuddy.ui.character.duck
 
 import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.character.IdlePhase
 import com.quietbuddy.ui.character.PokeEnvelope
 import com.quietbuddy.ui.character.isCalm
 import kotlin.math.PI
@@ -96,6 +97,13 @@ data class DuckFx(
     val patWag: Float = 0f,
     /** Seconds since the pat's quack began, or negative when there is none. */
     val quack: Float = -1f,
+    /** Angles in radians of the idle rhythms; see [IdlePhase]. */
+    val floatPhase: Float = 0f,
+    val swayPhase: Float = 0f,
+    val nodPhase: Float = 0f,
+    val paddlePhase: Float = 0f,
+    val wagPhase: Float = 0f,
+    val flapPhase: Float = 0f,
 ) {
     companion object {
         val Still = DuckFx()
@@ -118,6 +126,12 @@ class DuckAnimator(initial: Mood?, private val random: Random = Random.Default) 
     private var quackSec = -1f
     private val giggleEnv = PokeEnvelope(attackSec = 0.05f, holdSec = 0.5f, releaseSec = 0.35f)
     private val wagEnv = PokeEnvelope(attackSec = 0.05f, holdSec = 0.35f, releaseSec = 0.6f)
+    private val floatPhase = IdlePhase()
+    private val swayPhase = IdlePhase()
+    private val nodPhase = IdlePhase()
+    private val paddlePhase = IdlePhase()
+    private val wagPhase = IdlePhase()
+    private val flapPhase = IdlePhase()
 
     /** The giggle level as of the last [advance], 0..1. */
     val giggle: Float get() = giggleEnv.value
@@ -180,6 +194,14 @@ class DuckAnimator(initial: Mood?, private val random: Random = Random.Default) 
         val twitch = if (tp in 0f..1f) twitchDir * 8f * sin(PI.toFloat() * tp) else 0f
         giggleEnv.advance(dtSec)
         wagEnv.advance(dtSec)
+        floatPhase.advance(pose.floatHz, dtSec)
+        swayPhase.advance(pose.swayHz, dtSec)
+        nodPhase.advance(pose.nodHz, dtSec)
+        // The paddle amount doubles as its speed: faster, harder kicks when anxious.
+        paddlePhase.advance(pose.paddle, dtSec)
+        // A pat speeds the wag up; the envelope eases that change in and out.
+        wagPhase.advance(pose.tailHz + wagEnv.value * 3f, dtSec)
+        flapPhase.advance(pose.flapHz, dtSec)
         if (quackSec >= 0f) {
             quackSec += dtSec
             if (quackSec >= QUACK_SEC) quackSec = -1f
@@ -192,6 +214,12 @@ class DuckAnimator(initial: Mood?, private val random: Random = Random.Default) 
             giggle = giggleEnv.value,
             patWag = wagEnv.value,
             quack = quackSec,
+            floatPhase = floatPhase.radians,
+            swayPhase = swayPhase.radians,
+            nodPhase = nodPhase.radians,
+            paddlePhase = paddlePhase.radians,
+            wagPhase = wagPhase.radians,
+            flapPhase = flapPhase.radians,
         )
     }
 

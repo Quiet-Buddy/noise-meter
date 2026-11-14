@@ -1,6 +1,7 @@
 package com.quietbuddy.ui.character.duck
 
 import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.character.assertIdleRhythmsNeverSkip
 import kotlin.random.Random
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
@@ -124,5 +125,17 @@ class DuckMotionTest {
         assertNotEquals(mid, animator.pose)
         repeat(100) { animator.advance(0.05f) }
         assertEquals(DuckPoses.of(Mood.FINE), animator.pose)
+    }
+
+    @Test
+    fun idleRhythmsNeverSkipOnAMoodChange() {
+        val a = DuckAnimator(Mood.FINE, Random(1))
+        // the fastest rhythm is the worried tail wag, at 3 Hz
+        assertIdleRhythmsNeverSkip(
+            setMood = { a.setMood(it) },
+            advance = { a.advance(it) },
+            angles = { with(a) { listOf(fx.floatPhase, fx.swayPhase, fx.nodPhase, fx.paddlePhase, fx.wagPhase, fx.flapPhase) } },
+            maxHz = 3f,
+        )
     }
 }

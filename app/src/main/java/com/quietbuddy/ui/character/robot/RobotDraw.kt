@@ -223,8 +223,8 @@ private fun DrawScope.drawAstro(p: RobotPose, fx: RobotFx, pal: Palette, accesso
     val t = fx.time
     val idle = fx.idle
     val tau = PI.toFloat() * 2f
-    val hoverY = if (idle) p.hover * sin(t * tau * p.hoverHz) else 0f
-    val rock = if (idle) p.sway * sin(t * tau * p.swayHz) else 0f
+    val hoverY = if (idle) p.hover * sin(fx.hoverPhase) else 0f
+    val rock = if (idle) p.sway * sin(fx.swayPhase) else 0f
     val tremble = if (idle) p.shake * 2.5f * sin(t * tau / 0.12f) else 0f
     val th = p.thrust + fx.boost
     // Breathing is weighted by the pose, so it eases in and out with it.
@@ -251,7 +251,6 @@ private fun DrawScope.drawBody(p: RobotPose, fx: RobotFx, pal: Palette, accessor
     val c = pal.robot
     val t = fx.time
     val idle = fx.idle
-    val tau = PI.toFloat() * 2f
     val turn = Turn(fx.yaw)
     val spinning = turn.spinning
 
@@ -277,7 +276,7 @@ private fun DrawScope.drawBody(p: RobotPose, fx: RobotFx, pal: Palette, accessor
     val handsFront = ArrayList<HandDot>()
     G.Hands.forEachIndexed { i, (hx, hy) ->
         val side = if (i == 0) 1f else -1f
-        val wig = if (idle) p.handWiggle * sin(t * tau * p.handHz + i * PI.toFloat() * 0.8f) else 0f
+        val wig = if (idle) p.handWiggle * sin(fx.handPhase + i * PI.toFloat() * 0.8f) else 0f
         val restX = hx + side * p.handIn
         val restY = hy + p.handLift + wig
         val ear = G.Ears[i]
@@ -300,7 +299,7 @@ private fun DrawScope.drawBody(p: RobotPose, fx: RobotFx, pal: Palette, accessor
     handsBack.forEach { hand(it) }
 
     // The orb and everything on it tilts as one.
-    val tilt = p.tilt + (if (idle) p.nod * sin(t * tau * p.nodHz) else 0f) + fx.twitch * 0.4f
+    val tilt = p.tilt + (if (idle) p.nod * sin(fx.nodPhase) else 0f) + fx.twitch * 0.4f
     withTransform({ rotate(tilt, Offset(G.ORB_CX, G.ORB_CY)) }) {
         drawOrb(p, fx, pal, accessories, th, turn)
     }
@@ -344,7 +343,6 @@ private fun DrawScope.drawOrb(
     val c = pal.robot
     val t = fx.time
     val idle = fx.idle
-    val tau = PI.toFloat() * 2f
     val spinning = turn.spinning
     val faceA = 1f - 0.55f * p.dim
     val ring = Accessory.PLANET_RING in accessories
@@ -353,7 +351,7 @@ private fun DrawScope.drawOrb(
     if (ring) drawPlanetRing(pal.outline, front = false, at = ringAt)
 
     // Antenna: rooted at the top of the shell, it bends and wobbles, with the mood light on top.
-    val aDeg = p.antennaBend + (if (idle) p.antennaWobble * sin(t * tau * p.antennaHz) else 0f) + fx.boing
+    val aDeg = p.antennaBend + (if (idle) p.antennaWobble * sin(fx.antennaPhase) else 0f) + fx.boing
     val aRad = aDeg * PI.toFloat() / 180f
     val baseX = 100f
     val baseY = 40f

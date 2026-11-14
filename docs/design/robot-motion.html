@@ -429,9 +429,9 @@ function backHatch() {
 // [id] keeps gradient and clip ids unique across the stage and the thumbnails.
 function render(p, fx, id) {
   const t = fx.time, idle = fx.idle;
-  const hoverY = idle ? p.hover * Math.sin(t * Math.PI * 2 * p.hoverHz) : 0;
-  const rock = idle ? p.sway * Math.sin(t * Math.PI * 2 * p.swayHz) : 0;
-  const nod = idle ? p.nod * Math.sin(t * Math.PI * 2 * p.nodHz) : 0;
+  const hoverY = idle ? p.hover * Math.sin(fx.ph.hover) : 0;
+  const rock = idle ? p.sway * Math.sin(fx.ph.sway) : 0;
+  const nod = idle ? p.nod * Math.sin(fx.ph.nod) : 0;
   const tremble = idle ? p.shake * 2.5 * Math.sin(t * Math.PI * 2 / 0.12) : 0;
   const lift = p.lift;
   const tilt = p.tilt + nod + fx.twitch * 0.4;
@@ -465,7 +465,7 @@ function render(p, fx, id) {
   let handsBack = '', handsFront = '';
   HANDS.forEach(([hx, hy], i) => {
     const side = i === 0 ? 1 : -1;
-    const wig = idle ? p.handWiggle * Math.sin(t * Math.PI * 2 * p.handHz + i * Math.PI * 0.8) : 0;
+    const wig = idle ? p.handWiggle * Math.sin(fx.ph.hand + i * Math.PI * 0.8) : 0;
     const rest = [hx + side * p.handIn, hy + p.handLift + wig];
     const ear = EARS[i];
     let x = lerp(rest[0], ear[0] - side * 2, cover), y = lerp(rest[1], ear[1], cover);
@@ -481,7 +481,7 @@ function render(p, fx, id) {
   if (WORN.has('ring')) h += ringHalf(false);
   // antenna: rooted at the top of the shell, it bends and wobbles, with the mood light on top
   const boing = fx.boing;
-  const aDeg = p.antennaBend + (idle ? p.antennaWobble * Math.sin(t * Math.PI * 2 * p.antennaHz) : 0) + boing;
+  const aDeg = p.antennaBend + (idle ? p.antennaWobble * Math.sin(fx.ph.antenna) : 0) + boing;
   const aRad = aDeg * Math.PI / 180, base = [100, 40], len = 18;
   const tip = [base[0] + len * Math.sin(aRad), base[1] - len * Math.cos(aRad)];
   const ctrl = [base[0] + len * 0.25 * Math.sin(aRad), base[1] - len * 0.6];
@@ -632,7 +632,7 @@ function render(p, fx, id) {
   return o + (fx.overlay || '');
 }
 
-const STATIC_FX = { time: 0, idle: false, blink: 0, twitch: 0, bounce: 1, squash: 0, boing: 0, heartPulse: 0, overlay: '' };
+const STATIC_FX = { time: 0, ph: {}, idle: false, blink: 0, twitch: 0, bounce: 1, squash: 0, boing: 0, heartPulse: 0, overlay: '' };
 
 // ---------- state ----------
 const svg = document.getElementById('robot');
@@ -647,6 +647,10 @@ const ctl = {
 };
 if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) ctl.idle.checked = false;
 
+// Idle rhythms advance by each frame's own speed (see IdlePhase in the app), so a mood change
+// speeds them up or slows them down without the swing skipping.
+const PH = {};
+const advancePhase = (k, hz, dt) => { PH[k] = ((PH[k] || 0) + 2 * Math.PI * hz * dt) % (2 * Math.PI); };
 let clock = 0;                 // scaled time in seconds
 let current = clonePose(POSES.happy);
 let moodKey = 'happy';
@@ -779,8 +783,9 @@ function step(dt) {
   const patFace = ps >= 0 ? 1 - smooth(0.7 + patHold, 1.05 + patHold, ps) : 0;
   const shown = patFace > 0 ? lerpPose(current, PAT_FACE, () => patFace) : current;
   const idle = ctl.idle.checked;
+  for (const [k, hz] of [['hover', current.hoverHz], ['sway', current.swayHz], ['nod', current.nodHz], ['hand', current.handHz], ['antenna', current.antennaHz]]) advancePhase(k, hz, dt);
   svg.innerHTML = render(shown, {
-    time: clock, idle, blink: idle ? blink : 0, twitch: idle ? tw : 0,
+    time: clock, idle, blink: idle ? blink : 0, twitch: idle ? tw : 0, ph: { ...PH },
     bounce, squash, boing, yaw, hop, boost, orbit, lapSpeed, heartPulse: ps >= 0 && ps < 1 ? Math.abs(Math.sin(ps * 9)) * (1 - ps) : 0, overlay: patOverlay(),
   }, 'stage');
 }

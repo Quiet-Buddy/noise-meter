@@ -1,6 +1,7 @@
 package com.quietbuddy.ui.character.kitten
 
 import com.quietbuddy.core.Mood
+import com.quietbuddy.ui.character.IdlePhase
 import com.quietbuddy.ui.character.PokeEnvelope
 import com.quietbuddy.ui.character.isCalm
 import kotlin.math.PI
@@ -108,6 +109,8 @@ data class KittenFx(
     val earFlick: Float = 0f,
     /** Extra tail rotation in degrees for the swish after a poke. */
     val tailSwish: Float = 0f,
+    /** Angle in radians of the idle sway; see [IdlePhase]. */
+    val swayPhase: Float = 0f,
 ) {
     companion object {
         val Still = KittenFx()
@@ -130,6 +133,7 @@ class KittenAnimator(initial: Mood?, private val random: Random = Random.Default
     private val giggleEnv = PokeEnvelope(attackSec = 0.06f, holdSec = 0.2f, releaseSec = 0.2f)
     private val flickEnv = PokeEnvelope(attackSec = 0.05f, holdSec = 0.08f, releaseSec = 0.22f)
     private val swishEnv = PokeEnvelope(attackSec = 0.05f, holdSec = 0.15f, releaseSec = 0.35f)
+    private val swayPhase = IdlePhase()
 
     /** The giggle level as of the last [advance], 0..1. */
     val giggle: Float get() = giggleEnv.value
@@ -194,6 +198,7 @@ class KittenAnimator(initial: Mood?, private val random: Random = Random.Default
         giggleEnv.advance(dtSec)
         flickEnv.advance(dtSec)
         swishEnv.advance(dtSec)
+        swayPhase.advance(pose.swayHz, dtSec)
         // The swish phase runs on the clock; its amplitude eases in and out, so re-pokes never jump.
         val swish = 14f * swishEnv.value * sin(clock * PI.toFloat() * 2f * 2.6f)
         fx = KittenFx(
@@ -205,6 +210,7 @@ class KittenAnimator(initial: Mood?, private val random: Random = Random.Default
             giggle = giggleEnv.value,
             earFlick = flickEnv.value,
             tailSwish = swish,
+            swayPhase = swayPhase.radians,
         )
     }
 }
