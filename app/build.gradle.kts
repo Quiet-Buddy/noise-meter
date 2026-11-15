@@ -10,7 +10,7 @@ android {
     namespace = "com.quietbuddy"
     compileSdk = 36
     defaultConfig {
-        applicationId = "com.quietbuddy"
+        applicationId = "com.mendikoapps.quietbuddy"
         minSdk = 29
         targetSdk = 36
         versionCode = System.getenv("APP_VERSION_CODE")?.toIntOrNull() ?: 1
