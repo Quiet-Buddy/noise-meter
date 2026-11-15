@@ -26,7 +26,7 @@ Qué puedes hacer:
 - Usar la app en inglés, español o euskera. Sigue el idioma de tu teléfono.
 
 Tu privacidad:
-- No se graba nada. Compi mide lo fuerte que suena todo, pero no guarda audio ni almacena lo que dice nadie.
+- No se graba nada. Compi mide cuánto ruido hay, pero no guarda audio ni almacena lo que dice nadie.
 - Nada sale de tu teléfono. La app no tiene acceso a internet, así que tu historial se queda en tu dispositivo.
 - Sin cuenta, sin registro y sin anuncios.
 
