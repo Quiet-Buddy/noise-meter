@@ -19,7 +19,7 @@ Cuando la habitación está tranquila, Compi está feliz. Cuando se pone más ru
 Qué puedes hacer:
 - Elegir un límite de ruido adecuado para el lugar: Hora de silencio, Cada día o Hora de juego.
 - Configurar horas de silencio. Durante ese tiempo, Compi es más estricto, útil por la noche o a la hora de la siesta.
-- Consultar el Historial para ver lo ruidoso que fue el día y cuándo hubo los momentos más fuertes.
+- Consultar el Historial para ver cuánto ruido hubo cada día y cuándo fueron los momentos más ruidosos.
 - Recibir avisos sonoros cuando hay mucho ruido: un tono suave cuando Compi se preocupa y más fuerte cuando se pone triste. Puedes desactivarlos en Ajustes.
 - Seguir escuchando con la pantalla apagada. Una pequeña notificación muestra el ánimo de Compi, y puedes pausar la escucha desde ahí en cualquier momento.
 - Calibrar el micrófono con un sonómetro que tengas, para mejorar la precisión en tu teléfono.
@@ -35,5 +35,5 @@ Permisos:
 - Notificaciones: sirven para mostrar el ánimo de Compi mientras la app funciona en segundo plano.
 
 Sobre la precisión:
-Quiet Buddy ofrece una idea general de lo ruidoso que es un espacio. No es un sonómetro certificado, y los micrófonos de los teléfonos varían de un modelo a otro. No lo uses para mediciones legales, médicas ni de seguridad laboral.
+Quiet Buddy ofrece una idea general de cuánto ruido hay en un espacio. No es un sonómetro certificado, y los micrófonos de los teléfonos varían de un modelo a otro. No lo uses para mediciones legales, médicas ni de seguridad laboral.
 <!-- 2221 / 4000 characters OK -->

@@ -76,7 +76,7 @@
     <string name="settings_privacy">Nunca se graba ni se envía nada de audio. Todo se queda en este teléfono.</string>
     <string name="settings_room">Habitación</string>
     <string name="onb_hi">¡Hola! Soy Compi.</string>
-    <string name="onb_intro">Vigilo lo ruidoso que se pone el hogar, para que todos estemos tranquilos juntos.</string>
+    <string name="onb_intro">Vigilo cuánto ruido hay en casa, para que todos estemos tranquilos juntos.</string>
     <string name="onb_measure">Solo mido cuánto ruido hay</string>
     <string name="onb_measure_sub">Solo un número, muchas veces por segundo</string>
     <string name="onb_never_record">Nunca grabo nada</string>
