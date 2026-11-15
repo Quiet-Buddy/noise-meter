@@ -63,7 +63,7 @@ data class AppSettings(
     val preset: Preset? = Preset.EVERYDAY,
     val worriedFromDb: Float = Preset.EVERYDAY.worriedFromDb,
     val sadFromDb: Float = Preset.EVERYDAY.sadFromDb,
-    val chimeOnSad: Boolean = false,
+    val chimeOnSad: Boolean = true,
     val keepListening: Boolean = false,
     val keepScreenOn: Boolean = true,
     val calibrationOffsetDb: Float = DEFAULT_CALIBRATION_OFFSET_DB,
