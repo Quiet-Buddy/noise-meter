@@ -161,8 +161,9 @@ fun HomeScreen(onOpenCharacters: () -> Unit, onFullScreenChange: (Boolean) -> Un
         if (hasMicPermission(context)) viewModel.start() else permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
     }
 
+    // Runs on every return to Home; autoStart only acts once per process, so a user's pause sticks.
     LaunchedEffect(Unit) {
-        if (hasMicPermission(context)) viewModel.start()
+        if (hasMicPermission(context)) viewModel.autoStart()
     }
 
     // The background follows the dB continuously (see LoudWash); the short tween only smooths the 100 ms updates.

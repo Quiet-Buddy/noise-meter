@@ -66,6 +66,7 @@ class HomeViewModel @Inject constructor(
     private val settingsRepository: SettingsRepository,
     private val historyRepository: HistoryRepository,
     private val progressRepository: ProgressRepository,
+    private val launchAutoStart: LaunchAutoStart,
 ) : ViewModel() {
 
     private val speechIndex = MutableStateFlow(0)
@@ -202,6 +203,11 @@ class HomeViewModel @Inject constructor(
     private fun Mood.isCalm() = this == Mood.HAPPY || this == Mood.FINE
 
     fun start() = controller.start()
+
+    /** Starts listening on the app's first Home only (see [LaunchAutoStart]); later visits leave the state alone. */
+    fun autoStart() {
+        if (launchAutoStart.consume()) controller.start()
+    }
 
     fun pause() = controller.pause()
 
