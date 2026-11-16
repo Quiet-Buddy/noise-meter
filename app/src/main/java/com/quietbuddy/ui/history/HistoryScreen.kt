@@ -57,6 +57,7 @@ import com.quietbuddy.core.DaySummary
 import com.quietbuddy.core.HourBar
 
 import com.quietbuddy.core.Thresholds
+import com.quietbuddy.core.roundToIntOrNull
 import com.quietbuddy.ui.character.CharacterView
 import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
@@ -66,7 +67,6 @@ import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JTextStyle
 import java.util.Locale
-import kotlin.math.roundToInt
 
 @Composable
 fun HistoryScreen() {
@@ -170,7 +170,7 @@ fun HistoryScreen() {
             )
             StatCard(
                 title = stringResource(R.string.home_loudest_moment),
-                value = selectedSummary?.loudestDb?.let { "${it.roundToInt()} dB" } ?: "-",
+                value = selectedSummary?.loudestDb?.roundToIntOrNull()?.let { "$it dB" } ?: "-",
                 subtitle = selectedSummary?.loudestAtMs?.let { formatTime(it) },
                 modifier = Modifier.weight(1f),
             )
@@ -262,7 +262,7 @@ private fun HourlyChart(bars: List<HourBar>, thresholds: Thresholds, height: Dp)
         }
 
         bars.maxByOrNull { it.laeqDb }?.let { peak ->
-            val m = measurer.measure("${peak.laeqDb.roundToInt()}", peakStyle)
+            val m = measurer.measure("${peak.laeqDb.roundToIntOrNull() ?: "-"}", peakStyle)
             val top = yFor(peak.laeqDb)
             drawText(
                 m,

@@ -57,11 +57,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.Preset
+import com.quietbuddy.core.roundToIntOrNull
 import com.quietbuddy.ui.theme.LocalPalette
 import com.quietbuddy.ui.theme.QB
 import java.text.SimpleDateFormat
 import java.util.Locale
-import kotlin.math.roundToInt
 
 private val CardShape = RoundedCornerShape(20.dp)
 
@@ -180,7 +180,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
 
     // Navigation rows
     val navRows: @Composable () -> Unit = {
-        val offset = (settings.calibrationOffsetDb - AppSettings.DEFAULT_CALIBRATION_OFFSET_DB).roundToInt()
+        val offset = (settings.calibrationOffsetDb - AppSettings.DEFAULT_CALIBRATION_OFFSET_DB).roundToIntOrNull() ?: 0
         val calibratedText = settings.calibratedAtMs?.let {
             stringResource(R.string.settings_last_done, SimpleDateFormat("d MMM", Locale.getDefault()).format(it))
         } ?: ""

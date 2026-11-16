@@ -2,6 +2,7 @@ package com.quietbuddy.ui.settings
 
 import androidx.compose.ui.res.stringResource
 import com.quietbuddy.R
+import com.quietbuddy.core.Calibration
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,7 +52,8 @@ fun CalibrationScreen(onBack: () -> Unit) {
     val viewModel: CalibrationViewModel = hiltViewModel()
     val latest by viewModel.latest.collectAsStateWithLifecycle()
     var referenceText by rememberSaveable { mutableStateOf("") }
-    val reference = referenceText.toFloatOrNull()
+    // Null for anything that is not a plausible sound meter reading, which keeps Save disabled.
+    val reference = Calibration.parseReferenceDb(referenceText)
     val current = latest?.laeq2sDb
 
     Box(
@@ -95,7 +97,7 @@ fun CalibrationScreen(onBack: () -> Unit) {
                     onValueChange = { referenceText = it },
                     label = { Text(stringResource(R.string.cal_reading_label)) },
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Button(
