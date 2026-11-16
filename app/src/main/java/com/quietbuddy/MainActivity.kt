@@ -280,6 +280,9 @@ private fun AppNavHost(
         composable(Routes.SETTINGS) {
             SettingsScreen(onOpenCalibration = { nav.navigate(Routes.CALIBRATION) })
         }
-        composable(Routes.CALIBRATION) { CalibrationScreen(onBack = { nav.popBackStack() }) }
+        composable(Routes.CALIBRATION) { entry ->
+            // Only pop while this entry is on top, so a double tap on Back (or Back then Save) doesn't pop Settings too.
+            CalibrationScreen(onBack = { if (nav.currentBackStackEntry == entry) nav.popBackStack() })
+        }
     }
 }

@@ -10,6 +10,7 @@ import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.Thresholds
+import com.quietbuddy.core.roundToIntOrNull
 import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.Reward
 import com.quietbuddy.core.SettingsRepository
@@ -22,7 +23,6 @@ import com.quietbuddy.domain.character.Voices
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.time.ZoneId
 import javax.inject.Inject
-import kotlin.math.roundToInt
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -111,7 +111,7 @@ class HomeViewModel @Inject constructor(
             styles = Character.entries.associateWith { settings.styleFor(it) },
             listening = listening,
             mood = mood,
-            db = latest?.laeq2sDb?.roundToInt(),
+            db = latest?.laeq2sDb?.roundToIntOrNull(),
             thresholds = settings.baseThresholds,
             calmMinutes = today?.calmMinutes ?: 0,
             pendingUnlocks = progress.pendingCelebration,

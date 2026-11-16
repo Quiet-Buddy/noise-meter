@@ -15,6 +15,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.quietbuddy.R
 import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.AppSettings
+import com.quietbuddy.core.Calibration
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.CharacterStyle
 import com.quietbuddy.core.Preset
@@ -96,7 +97,8 @@ class DataStoreSettingsRepository @Inject constructor(
             chimeOnSad = this[Keys.CHIME_ON_SAD] ?: d.chimeOnSad,
             keepListening = this[Keys.KEEP_LISTENING] ?: d.keepListening,
             keepScreenOn = this[Keys.KEEP_SCREEN_ON] ?: d.keepScreenOn,
-            calibrationOffsetDb = this[Keys.CALIBRATION_OFFSET_DB] ?: d.calibrationOffsetDb,
+            // Sanitised so a NaN or Infinity saved by an older build falls back to the default instead of crashing.
+            calibrationOffsetDb = Calibration.sanitizeStoredOffset(this[Keys.CALIBRATION_OFFSET_DB]),
             calibratedAtMs = this[Keys.CALIBRATED_AT_MS],
             onboardingDone = this[Keys.ONBOARDING_DONE] ?: d.onboardingDone,
             character = Character.fromKey(this[Keys.CHARACTER]),
