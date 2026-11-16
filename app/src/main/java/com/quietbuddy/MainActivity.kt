@@ -1,7 +1,9 @@
 package com.quietbuddy
 
 import android.os.Bundle
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
+import androidx.core.app.NotificationManagerCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -158,11 +160,14 @@ private fun AppContent(loaded: AppSettings, vm: MainViewModel) {
 
     // Stop listening when the UI goes away, unless the user asked to keep listening; resume when it comes back.
     val keep by rememberUpdatedState(loaded.keepListening)
+    val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
         val obs = LifecycleEventObserver { _, e ->
             when (e) {
-                Lifecycle.Event.ON_STOP -> vm.onUiStopped(keep)
+                // Without notifications the listening notice and its Pause button are hidden, so don't listen on in secret.
+                Lifecycle.Event.ON_STOP ->
+                    vm.onUiStopped(keep && NotificationManagerCompat.from(context).areNotificationsEnabled())
                 Lifecycle.Event.ON_START -> vm.onUiStarted()
                 else -> Unit
             }

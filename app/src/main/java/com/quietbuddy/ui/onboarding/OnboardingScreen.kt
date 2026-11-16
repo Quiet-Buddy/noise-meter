@@ -3,6 +3,7 @@ package com.quietbuddy.ui.onboarding
 import androidx.compose.ui.res.stringResource
 import com.quietbuddy.R
 import android.Manifest
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
@@ -66,9 +67,19 @@ private val OnboardingBackground = Color(0xFFFFF7E3)
 fun OnboardingScreen(onDone: () -> Unit) {
     val viewModel: OnboardingViewModel = hiltViewModel()
 
-    val micLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-        // Whatever the answer, onboarding is finished. Home asks again later if it is still needed.
+    val permissionsLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
+        // Whatever the answers, onboarding is finished. Home asks again later if the mic is still needed, and
+        // listening starts there once it is granted, with or without notifications.
         viewModel.finish(onDone)
+    }
+    // Android 13+ also needs a yes for notifications, so the listening notification and its Pause button can show.
+    val onListen = {
+        val wanted = if (Build.VERSION.SDK_INT >= 33) {
+            arrayOf(Manifest.permission.RECORD_AUDIO, Manifest.permission.POST_NOTIFICATIONS)
+        } else {
+            arrayOf(Manifest.permission.RECORD_AUDIO)
+        }
+        permissionsLauncher.launch(wanted)
     }
 
     val large = isLargeScreen()
@@ -133,7 +144,7 @@ fun OnboardingScreen(onDone: () -> Unit) {
                         infoRows()
                         Spacer(Modifier.height(16.dp))
                     }
-                    Actions(onListen = { micLauncher.launch(Manifest.permission.RECORD_AUDIO) }, onLater = { viewModel.finish(onDone) })
+                    Actions(onListen = onListen, onLater = { viewModel.finish(onDone) })
                 }
             }
         } else {
@@ -157,7 +168,7 @@ fun OnboardingScreen(onDone: () -> Unit) {
                     infoRows()
                     Spacer(Modifier.height(16.dp))
                 }
-                Actions(onListen = { micLauncher.launch(Manifest.permission.RECORD_AUDIO) }, onLater = { viewModel.finish(onDone) })
+                Actions(onListen = onListen, onLater = { viewModel.finish(onDone) })
             }
         }
     }
