@@ -29,9 +29,12 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
+private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "settings",
+    produceMigrations = { listOf(SettingsV2Migration) },
+)
 
-private object Keys {
+internal object Keys {
     val ROOM_NAME = stringPreferencesKey("room_name")
     /** Preset name; empty string means null (custom thresholds). Absent means the AppSettings default. */
     val PRESET = stringPreferencesKey("preset")
@@ -77,7 +80,8 @@ class DataStoreSettingsRepository @Inject constructor(
 
     override suspend fun update(transform: (AppSettings) -> AppSettings) {
         store.edit { prefs ->
-            prefs.writeAll(transform(prefs.toAppSettings()))
+            val old = prefs.toAppSettings()
+            prefs.writeChanged(old, transform(old))
         }
     }
 
@@ -113,29 +117,37 @@ class DataStoreSettingsRepository @Inject constructor(
             }.toMap(),
         )
     }
+}
 
-    private fun MutablePreferences.writeAll(s: AppSettings) {
-        this[Keys.ROOM_NAME] = s.roomName
-        this[Keys.PRESET] = s.preset?.name ?: ""
-        this[Keys.WORRIED_FROM_DB] = s.worriedFromDb
-        this[Keys.SAD_FROM_DB] = s.sadFromDb
-        this[Keys.CHIME_ON_SAD] = s.chimeOnSad
-        this[Keys.KEEP_LISTENING] = s.keepListening
-        this[Keys.KEEP_SCREEN_ON] = s.keepScreenOn
-        this[Keys.CALIBRATION_OFFSET_DB] = s.calibrationOffsetDb
-        val calibrated = s.calibratedAtMs
-        if (calibrated != null) this[Keys.CALIBRATED_AT_MS] = calibrated
-        else remove(Keys.CALIBRATED_AT_MS)
-        this[Keys.ONBOARDING_DONE] = s.onboardingDone
-        this[Keys.CHARACTER] = s.character.key
-        for (c in Character.entries) {
-            val style = s.styles[c]
-            if (style != null) this[Keys.style(c)] = style.key
-            else remove(Keys.style(c))
-            val worn = s.accessories[c].orEmpty()
+/**
+ * Writes only the settings that differ between [old] and [new]. A setting the user never changed stays absent,
+ * so it follows the AppSettings default, including when a later version changes that default.
+ */
+internal fun MutablePreferences.writeChanged(old: AppSettings, new: AppSettings) {
+    if (new.roomName != old.roomName) this[Keys.ROOM_NAME] = new.roomName
+    if (new.preset != old.preset) this[Keys.PRESET] = new.preset?.name ?: ""
+    if (new.worriedFromDb != old.worriedFromDb) this[Keys.WORRIED_FROM_DB] = new.worriedFromDb
+    if (new.sadFromDb != old.sadFromDb) this[Keys.SAD_FROM_DB] = new.sadFromDb
+    if (new.chimeOnSad != old.chimeOnSad) this[Keys.CHIME_ON_SAD] = new.chimeOnSad
+    if (new.keepListening != old.keepListening) this[Keys.KEEP_LISTENING] = new.keepListening
+    if (new.keepScreenOn != old.keepScreenOn) this[Keys.KEEP_SCREEN_ON] = new.keepScreenOn
+    if (new.calibrationOffsetDb != old.calibrationOffsetDb) this[Keys.CALIBRATION_OFFSET_DB] = new.calibrationOffsetDb
+    if (new.calibratedAtMs != old.calibratedAtMs) {
+        val calibrated = new.calibratedAtMs
+        if (calibrated != null) this[Keys.CALIBRATED_AT_MS] = calibrated else remove(Keys.CALIBRATED_AT_MS)
+    }
+    if (new.onboardingDone != old.onboardingDone) this[Keys.ONBOARDING_DONE] = new.onboardingDone
+    if (new.character != old.character) this[Keys.CHARACTER] = new.character.key
+    for (c in Character.entries) {
+        if (new.styles[c] != old.styles[c]) {
+            val style = new.styles[c]
+            if (style != null) this[Keys.style(c)] = style.key else remove(Keys.style(c))
+        }
+        val worn = new.accessories[c].orEmpty()
+        if (worn != old.accessories[c].orEmpty()) {
             if (worn.isNotEmpty()) this[Keys.accessories(c)] = worn.map { it.key }.toSet()
             else remove(Keys.accessories(c))
         }
-        remove(booleanPreferencesKey("unlock_all_styles")) // option removed; drop it from old installs
     }
+    remove(booleanPreferencesKey("unlock_all_styles")) // option removed; drop it from old installs
 }
