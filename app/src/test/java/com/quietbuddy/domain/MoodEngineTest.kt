@@ -90,6 +90,36 @@ class MoodEngineTest {
     }
 
     @Test
+    fun wobbleBetweenCalmerBandsStillCalmsDown() {
+        val engine = MoodEngine(initial = Mood.SAD)
+        // Alternate FINE (63.5 dB) and WORRIED (66 dB) every 1.2 s: consistently well below SAD.
+        assertEquals(Mood.SAD, engine.update(63.5f, thresholds, 0L))
+        assertEquals(Mood.SAD, engine.update(66f, thresholds, 1_200L))
+        assertEquals(Mood.SAD, engine.update(63.5f, thresholds, 2_400L))
+        // Drops only as far as the room has consistently been: the loudest calmer mood seen.
+        assertEquals(Mood.WORRIED, engine.update(66f, thresholds, 3_600L))
+    }
+
+    @Test
+    fun calmDownGoesToLoudestCalmerMoodSeen() {
+        val engine = MoodEngine(initial = Mood.SAD)
+        engine.update(45f, thresholds, 0L)
+        engine.update(60f, thresholds, 2_000L)
+        assertEquals(Mood.FINE, engine.update(45f, thresholds, 3_000L))
+    }
+
+    @Test
+    fun readingWithinHysteresisRestartsCalmDown() {
+        val engine = MoodEngine(initial = Mood.SAD)
+        // Lower edge of SAD is 75; 74 dB is calmer but within the 2 dB margin.
+        engine.update(60f, thresholds, 0L)
+        engine.update(74f, thresholds, 2_000L)
+        engine.update(60f, thresholds, 2_500L)
+        assertEquals(Mood.SAD, engine.update(60f, thresholds, 5_499L))
+        assertEquals(Mood.FINE, engine.update(60f, thresholds, 5_500L))
+    }
+
+    @Test
     fun resetReturnsToGivenMoodAndClearsPending() {
         val engine = MoodEngine()
         engine.update(90f, thresholds, 0L)
