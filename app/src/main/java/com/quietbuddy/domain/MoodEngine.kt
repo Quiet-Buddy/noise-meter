@@ -11,8 +11,10 @@ import com.quietbuddy.core.Thresholds
  * - Louder: once the level has been above the current mood's band continuously for [riseDwellMs],
  *   the mood rises to the calmest louder mood seen during that time (so a brief peak can't jump
  *   straight to the top, but a level wobbling between two loud bands still escalates).
- * - Calmer: the level must fall [hysteresisDb] below the current band's lower edge, and the
- *   calmer candidate must persist for [fallDwellMs].
+ * - Calmer: once the level has been at least [hysteresisDb] below the current band's lower edge
+ *   continuously for [fallDwellMs], the mood falls to the loudest calmer mood seen during that time
+ *   (so a level wobbling between two calmer bands still calms down, but only as far as the room
+ *   has consistently been). Any reading back within the hysteresis margin restarts the wait.
  */
 class MoodEngine(
     initial: Mood = Mood.HAPPY,
@@ -26,8 +28,8 @@ class MoodEngine(
     private var riseMin: Mood? = null
     private var riseSinceMs = 0L
 
-    // Pending calm-down candidate.
-    private var fallMood: Mood? = null
+    // Pending calm-down: calmer than current since [fallSinceMs]; [fallMax] is the loudest calmer mood seen.
+    private var fallMax: Mood? = null
     private var fallSinceMs = 0L
 
     val current: Mood
@@ -39,7 +41,7 @@ class MoodEngine(
 
         when {
             raw > _current -> {
-                fallMood = null
+                fallMax = null
                 val min = riseMin
                 if (min == null) {
                     riseMin = raw
@@ -54,18 +56,22 @@ class MoodEngine(
             }
             raw < _current && levelDb < thresholds.lowerEdge(_current) - hysteresisDb -> {
                 riseMin = null
-                if (raw != fallMood) {
-                    fallMood = raw
+                val max = fallMax
+                if (max == null) {
+                    fallMax = raw
                     fallSinceMs = nowMs
+                } else if (raw > max) {
+                    fallMax = raw
                 }
                 if (nowMs - fallSinceMs >= fallDwellMs) {
-                    _current = raw
-                    fallMood = null
+                    _current = fallMax!!
+                    fallMax = null
                 }
             }
+            // Same band, or calmer but still within the hysteresis margin: nothing pending.
             else -> {
                 riseMin = null
-                fallMood = null
+                fallMax = null
             }
         }
         return _current
@@ -75,7 +81,7 @@ class MoodEngine(
         _current = mood
         riseMin = null
         riseSinceMs = 0L
-        fallMood = null
+        fallMax = null
         fallSinceMs = 0L
     }
 }
