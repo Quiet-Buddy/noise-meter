@@ -76,6 +76,7 @@ class HomeViewModelTapTest {
             override suspend fun backfillIfNeeded() = Unit
             override suspend fun markCelebrated(rewards: Collection<Reward>) = Unit
         },
+        LaunchAutoStart(),
     ).also {
         it.clockMs = { now }
         backgroundScope.launch { it.uiState.collect {} }
