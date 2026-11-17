@@ -46,6 +46,12 @@ android {
         buildConfig = true
     }
     testOptions { unitTests.isReturnDefaultValues = true }
+    bundle {
+        // Ship every language in the base APK. The in-app language picker exists so Basque works on phones
+        // whose system languages don't include it, but Play only installs the language splits for the
+        // system's languages, so picking Euskara there (on Android 12 and older) fell back to English.
+        language { enableSplit = false }
+    }
 }
 
 kotlin {
