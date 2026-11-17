@@ -2,6 +2,7 @@ package com.quietbuddy.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -29,8 +30,10 @@ import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+// A file that can't be parsed is replaced with defaults rather than crashing every write (onboarding shows again).
 private val Context.settingsDataStore: DataStore<Preferences> by preferencesDataStore(
     name = "settings",
+    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
     produceMigrations = { listOf(SettingsV2Migration) },
 )
 

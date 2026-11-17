@@ -2,6 +2,7 @@ package com.quietbuddy.data
 
 import android.content.Context
 import androidx.datastore.core.DataStore
+import androidx.datastore.core.handlers.ReplaceFileCorruptionHandler
 import androidx.datastore.preferences.core.MutablePreferences
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
@@ -28,7 +29,12 @@ import java.time.Clock
 import javax.inject.Inject
 import javax.inject.Singleton
 
-private val Context.progressDataStore: DataStore<Preferences> by preferencesDataStore(name = "progress")
+// A file that can't be parsed is replaced with empty progress rather than crashing every write: calm minutes
+// and rewards are then rebuilt from the minute history by backfillIfNeeded on the next start.
+private val Context.progressDataStore: DataStore<Preferences> by preferencesDataStore(
+    name = "progress",
+    corruptionHandler = ReplaceFileCorruptionHandler { emptyPreferences() },
+)
 
 private object ProgressKeys {
     val CALM_MINUTES = longPreferencesKey("calm_minutes")
