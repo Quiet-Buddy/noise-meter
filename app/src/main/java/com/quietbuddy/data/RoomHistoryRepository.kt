@@ -31,7 +31,7 @@ class RoomHistoryRepository @Inject constructor(
 ) : HistoryRepository {
 
     override suspend fun recordMinute(minute: MinuteAggregate, dominantMood: Mood) {
-        dao.insertMinute(
+        dao.addMinute(
             LevelMinuteEntity(
                 minuteStartMs = minute.minuteStartMs,
                 laeqDb = minute.laeqDb,
