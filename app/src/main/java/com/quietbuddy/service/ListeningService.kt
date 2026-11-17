@@ -22,16 +22,15 @@ import com.quietbuddy.audio.LevelBus
 import com.quietbuddy.core.AppSettings
 import com.quietbuddy.core.Character
 import com.quietbuddy.core.HistoryRepository
+import com.quietbuddy.core.LedgerState
+import com.quietbuddy.core.LevelSample
 import com.quietbuddy.core.ListeningState
 import com.quietbuddy.core.MinuteAggregate
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.ProgressRepository
 import com.quietbuddy.core.SettingsRepository
-import com.quietbuddy.domain.AlertPolicy
-import com.quietbuddy.domain.CalmLedger
-import com.quietbuddy.domain.MoodEngine
+import com.quietbuddy.domain.ListeningSession
 import com.quietbuddy.domain.character.Voices
-import com.quietbuddy.audio.LevelProcessor
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.NonCancellable
@@ -50,25 +49,12 @@ class ListeningService : LifecycleService() {
     @Inject lateinit var history: HistoryRepository
     @Inject lateinit var progress: ProgressRepository
 
+    // Latest settings, for the notification; the session gets its own copy.
     @Volatile private var settings = AppSettings()
     private var capture: AudioCapture? = null
-    private var processor: LevelProcessor? = null
-    private val engine = MoodEngine()
-    private var running = false
-
-    // Per-minute mood counts; touched only from the capture thread (and after it has stopped).
-    private val moodCounts = IntArray(Mood.values().size)
-    private var lastNotifMs = 0L
-    private var lastNotifMood: Mood? = null
-    private val alerts = AlertPolicy()
+    private var session: ListeningSession? = null
     private var sounder: AlertSounder? = null
-    // While our own alert tone is in the mic's rolling window, hold the mood so Buddy doesn't react to it.
-    private var holdMoodUntilMs = 0L
-    // Earns calm minutes; null until the saved debt has loaded. Fed from the capture thread.
-    @Volatile private var ledger: CalmLedger? = null
-    @Volatile private var silenced = false
-    // Minutes the ledger has earned since the last commit; capture thread only (and after it has stopped).
-    private var pendingCalmMinutes = 0
+    private var running = false
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         super.onStartCommand(intent, flags, startId)
@@ -101,33 +87,14 @@ class ListeningService : LifecycleService() {
             return
         }
         running = true
-        engine.reset()
-        alerts.reset()
-        holdMoodUntilMs = 0L
-        moodCounts.fill(0)
         bus.setMood(Mood.HAPPY)
-        silenced = false
-        ledger = null
-        pendingCalmMinutes = 0
-
-        lifecycleScope.launch {
-            launch(Dispatchers.IO) {
-                val saved = progress.ledger()
-                if (running) ledger = CalmLedger(saved)
-            }
-            launch { settingsRepo.settings.collect { s ->
-                settings = s
-                processor?.calibrationOffsetDb = s.calibrationOffsetDb
-            } }
-            launch(Dispatchers.IO) { history.prune(System.currentTimeMillis()) }
-        }
 
         val cap = AudioCapture(
             context = this,
-            onFrame = ::onFrame,
+            onFrame = { frame, count, ts -> session?.onFrame(frame, count, ts) },
             onFailure = { onCaptureFailure() },
             onSilenced = { isSilenced ->
-                silenced = isSilenced
+                session?.silenced = isSilenced
                 bus.setState(if (isSilenced) ListeningState.MIC_BUSY else ListeningState.LISTENING)
             },
         )
@@ -136,74 +103,53 @@ class ListeningService : LifecycleService() {
             onCaptureFailure()
             return
         }
+        val newSession = ListeningSession(rate, settings, output)
+        session = newSession
+
+        lifecycleScope.launch {
+            launch(Dispatchers.IO) {
+                val saved = progress.ledger()
+                if (session === newSession) newSession.ledgerLoaded(saved)
+            }
+            launch { settingsRepo.settings.collect { s ->
+                settings = s
+                newSession.settings = s
+            } }
+            launch(Dispatchers.IO) { history.prune(System.currentTimeMillis()) }
+        }
+
         capture = cap
-        processor = LevelProcessor(rate, settings.calibrationOffsetDb)
         bus.setState(ListeningState.LISTENING)
         cap.start()
     }
 
-    private fun onFrame(frame: ShortArray, count: Int, ts: Long) {
-        val p = processor ?: return
-        // While another app has the mic we only get zeros. Leave them out entirely: fed in, they read as a
-        // perfectly calm room, so history filled up with ~0 dB calm minutes and Buddy drifted to happy.
-        if (silenced) {
-            ledger?.skip(ts)
-            return
-        }
-        val s = settings
-        val r = p.process(frame, count, ts)
-        bus.emitSample(r.sample)
-        val mood = if (ts < holdMoodUntilMs) engine.current
-        else engine.update(r.sample.laeq2sDb, s.baseThresholds, ts)
-        bus.setMood(mood)
-        moodCounts[mood.ordinal]++
-        ledger?.let { l ->
-            // Our own alert tone reads as noise; it shouldn't count either way.
-            if (ts < holdMoodUntilMs) l.skip(ts)
-            else pendingCalmMinutes += l.update(r.sample.laeq2sDb, s.baseThresholds, ts)
+    /** Carries out what the session asks for; called on the capture thread. */
+    private val output = object : ListeningSession.Output {
+        override fun sample(sample: LevelSample) = bus.emitSample(sample)
+
+        override fun mood(mood: Mood) = bus.setMood(mood)
+
+        override fun playAlert(character: Character, mood: Mood): Long =
+            (sounder ?: AlertSounder().also { sounder = it }).play(character, mood)
+
+        override fun minute(minute: MinuteAggregate, dominantMood: Mood) {
+            lifecycleScope.launch(Dispatchers.IO + NonCancellable) { history.recordMinute(minute, dominantMood) }
         }
 
-        if (s.chimeOnSad) {
-            alerts.onMood(mood, ts)?.let { alertMood ->
-                val sounder = sounder ?: AlertSounder().also { sounder = it }
-                val lengthMs = sounder.play(s.character, alertMood)
-                if (lengthMs > 0) holdMoodUntilMs = ts + lengthMs + LevelProcessor.DEFAULT_WINDOW_MS + 200
-            }
-        } else {
-            alerts.reset()
+        override fun ledger(earnedMinutes: Int, state: LedgerState) {
+            lifecycleScope.launch(Dispatchers.IO + NonCancellable) { progress.commitLedger(earnedMinutes, state) }
         }
 
-        r.completedMinute?.let { recordMinute(it) }
-
-        if (mood != lastNotifMood || ts - lastNotifMs >= 10_000) {
-            lastNotifMood = mood
-            lastNotifMs = ts
+        override fun notification(mood: Mood, levelDb: Float) {
             val canNotify = Build.VERSION.SDK_INT < 33 ||
-                ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) ==
+                ContextCompat.checkSelfPermission(this@ListeningService, Manifest.permission.POST_NOTIFICATIONS) ==
                 PackageManager.PERMISSION_GRANTED
             if (canNotify) {
                 runCatching {
-                    NotificationManagerCompat.from(this).notify(NOTIF_ID, buildNotification(mood, r.sample.laeq2sDb))
+                    NotificationManagerCompat.from(this@ListeningService).notify(NOTIF_ID, buildNotification(mood, levelDb))
                 }
             }
         }
-    }
-
-    private fun recordMinute(m: MinuteAggregate) {
-        var best = 0
-        for (i in moodCounts.indices) if (moodCounts[i] > moodCounts[best]) best = i
-        val dominant = Mood.values()[best]
-        moodCounts.fill(0)
-        lifecycleScope.launch(Dispatchers.IO + NonCancellable) { history.recordMinute(m, dominant) }
-        commitLedger()
-    }
-
-    /** Saves the ledger and credits what it earned; once a minute and on shutdown. */
-    private fun commitLedger() {
-        val state = ledger?.state ?: return
-        val earned = pendingCalmMinutes
-        pendingCalmMinutes = 0
-        lifecycleScope.launch(Dispatchers.IO + NonCancellable) { progress.commitLedger(earned, state) }
     }
 
     private fun onCaptureFailure() {
@@ -226,10 +172,8 @@ class ListeningService : LifecycleService() {
 
     private fun finishMinuteAndShutdown(finalState: ListeningState) {
         running = false
-        processor?.flushMinute()?.let { recordMinute(it) }
-        processor = null
-        commitLedger()
-        ledger = null
+        session?.finish()
+        session = null
         bus.clearLatest()
         bus.setState(finalState)
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)
