@@ -54,7 +54,6 @@ import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -195,7 +194,9 @@ private fun AppContent(loaded: AppSettings, vm: MainViewModel) {
     val rail = useNavigationRail()
     fun select(tab: Tab) {
         nav.navigate(tab.route) {
-            popUpTo(nav.graph.findStartDestination().id) { saveState = true }
+            // Pop to Home, not the graph's start destination: on first launch that is onboarding, which is
+            // already gone from the back stack, so the pop was skipped and tabs piled up behind each other.
+            popUpTo(Routes.HOME) { saveState = true }
             launchSingleTop = true
             restoreState = true
         }
