@@ -144,6 +144,12 @@ class ListeningService : LifecycleService() {
 
     private fun onFrame(frame: ShortArray, count: Int, ts: Long) {
         val p = processor ?: return
+        // While another app has the mic we only get zeros. Leave them out entirely: fed in, they read as a
+        // perfectly calm room, so history filled up with ~0 dB calm minutes and Buddy drifted to happy.
+        if (silenced) {
+            ledger?.skip(ts)
+            return
+        }
         val s = settings
         val r = p.process(frame, count, ts)
         bus.emitSample(r.sample)
@@ -152,8 +158,8 @@ class ListeningService : LifecycleService() {
         bus.setMood(mood)
         moodCounts[mood.ordinal]++
         ledger?.let { l ->
-            // A silenced mic reads as silence and our own tone as noise; neither should count.
-            if (silenced || ts < holdMoodUntilMs) l.skip(ts)
+            // Our own alert tone reads as noise; it shouldn't count either way.
+            if (ts < holdMoodUntilMs) l.skip(ts)
             else pendingCalmMinutes += l.update(r.sample.laeq2sDb, s.baseThresholds, ts)
         }
 
