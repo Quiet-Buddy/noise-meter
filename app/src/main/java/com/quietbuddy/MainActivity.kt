@@ -1,5 +1,8 @@
 package com.quietbuddy
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.os.Bundle
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -164,9 +167,12 @@ private fun AppContent(loaded: AppSettings, vm: MainViewModel) {
     DisposableEffect(lifecycleOwner) {
         val obs = LifecycleEventObserver { _, e ->
             when (e) {
-                // Without notifications the listening notice and its Pause button are hidden, so don't listen on in secret.
-                Lifecycle.Event.ON_STOP ->
+                // A rotation, theme or language change recreates the activity; the UI isn't really leaving, and
+                // pausing would reset Buddy's mood and cut the minute short.
+                Lifecycle.Event.ON_STOP -> if (context.findActivity()?.isChangingConfigurations != true) {
+                    // Without notifications the listening notice and its Pause button are hidden, so don't listen on in secret.
                     vm.onUiStopped(keep && NotificationManagerCompat.from(context).areNotificationsEnabled())
+                }
                 Lifecycle.Event.ON_START -> vm.onUiStarted()
                 else -> Unit
             }
@@ -291,4 +297,10 @@ private fun AppNavHost(
             CalibrationScreen(onBack = { if (nav.currentBackStackEntry == entry) nav.popBackStack() })
         }
     }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
 }
