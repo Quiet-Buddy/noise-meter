@@ -1,5 +1,6 @@
 package com.quietbuddy.data
 
+import com.quietbuddy.core.DayClock
 import com.quietbuddy.core.DaySummary
 import com.quietbuddy.core.HistoryRepository
 import com.quietbuddy.core.HourBar
@@ -7,7 +8,9 @@ import com.quietbuddy.core.MinuteAggregate
 import com.quietbuddy.core.Mood
 import com.quietbuddy.core.SettingsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import java.time.Instant
 import java.time.LocalDate
@@ -24,6 +27,7 @@ private const val MINUTE_RETENTION_DAYS = 35L
 class RoomHistoryRepository @Inject constructor(
     private val dao: HistoryDao,
     private val settings: SettingsRepository,
+    private val dayClock: DayClock,
 ) : HistoryRepository {
 
     override suspend fun recordMinute(minute: MinuteAggregate, dominantMood: Mood) {
@@ -50,13 +54,14 @@ class RoomHistoryRepository @Inject constructor(
         }
     }
 
-    override fun lastDays(days: Int): Flow<List<DaySummary>> {
+    /** The window moves on by itself at midnight, so a screen left open overnight counts the new day. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    override fun lastDays(days: Int): Flow<List<DaySummary>> = dayClock.days.flatMapLatest { today ->
         val zone = ZoneId.systemDefault()
-        val today = LocalDate.now(zone)
         val firstDay = today.minusDays((days - 1).toLong())
         val from = startOfDayMs(firstDay, zone)
         val to = startOfDayMs(today.plusDays(1), zone)
-        return combine(
+        combine(
             dao.minutesBetween(from, to),
             settings.settings,
         ) { minutes, appSettings ->
