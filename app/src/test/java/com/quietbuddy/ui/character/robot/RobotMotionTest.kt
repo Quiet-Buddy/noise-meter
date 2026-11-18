@@ -1,5 +1,7 @@
 package com.quietbuddy.ui.character.robot
 
+import com.quietbuddy.ui.character.TransitionKind
+import kotlin.math.roundToInt
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.assertIdleRhythmsNeverSkip
 import kotlin.random.Random
@@ -101,22 +103,13 @@ class RobotMotionTest {
         assertEquals(0.5f, fine.patted(0.5f).heart, 1e-6f)
     }
 
-    @Test
-    fun kindFollowsMoodLevel() {
-        assertEquals(RobotTransitionKind.LOUDER, robotTransitionKind(Mood.HAPPY, Mood.WORRIED))
-        assertEquals(RobotTransitionKind.LOUDER, robotTransitionKind(Mood.SAD, Mood.EARS_COVERED))
-        assertEquals(RobotTransitionKind.CALMER, robotTransitionKind(Mood.EARS_COVERED, Mood.SAD))
-        assertEquals(RobotTransitionKind.CALMER, robotTransitionKind(Mood.FINE, Mood.HAPPY))
-        assertEquals(RobotTransitionKind.SLEEP, robotTransitionKind(Mood.HAPPY, null))
-        assertEquals(RobotTransitionKind.WAKE, robotTransitionKind(null, Mood.EARS_COVERED))
-    }
 
     @Test
     fun durationsMatchTheDesign() {
-        assertEquals(180, RobotTransitionKind.LOUDER.durationMs)
-        assertEquals(900, RobotTransitionKind.CALMER.durationMs)
-        assertEquals(1400, RobotTransitionKind.SLEEP.durationMs)
-        assertEquals(1400, RobotTransitionKind.WAKE.durationMs)
+        assertEquals(180, durationMs(TransitionKind.LOUDER))
+        assertEquals(900, durationMs(TransitionKind.CALMER))
+        assertEquals(1400, durationMs(TransitionKind.SLEEP))
+        assertEquals(1400, durationMs(TransitionKind.WAKE))
     }
 
     @Test
@@ -132,7 +125,7 @@ class RobotMotionTest {
 
     @Test
     fun headLagsTheFaceWhenCalmingDown() {
-        val t = RobotTransition(RobotPoses.of(Mood.SAD), RobotPoses.of(Mood.FINE), RobotTransitionKind.CALMER, 0f)
+        val t = RobotTransition(RobotPoses.of(Mood.SAD), RobotPoses.of(Mood.FINE), TransitionKind.CALMER)
         // At 10% the face window (0..0.55) has begun but the head window (0.2..1) has not.
         val early = t.poseAt(0.09f)
         assertEquals(RobotPoses.of(Mood.SAD).tilt, early.tilt, 0f)
@@ -141,7 +134,7 @@ class RobotMotionTest {
 
     @Test
     fun bodyMovesFirstWhenWakingAndLast() {
-        val t = RobotTransition(RobotPoses.of(null), RobotPoses.of(Mood.FINE), RobotTransitionKind.WAKE, 0f)
+        val t = RobotTransition(RobotPoses.of(null), RobotPoses.of(Mood.FINE), TransitionKind.WAKE)
         // At 20% the face window (0..0.4) is under way, the body window (0.25..1) has not begun.
         val early = t.poseAt(0.28f)
         assertEquals(RobotPoses.of(null).lift, early.lift, 0f)
@@ -353,4 +346,8 @@ class RobotMotionTest {
             maxHz = 9f,
         )
     }
+
+    private fun durationMs(kind: TransitionKind): Int =
+        (RobotTransition(RobotPoses.of(null), RobotPoses.of(null), kind).durationSec * 1000).roundToInt()
+
 }
