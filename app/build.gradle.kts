@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
@@ -86,9 +85,6 @@ dependencies {
     debugImplementation(libs.compose.ui.tooling)
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
-    // Hilt 2.58 bundles a kotlin-metadata-jvm that cannot read Kotlin 2.4 classes; use the matching one.
-    // Drop this once Hilt can be updated (2.59+ needs AGP 9).
-    ksp(libs.kotlin.metadata.jvm)
     implementation(libs.hilt.navigation.compose)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)

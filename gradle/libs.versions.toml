@@ -1,8 +1,8 @@
 [versions]
-agp = "8.13.2"
+agp = "9.5.1"
 kotlin = "2.4.21"
 ksp = "2.3.14"
-hilt = "2.58"
+hilt = "2.60.1"
 composeBom = "2026.06.01"
 activityCompose = "1.9.3"
 lifecycle = "2.9.4"
@@ -34,7 +34,6 @@ compose-material-icons = { module = "androidx.compose.material:material-icons-ex
 compose-ui-test-junit4 = { module = "androidx.compose.ui:ui-test-junit4" }
 compose-ui-test-manifest = { module = "androidx.compose.ui:ui-test-manifest" }
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
-kotlin-metadata-jvm = { module = "org.jetbrains.kotlin:kotlin-metadata-jvm", version.ref = "kotlin" }
 hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hilt" }
 hilt-navigation-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref = "hiltNavigation" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
@@ -50,7 +49,6 @@ androidx-test-core = { module = "androidx.test:core", version.ref = "androidxTes
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
