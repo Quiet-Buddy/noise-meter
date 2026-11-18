@@ -91,6 +91,15 @@ class HomeViewModelAutoStartTest {
         assertEquals(1, controller.starts)
     }
 
+    @Test fun aPauseAfterAStartFromTheWakeButtonSticks() {
+        // Home first opened without the mic, so autoStart wasn't called; the user then granted it via the wake button.
+        val vm = viewModel()
+        vm.start()
+        vm.pause()
+        vm.autoStart() // back from another tab, mic now granted
+        assertEquals(1, controller.starts)
+    }
+
     @Test fun anExplicitStartStillWorksAfterTheAutoStart() {
         val vm = viewModel()
         vm.autoStart()
