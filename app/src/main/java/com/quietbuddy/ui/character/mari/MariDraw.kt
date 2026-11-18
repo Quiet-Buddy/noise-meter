@@ -15,6 +15,9 @@ import com.quietbuddy.ui.character.drawEguzkilore
 import com.quietbuddy.ui.character.drawLantern
 import com.quietbuddy.ui.character.drawRobin
 import com.quietbuddy.ui.character.drawZapia
+import com.quietbuddy.ui.character.waveCos
+import com.quietbuddy.ui.character.waveCycle
+import com.quietbuddy.ui.character.waveSin
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.QB
 import kotlin.math.PI
@@ -291,9 +294,9 @@ private fun DrawScope.drawScene(p: MariPose, fx: MariFx, pal: Palette, accessori
     val idle = fx.idle
     val bobY = if (idle) -p.bob * (0.5f - 0.5f * cos(fx.bobPhase)) else 0f
     val sway = if (idle) p.sway * sin(fx.swayPhase) else 0f
-    val tremble = if (idle) p.shake * 1.6f * sin(t * 47f) else 0f
+    val tremble = if (idle) p.shake * 1.6f * waveSin(t, 47.0) else 0f
     val nod = if (idle) p.nod * sin(fx.nodPhase) else 0f
-    val wig = if (idle) p.handWiggle * sin(2f * PI.toFloat() * 1.6f * t) else 0f
+    val wig = if (idle) p.handWiggle * waveSin(t, 2.0 * PI * 1.6) else 0f
     val lift = p.sink + fx.hop
 
     // Hands, with any trick (dance, jump, apple toss) blended over the mood.
@@ -322,7 +325,7 @@ private fun DrawScope.drawScene(p: MariPose, fx: MariFx, pal: Palette, accessori
     }
 
     // Whole-body motion: bob, sway about the feet, the dance, tremble, breathing and the jump's squash and stretch.
-    val breath = if (idle) 1f + 0.02f * p.breathe * (0.5f - 0.5f * cos(t * PI.toFloat())) else 1f
+    val breath = if (idle) 1f + 0.02f * p.breathe * (0.5f - 0.5f * waveCos(t, PI)) else 1f
     val st = fx.stretch
     val sx = breath * (1f + 0.07f * fx.squash) / sqrt(st)
     val sy = breath * (1f - 0.1f * fx.squash) * st
@@ -384,7 +387,7 @@ private fun DrawScope.drawScene(p: MariPose, fx: MariFx, pal: Palette, accessori
         basket(pal, bx, by)
         if (Accessory.LANTERN in accessories) {
             val flick = if (idle && p.lampFlicker > 0.02f) {
-                1f - p.lampFlicker * 0.55f * (if (sin(t * 23f) > 0.25f) 1f else 0f) * (0.6f + 0.4f * sin(t * 7f))
+                1f - p.lampFlicker * 0.55f * (if (waveSin(t, 23.0) > 0.25f) 1f else 0f) * (0.6f + 0.4f * waveSin(t, 7.0))
             } else {
                 1f
             }
@@ -431,18 +434,18 @@ private fun DrawScope.drawScene(p: MariPose, fx: MariFx, pal: Palette, accessori
         flying?.let { (ax, ay, spin) -> withTransform({ rotate(spin, Offset(ax, ay)) }) { apple(pal, ax, ay, 0.9f) } }
 
         // Extras that ride with her: sparkles, a sweat drop, worried amber lines.
-        fun tw(q: Float) = if (idle) 0.7f + 0.3f * sin(t * 5f + q) else 1f
+        fun tw(q: Float) = if (idle) 0.7f + 0.3f * waveSin(t, 5.0, q) else 1f
         if (p.sparkle > 0.02f) {
             drawPath(starPath(G.CX + G.R + 26f, G.CY - G.R - 2f, 7f * tw(0f)), Spark, alpha = clamp01(p.sparkle))
             drawPath(starPath(G.CX - G.R - 26f, G.CY - 4f, 5f * tw(2f)), Spark, alpha = clamp01(p.sparkle))
         }
         if (p.sweat > 0.02f) {
-            val k = if (idle) (t * 0.9f) % 1f else 0.3f
+            val k = if (idle) waveCycle(t, 0.9) else 0.3f
             drop(pal, G.CX + G.R + 14f, G.CY - G.R + 4f + 16f * k, 1f, p.sweat * (1f - smooth(0.7f, 1f, k)))
         }
         if (p.amber > 0.02f) {
             for (ph0 in listOf(0f, 0.5f)) {
-                val ph = if (idle) (t * 1.2f + ph0) % 1f else 0.25f + ph0
+                val ph = if (idle) (waveCycle(t, 1.2) + ph0) % 1f else 0.25f + ph0
                 val a = p.amber * (1f - smooth(0.6f, 1f, ph))
                 val x = G.CX - G.R - 18f - 14f * ph
                 val hh = 10f + 8f * ph
@@ -458,7 +461,7 @@ private fun DrawScope.drawScene(p: MariPose, fx: MariFx, pal: Palette, accessori
     // Extras that stay put: sound waves, the moon, falling petals and the trick's petal burst.
     if (p.waves > 0.02f) {
         for (ph0 in listOf(0f, 0.5f)) {
-            val ph = if (idle) (t * 1.6f + ph0) % 1f else 0.25f + ph0
+            val ph = if (idle) (waveCycle(t, 1.6) + ph0) % 1f else 0.25f + ph0
             val a = p.waves * (1f - smooth(0.6f, 1f, ph))
             val dx = 28f + 14f * ph
             val hh = 14f + 12f * ph
@@ -473,7 +476,7 @@ private fun DrawScope.drawScene(p: MariPose, fx: MariFx, pal: Palette, accessori
         }
     }
     if (p.moon > 0.02f) {
-        fun tw(q: Float) = if (idle) 0.7f + 0.3f * sin(t * 5f + q) else 1f
+        fun tw(q: Float) = if (idle) 0.7f + 0.3f * waveSin(t, 5.0, q) else 1f
         val a = clamp01(p.moon)
         drawPath(Crescent, MoonGold, alpha = a)
         drawPath(Crescent, pal.outline, alpha = a, style = strokeOf(3f))
@@ -483,7 +486,7 @@ private fun DrawScope.drawScene(p: MariPose, fx: MariFx, pal: Palette, accessori
     if (p.petals > 0.02f) {
         val xs = floatArrayOf(32f, 168f, 54f, 150f)
         for (i in 0 until 4) {
-            val k = if (idle) (t * 0.22f + i * 0.25f) % 1f else 0.2f + i * 0.2f
+            val k = if (idle) (waveCycle(t, 0.22) + i * 0.25f) % 1f else 0.2f + i * 0.2f
             val x = xs[i] + 10f * sin(k * 6f + i)
             val y = 40f + 210f * k
             petal(x, y, k * 360f + i * 70f, p.petals * (1f - smooth(0.8f, 1f, k)) * smooth(0f, 0.1f, k))
@@ -619,12 +622,12 @@ private fun DrawScope.drawTontorra(pal: Palette, cx: Float, baseY: Float, lean: 
 private fun DrawScope.drawRobinOnHook(p: MariPose, fx: MariFx, pal: Palette, hookEnd: Offset) {
     val away = smooth(0f, 1f, p.robinAway)
     val t = fx.time
-    val flap = if (fx.idle) sin(t * 34f) else 0.4f
+    val flap = if (fx.idle) waveSin(t, 34.0) else 0.4f
     val perchX = hookEnd.x - 1f
     val perchY = hookEnd.y - 25f
-    val hop = if (fx.idle) p.robinHop * abs(sin(t * 4.2f)) * 4f else 0f
+    val hop = if (fx.idle) p.robinHop * abs(waveSin(t, 4.2)) * 4f else 0f
     val k = away
-    val x = lerp(perchX, perchX + 110f, smooth(0.45f, 1f, k)) + 8f * sin(t * 2.3f) * smooth(0.05f, 0.4f, k)
+    val x = lerp(perchX, perchX + 110f, smooth(0.45f, 1f, k)) + 8f * waveSin(t, 2.3) * smooth(0.05f, 0.4f, k)
     val y = lerp(perchY - hop, perchY - 34f, smooth(0f, 0.35f, k)) - 90f * smooth(0.45f, 1f, k)
     val flying = k > 0.05f
     val a = 1f - smooth(0.85f, 1f, away)
@@ -683,7 +686,7 @@ private fun DrawScope.drawFace(
     }
 
     // Mouth: one curve for smile or frown, opened into a shape, wobbling when worried.
-    val wob = if (fx.idle) sin(t * 7f) else 1f
+    val wob = if (fx.idle) waveSin(t, 7.0) else 1f
     val top = ArrayList<Offset>(9)
     val bot = ArrayList<Offset>(9)
     for (i in 0..8) {
@@ -739,7 +742,7 @@ private fun DrawScope.drawFace(
     }
     // A tear runs down the cheek and drips, again and again.
     if (p.tear > 0.02f) {
-        val k = if (fx.idle) (t * 0.7f) % 1f else 0.2f
+        val k = if (fx.idle) waveCycle(t, 0.7) else 0.2f
         drop(pal, cx - dx - 2f, ey + 12f + 14f * k, 0.9f, p.tear * (1f - smooth(0.75f, 1f, k)))
     }
 }

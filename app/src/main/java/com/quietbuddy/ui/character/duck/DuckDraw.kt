@@ -15,6 +15,9 @@ import com.quietbuddy.core.AccessorySlot
 import com.quietbuddy.ui.character.AccessoryAnchors
 import com.quietbuddy.ui.character.drawAccessories
 import com.quietbuddy.ui.character.drawSwimRing
+import com.quietbuddy.ui.character.waveCos
+import com.quietbuddy.ui.character.waveCycle
+import com.quietbuddy.ui.character.waveSin
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.QB
 import kotlin.math.PI
@@ -218,13 +221,12 @@ fun DrawScope.drawDuck(pose: DuckPose, fx: DuckFx, pal: Palette, accessories: Se
     val rig = Rig(p, fx)
     val t = fx.time
     val idle = fx.idle
-    val tau = PI.toFloat() * 2f
 
     val floatY = if (idle) p.float * sin(fx.floatPhase) else 0f
     val rock = if (idle) p.sway * sin(fx.swayPhase) else 0f
     // Whole-body motion: tremble and breathing are weighted by the pose, so they ease in and out with it.
-    val dx = if (idle) p.shake * 2.5f * sin(t * tau / 0.12f) else 0f
-    val breath = if (idle) 1f + 0.02f * p.breathe * (0.5f - 0.5f * cos(t * PI.toFloat())) else 1f
+    val dx = if (idle) p.shake * 2.5f * waveSin(t, 2.0 * PI / 0.12) else 0f
+    val breath = if (idle) 1f + 0.02f * p.breathe * (0.5f - 0.5f * waveCos(t, PI)) else 1f
 
     drawWater(p, fx, pal)
     withTransform({
@@ -308,7 +310,7 @@ private fun anchors(p: DuckPose, rig: Rig): AccessoryAnchors {
 /** Ripples spreading out and webbed feet paddling below the surface. */
 private fun DrawScope.drawWater(p: DuckPose, fx: DuckFx, pal: Palette) {
     for (ph0 in listOf(0f, 0.5f)) {
-        val ph = if (fx.idle) (fx.time * 0.3f + ph0) % 1f else 0.3f + ph0
+        val ph = if (fx.idle) (waveCycle(fx.time, 0.3) + ph0) % 1f else 0.3f + ph0
         val rx = 76f + 22f * ph
         val ry = 6f + 3.5f * ph
         drawOval(
@@ -491,7 +493,7 @@ private fun DrawScope.drawFace(p: DuckPose, fx: DuckFx, pal: Palette, rig: Rig) 
         }
         if (p.well > 0.02f) fill(Well, pal.tear, 0.9f * p.well * smooth(0.3f, 0.8f, effOpen))
         if (p.tearDrop > 0.02f) {
-            val ph = if (idle) (t * 0.55f) % 1f else 0.3f
+            val ph = if (idle) waveCycle(t, 0.55) else 0.3f
             val a = p.tearDrop * (1f - smooth(0.75f, 1f, ph)) * smooth(0.3f, 0.8f, effOpen)
             drop(pal, 103f, 74f + ph * 14f, 12f, a, 2.2f * sw)
         }
@@ -499,7 +501,7 @@ private fun DrawScope.drawFace(p: DuckPose, fx: DuckFx, pal: Palette, rig: Rig) 
         // No line is ever drawn on the face at the corner of the bill: it reads as a second mouth. Smiles come from
         // the eyes, cheeks and open bill; unhappiness from the drooping bill.
         if (p.bubble > 0.02f) {
-            val br = 7f * (0.7f + 0.3f * (if (idle) 0.5f - 0.5f * cos(t * PI.toFloat()) else 1f))
+            val br = 7f * (0.7f + 0.3f * (if (idle) 0.5f - 0.5f * waveCos(t, PI) else 1f))
             oval(181f, 93f, br, br, Bubble, 0.9f * p.bubble, outline = pal.outline, w = 2f * sw)
             oval(179f, 91f, 2f, 1.5f, Color.White, p.bubble)
         }
@@ -634,20 +636,20 @@ private fun DrawScope.drawExtras(p: DuckPose, fx: DuckFx, pal: Palette, rig: Rig
         drop(pal, sp.x, sp.y, 13f - 2f * p.shake, p.sweat)
     }
     if (p.sparkle > 0.02f) {
-        fun tw(k: Float) = if (idle) 0.75f + 0.25f * sin(t * 5f + k) else 1f
+        fun tw(k: Float) = if (idle) 0.75f + 0.25f * waveSin(t, 5.0, k) else 1f
         sparkle(pal, 22f, 52f, 8f * tw(0f), p.sparkle)
         sparkle(pal, 182f, 26f, 6f * tw(2f), p.sparkle)
         sparkle(pal, 190f, 104f, 4f * tw(4f), p.sparkle)
     }
     if (p.zzz > 0.02f) {
-        val bob = if (idle) sin(t * 1.6f) * 2.5f else 0f
+        val bob = if (idle) waveSin(t, 1.6) * 2.5f else 0f
         withTransform({ translate(0f, bob) }) {
             ink(ZzzBig, pal.outline, 3.5f, p.zzz)
             ink(ZzzSmall, pal.outline, 3f, p.zzz)
         }
     }
     if (p.shock > 0.02f) {
-        val fl = if (idle) 0.7f + 0.3f * sin(t * 22f) else 1f
+        val fl = if (idle) 0.7f + 0.3f * waveSin(t, 22.0) else 1f
         val r = DuckShapes.HEAD_R
         val x = rig.cx
         val y = rig.cy

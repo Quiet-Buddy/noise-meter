@@ -179,6 +179,13 @@ abstract class MoodAnimator<P>(
     /** Seconds since the start, moved back an hour at a time; timestamps compared with it need [onClockRebased]. */
     protected val clock: Float get() = time.seconds
 
+    /**
+     * Seconds since the start, never moved back, for oscillations (see [waveSin]): their phase must not jump when
+     * [clock] is rebased. Do not compare timestamps against it.
+     */
+    protected var waveTime = 0.0
+        private set
+
     /** Registers a helper whose timestamps must follow the clock when it is rebased. */
     protected fun <T : ClockStamped> track(item: T): T = time.track(item)
 
@@ -212,6 +219,7 @@ abstract class MoodAnimator<P>(
 
     /** Moves time on by [dtSec] and refreshes [pose] and the character's effects. */
     fun advance(dtSec: Float) {
+        waveTime += dtSec
         val rebased = time.advance(dtSec)
         if (rebased > 0f) onClockRebased(rebased)
         transition?.let {

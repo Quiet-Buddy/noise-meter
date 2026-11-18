@@ -50,7 +50,7 @@ class TrailDot(val x: Float, val y: Float, val radius: Float, val alpha: Float)
 
 /** Per-frame effects drawn on top of a pose. */
 data class RobotFx(
-    val time: Float = 0f,
+    val time: Double = 0.0,
     /** False draws the still pose: no hovering, rocking, hand waving, tremble, breathing, flame flicker or twinkle. */
     val idle: Boolean = false,
     val blink: Float = 0f,
@@ -235,7 +235,7 @@ class RobotAnimator(initial: Mood?, random: Random = Random.Default) :
         val bk = (clock - burstAt) / BURST_SEC
 
         fx = RobotFx(
-            time = clock,
+            time = waveTime,
             idle = true,
             blink = blink,
             twitch = twitch,

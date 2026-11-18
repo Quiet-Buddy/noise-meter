@@ -13,6 +13,9 @@ import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.AccessorySlot
 import com.quietbuddy.ui.character.AccessoryAnchors
 import com.quietbuddy.ui.character.drawAccessories
+import com.quietbuddy.ui.character.waveCos
+import com.quietbuddy.ui.character.waveSin
+import com.quietbuddy.ui.character.waveCycle
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.QB
 import kotlin.math.PI
@@ -339,12 +342,12 @@ private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette, accesso
     val idle = fx.idle
     val sway = if (idle) p.sway * sin(fx.swayPhase) else 0f
     val tremble = if (idle) p.shake else 0f
-    val poofJitter = tremble * 0.12f * sin(t * 47f)
+    val poofJitter = tremble * 0.12f * waveSin(t, 47.0)
     val poof = (p.poof + poofJitter).coerceIn(0f, 1.2f)
 
     // Whole-body motion: tremble and breathing are weighted by the pose, so they ease in and out with it.
-    val dx = if (idle) tremble * 3f * sin(t * PI.toFloat() * 2f / 0.12f) else 0f
-    val breath = if (idle) 1f + 0.02f * p.breathe * (0.5f - 0.5f * cos(t * PI.toFloat())) else 1f
+    val dx = if (idle) tremble * 3f * waveSin(t, 2.0 * PI / 0.12) else 0f
+    val breath = if (idle) 1f + 0.02f * p.breathe * (0.5f - 0.5f * waveCos(t, PI)) else 1f
 
     withTransform({
         translate(dx, 0f)
@@ -383,20 +386,20 @@ private fun DrawScope.drawRig(p: KittenPose, fx: KittenFx, pal: Palette, accesso
         }
 
         if (p.sparkle > 0.02f) {
-            fun tw(k: Float) = if (idle) 0.75f + 0.25f * sin(t * 5f + k) else 1f
+            fun tw(k: Float) = if (idle) 0.75f + 0.25f * waveSin(t, 5.0, k) else 1f
             sparkle(pal, 26f, 46f, 8f * tw(0f), p.sparkle)
             sparkle(pal, 176f, 36f, 6f * tw(2f), p.sparkle)
             sparkle(pal, 184f, 66f, 4f * tw(4f), p.sparkle)
         }
         if (p.zzz > 0.02f) {
-            val bob = if (idle) sin(t * 1.6f) * 2.5f else 0f
+            val bob = if (idle) waveSin(t, 1.6) * 2.5f else 0f
             withTransform({ translate(0f, bob) }) {
                 ink(ZzzBig, pal.outline, 3.5f, clamp01(p.zzz))
                 ink(ZzzSmall, pal.outline, 3f, clamp01(p.zzz))
             }
         }
         if (p.shock > 0.02f) {
-            val fl = if (idle) 0.7f + 0.3f * sin(t * 22f) else 1f
+            val fl = if (idle) 0.7f + 0.3f * waveSin(t, 22.0) else 1f
             ink(ShockMarks, QB.TooLoud, 4f, clamp01(p.shock * fl))
         }
     }
@@ -497,7 +500,7 @@ private fun DrawScope.drawHead(p: KittenPose, fx: KittenFx, pal: Palette, poof: 
     // extras
     if (p.sweat > 0.02f) drop(pal, p.sweatX, p.sweatY, 16f - 3f * p.shake, p.sweat)
     if (p.tearDrop > 0.02f) {
-        val ph = if (idle) (t * 0.55f) % 1f else 0.3f
+        val ph = if (idle) waveCycle(t, 0.55) else 0.3f
         drop(
             pal,
             138f + EYE_DX + 4f * (EYE_S - 1f),
@@ -507,7 +510,7 @@ private fun DrawScope.drawHead(p: KittenPose, fx: KittenFx, pal: Palette, poof: 
         )
     }
     if (p.bubble > 0.02f) {
-        val br = 7f * (0.7f + 0.3f * (if (idle) 0.5f - 0.5f * cos(t * PI.toFloat()) else 1f))
+        val br = 7f * (0.7f + 0.3f * (if (idle) 0.5f - 0.5f * waveCos(t, PI) else 1f))
         oval(112f, 106f, br, br, Bubble, clamp01(0.9f * p.bubble), outline = pal.outline, w = 2f)
         oval(110f, 104f, 2f, 1.5f, Color.White, clamp01(p.bubble))
     }

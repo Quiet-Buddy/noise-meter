@@ -33,7 +33,7 @@ class DuckTransition(from: DuckPose, to: DuckPose, kind: TransitionKind) :
 
 /** Per-frame effects drawn on top of a pose. */
 data class DuckFx(
-    val time: Float = 0f,
+    val time: Double = 0.0,
     /** False draws the still pose: no floating, rocking, paddling, tremble, breathing or twinkle. */
     val idle: Boolean = false,
     val blink: Float = 0f,
@@ -119,7 +119,7 @@ class DuckAnimator(initial: Mood?, random: Random = Random.Default) :
             if (quackSec >= QUACK_SEC) quackSec = -1f
         }
         fx = DuckFx(
-            time = clock,
+            time = waveTime,
             idle = true,
             blink = blink,
             twitch = twitch,
