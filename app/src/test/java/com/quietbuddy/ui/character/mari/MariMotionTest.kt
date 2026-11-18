@@ -1,5 +1,7 @@
 package com.quietbuddy.ui.character.mari
 
+import com.quietbuddy.ui.character.TransitionKind
+import kotlin.math.roundToInt
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.assertIdleRhythmsNeverSkip
 import kotlin.math.abs
@@ -104,22 +106,13 @@ class MariMotionTest {
         assertEquals(0.5f, fine.patted(0.5f).open, 1e-6f)
     }
 
-    @Test
-    fun kindFollowsMoodLevel() {
-        assertEquals(MariTransitionKind.LOUDER, mariTransitionKind(Mood.HAPPY, Mood.WORRIED))
-        assertEquals(MariTransitionKind.LOUDER, mariTransitionKind(Mood.SAD, Mood.EARS_COVERED))
-        assertEquals(MariTransitionKind.CALMER, mariTransitionKind(Mood.EARS_COVERED, Mood.SAD))
-        assertEquals(MariTransitionKind.CALMER, mariTransitionKind(Mood.FINE, Mood.HAPPY))
-        assertEquals(MariTransitionKind.SLEEP, mariTransitionKind(Mood.HAPPY, null))
-        assertEquals(MariTransitionKind.WAKE, mariTransitionKind(null, Mood.EARS_COVERED))
-    }
 
     @Test
     fun durationsMatchThePrototype() {
-        assertEquals(220, MariTransitionKind.LOUDER.durationMs)
-        assertEquals(900, MariTransitionKind.CALMER.durationMs)
-        assertEquals(1400, MariTransitionKind.SLEEP.durationMs)
-        assertEquals(1400, MariTransitionKind.WAKE.durationMs)
+        assertEquals(220, durationMs(TransitionKind.LOUDER))
+        assertEquals(900, durationMs(TransitionKind.CALMER))
+        assertEquals(1400, durationMs(TransitionKind.SLEEP))
+        assertEquals(1400, durationMs(TransitionKind.WAKE))
     }
 
     @Test
@@ -135,7 +128,7 @@ class MariMotionTest {
 
     @Test
     fun faceRelaxesBeforeTheTontorraWhenCalmingDown() {
-        val t = MariTransition(MariPoses.of(Mood.SAD), MariPoses.of(Mood.FINE), MariTransitionKind.CALMER, 0f)
+        val t = MariTransition(MariPoses.of(Mood.SAD), MariPoses.of(Mood.FINE), TransitionKind.CALMER)
         // At 8% the face window (0..0.5) has begun but the head window (0.1..1) has not.
         val early = t.poseAt(0.072f)
         assertEquals(MariPoses.of(Mood.SAD).bend, early.bend, 0f)
@@ -144,7 +137,7 @@ class MariMotionTest {
 
     @Test
     fun fallingAsleepSetsTheBasketDownBeforeTheEyesClose() {
-        val t = MariTransition(MariPoses.of(Mood.FINE), MariPoses.of(null), MariTransitionKind.SLEEP, 0f)
+        val t = MariTransition(MariPoses.of(Mood.FINE), MariPoses.of(null), TransitionKind.SLEEP)
         // At 40% the body window (0..0.7) is well under way, the face window (0.45..1) has not begun.
         val early = t.poseAt(0.56f)
         assertTrue(early.drop > 0.3f)
@@ -469,4 +462,8 @@ class MariMotionTest {
             maxHz = 9f,
         )
     }
+
+    private fun durationMs(kind: TransitionKind): Int =
+        (MariTransition(MariPoses.of(null), MariPoses.of(null), kind).durationSec * 1000).roundToInt()
+
 }

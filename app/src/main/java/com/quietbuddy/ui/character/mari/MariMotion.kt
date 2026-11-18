@@ -2,6 +2,10 @@ package com.quietbuddy.ui.character.mari
 
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.IdlePhase
+import com.quietbuddy.ui.character.MoodAnimator
+import com.quietbuddy.ui.character.PoseTransition
+import com.quietbuddy.ui.character.TransitionKind
+import com.quietbuddy.ui.character.Twitcher
 import com.quietbuddy.ui.character.isCalm
 import kotlin.math.PI
 import kotlin.math.abs
@@ -15,37 +19,15 @@ import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.random.Random
 
-/** How a transition feels: the direction decides its duration, per-part windows and easing. */
-enum class MariTransitionKind(val durationMs: Int) {
-    /** Towards a louder mood: the hands fly up first (to her ears, dropping the basket) and the tontorra follows. */
-    LOUDER(220),
-
-    /** Towards a calmer mood: her face relaxes first, then the tontorra settles. */
-    CALMER(900),
-
-    /** Any mood to asleep: she sets the basket down, the tontorra nods, then her eyes close. */
-    SLEEP(1400),
-
-    /** Asleep to any mood: the eyes open first and the body follows. */
-    WAKE(1400),
-}
-
 /** The parts of Mari Domingi that move on their own schedule during a transition. */
 private enum class Part { BODY, HEAD, FACE }
 
 /** When each part moves, as a fraction of the whole transition. */
-private fun MariTransitionKind.window(part: Part): ClosedFloatingPointRange<Float> = when (this) {
-    MariTransitionKind.LOUDER -> when (part) { Part.BODY -> 0f..0.95f; Part.HEAD -> 0.05f..1f; Part.FACE -> 0f..0.7f }
-    MariTransitionKind.CALMER -> when (part) { Part.BODY -> 0.15f..1f; Part.HEAD -> 0.1f..1f; Part.FACE -> 0f..0.5f }
-    MariTransitionKind.SLEEP -> when (part) { Part.BODY -> 0f..0.7f; Part.HEAD -> 0.2f..0.9f; Part.FACE -> 0.45f..1f }
-    MariTransitionKind.WAKE -> when (part) { Part.BODY -> 0.3f..1f; Part.HEAD -> 0.1f..0.8f; Part.FACE -> 0f..0.4f }
-}
-
-private fun MariTransitionKind.ease(t: Float): Float = when (this) {
-    MariTransitionKind.LOUDER -> 1f - (1f - t).pow(2)
-    MariTransitionKind.CALMER -> if (t < 0.5f) 4f * t * t * t else 1f - (-2f * t + 2f).pow(3) / 2f
-    MariTransitionKind.SLEEP -> if (t < 0.5f) 2f * t * t else 1f - (-2f * t + 2f).pow(2) / 2f
-    MariTransitionKind.WAKE -> 1f - (1f - t).pow(2)
+private fun TransitionKind.window(part: Part): ClosedFloatingPointRange<Float> = when (this) {
+    TransitionKind.LOUDER -> when (part) { Part.BODY -> 0f..0.95f; Part.HEAD -> 0.05f..1f; Part.FACE -> 0f..0.7f }
+    TransitionKind.CALMER -> when (part) { Part.BODY -> 0.15f..1f; Part.HEAD -> 0.1f..1f; Part.FACE -> 0f..0.5f }
+    TransitionKind.SLEEP -> when (part) { Part.BODY -> 0f..0.7f; Part.HEAD -> 0.2f..0.9f; Part.FACE -> 0.45f..1f }
+    TransitionKind.WAKE -> when (part) { Part.BODY -> 0.3f..1f; Part.HEAD -> 0.1f..0.8f; Part.FACE -> 0f..0.4f }
 }
 
 internal fun smooth(a: Float, b: Float, x: Float): Float {
@@ -53,43 +35,15 @@ internal fun smooth(a: Float, b: Float, x: Float): Float {
     return t * t * (3f - 2f * t)
 }
 
-/** Louder = higher level; asleep is handled before levels are compared. */
-private val Mood.level: Int
-    get() = when (this) {
-        Mood.HAPPY -> 0
-        Mood.FINE -> 1
-        Mood.WORRIED -> 2
-        Mood.SAD -> 3
-        Mood.EARS_COVERED -> 4
-    }
+/** Mari's easing: like the others, but a gentler start when the room gets louder. */
+private fun TransitionKind.mariEase(t: Float): Float = if (this == TransitionKind.LOUDER) 1f - (1f - t).pow(2) else ease(t)
 
-/** Picks the transition kind between two moods (null = asleep). */
-fun mariTransitionKind(from: Mood?, to: Mood?): MariTransitionKind = when {
-    to == null -> MariTransitionKind.SLEEP
-    from == null -> MariTransitionKind.WAKE
-    to.level > from.level -> MariTransitionKind.LOUDER
-    else -> MariTransitionKind.CALMER
-}
+/** A blend from one pose to another. */
+class MariTransition(from: MariPose, to: MariPose, kind: TransitionKind) :
+    PoseTransition<MariPose>(from, to, kind, if (kind == TransitionKind.LOUDER) 220 else kind.defaultDurationMs) {
 
-/** A blend from one pose to another that started at [startSec]. */
-class MariTransition(
-    val from: MariPose,
-    val to: MariPose,
-    val kind: MariTransitionKind,
-    val startSec: Float,
-) {
-    private val durationSec = kind.durationMs / 1000f
-
-    fun isFinished(nowSec: Float): Boolean = nowSec - startSec >= durationSec
-
-    /** The blended pose at [nowSec]; exactly [to] once finished. */
-    fun poseAt(nowSec: Float): MariPose {
-        val e = (nowSec - startSec) / durationSec
-        if (e >= 1f) return to
-        fun progress(part: Part): Float {
-            val w = kind.window(part)
-            return kind.ease(((e - w.start) / (w.endInclusive - w.start)).coerceIn(0f, 1f))
-        }
+    override fun blend(e: Float): MariPose {
+        fun progress(part: Part) = partProgress(e, kind.window(part)) { kind.mariEase(it) }
         return MariPose.blend(from, to, progress(Part.BODY), progress(Part.HEAD), progress(Part.FACE))
     }
 }
@@ -172,8 +126,9 @@ data class MariFx(
  * then the count carries on. A trick never cuts another off: a new one waits and plays right after, and a mood
  * change lets a running one finish. Everything a trick drives is eased, so nothing jumps between frames.
  */
-class MariAnimator(initial: Mood?, private val random: Random = Random.Default) {
-    private class Act(val trick: MariTrick, val start: Float) {
+class MariAnimator(initial: Mood?, random: Random = Random.Default) :
+    MoodAnimator<MariPose>(initial, MariPoses.of(initial), random, blinkGapSec = 2.4f) {
+    private class Act(val trick: MariTrick, var start: Float) {
         var caught = false
     }
 
@@ -193,14 +148,8 @@ class MariAnimator(initial: Mood?, private val random: Random = Random.Default) 
         }
     }
 
-    private var mood: Mood? = initial
-    private var transition: MariTransition? = null
-    private var clock = 0f
-    private var nextBlink = 1.5f
-    private var blinkStart = -10f
-    private var twitchStart = -10f
-    private var twitchDir = 1f
-    private var nextTwitch = 2f
+    // Small glances or twitches to the side: random, more often in tense poses.
+    private val twitcher = track(Twitcher(random, durationSec = 0.5f))
 
     private var lastPat = -10f
     private var combo = 0
@@ -236,10 +185,6 @@ class MariAnimator(initial: Mood?, private val random: Random = Random.Default) 
     private val nodPhase = IdlePhase()
     private val hookPhase = IdlePhase()
 
-    /** The pose being shown, before the pat's face is blended over it (that is [MariFx.patFace]). */
-    var pose: MariPose = MariPoses.of(initial)
-        private set
-
     /** The idle effects as of the last [advance]; still until the first one. */
     var fx: MariFx = MariFx.Still
         private set
@@ -256,17 +201,11 @@ class MariAnimator(initial: Mood?, private val random: Random = Random.Default) 
     /** Whether a trick is under way. */
     val isPerforming: Boolean get() = act != null
 
-    /** Moves towards [newMood]; with [animate] false it jumps there. A running trick carries on either way. */
-    fun setMood(newMood: Mood?, animate: Boolean = true) {
-        if (newMood == mood && transition == null) return
-        val target = MariPoses.of(newMood)
-        if (animate) {
-            transition = MariTransition(pose, target, mariTransitionKind(mood, newMood), clock)
-        } else {
-            transition = null
-            pose = target
-        }
-        mood = newMood
+    override fun poseOf(mood: Mood?) = MariPoses.of(mood)
+
+    override fun transition(from: MariPose, to: MariPose, kind: TransitionKind) = MariTransition(from, to, kind)
+
+    override fun onMoodChanged(newMood: Mood?) {
         if (!newMood.isCalm) {
             // A delighted face makes no sense in a loud room: it eases away now. The combo is over too.
             lastPat = -10f
@@ -301,29 +240,14 @@ class MariAnimator(initial: Mood?, private val random: Random = Random.Default) 
         if (trick == MariTrick.HOP) burstAt = clock + trick.durationSec * 0.72f
     }
 
-    /** Moves time on by [dtSec] and refreshes [pose] and [fx]. */
-    fun advance(dtSec: Float) {
-        clock += dtSec
-        transition?.let {
-            pose = it.poseAt(clock)
-            if (it.isFinished(clock)) transition = null
-        }
-        if (clock > nextBlink) {
-            blinkStart = clock
-            nextBlink = clock + 2.4f + random.nextFloat() * 3.2f
-        }
-        val bp = (clock - blinkStart) / 0.16f
-        val blink = if (bp in 0f..1f) sin(PI.toFloat() * bp) else 0f
-        // Small glances to the side: random, more often when worried.
-        if (clock > nextTwitch) {
-            if (random.nextFloat() < pose.twitch * 2f) {
-                twitchStart = clock
-                twitchDir = if (random.nextFloat() < 0.5f) -1f else 1f
-            }
-            nextTwitch = clock + 0.5f
-        }
-        val tp = (clock - twitchStart) / 0.5f
-        val twitch = if (tp in 0f..1f) twitchDir * 3f * sin(PI.toFloat() * tp) else 0f
+    override fun onClockRebased(sec: Float) {
+        lastPat -= sec
+        act?.let { it.start -= sec }
+        burstAt -= sec
+    }
+
+    override fun update(dtSec: Float, blink: Float) {
+        val twitch = twitcher.direction * 3f * twitcher.at(clock, pose.twitch)
 
         squashSpring.step(dtSec)
         boingSpring.step(dtSec)

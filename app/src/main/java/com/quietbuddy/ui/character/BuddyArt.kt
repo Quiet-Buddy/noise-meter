@@ -12,8 +12,6 @@ import com.quietbuddy.core.Accessory
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.QB
-import kotlin.math.PI
-import kotlin.math.sin
 import kotlin.random.Random
 
 /**
@@ -48,14 +46,13 @@ object BuddyArt : AnimatedCharacterArt {
  * Buddy's per-view state: the mood, a giggle envelope for pokes (calm moods only) and an occasional blink for the
  * open-eyed moods. Pure Kotlin; the caller feeds it time via [advance].
  */
-class BuddyAnimator(initial: Mood?, private val random: Random = Random.Default) {
+class BuddyAnimator(initial: Mood?, random: Random = Random.Default) {
     var mood: Mood? = initial
         private set
 
     private val giggleEnv = PokeEnvelope(attackSec = 0.06f, holdSec = 0.2f, releaseSec = 0.2f)
-    private var clock = 0f
-    private var nextBlink = 1.8f
-    private var blinkStart = -10f
+    private val time = AnimationClock()
+    private val blinker = time.track(Blinker(random, gapSec = 2.5f, jitterSec = 3.5f, firstSec = 1.8f))
 
     /** Giggle level, 0..1: eyes squeeze into happy arcs and the cheeks blush. */
     val giggle: Float get() = giggleEnv.value
@@ -75,14 +72,9 @@ class BuddyAnimator(initial: Mood?, private val random: Random = Random.Default)
     }
 
     fun advance(dtSec: Float) {
-        clock += dtSec
+        time.advance(dtSec)
         giggleEnv.advance(dtSec)
-        if (clock > nextBlink) {
-            blinkStart = clock
-            nextBlink = clock + 2.5f + random.nextFloat() * 3.5f
-        }
-        val bp = (clock - blinkStart) / 0.16f
-        blink = if (bp in 0f..1f) sin(PI.toFloat() * bp) else 0f
+        blink = blinker.at(time.seconds)
     }
 }
 

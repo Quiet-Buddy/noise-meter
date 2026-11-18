@@ -1,5 +1,7 @@
 package com.quietbuddy.ui.character.kitten
 
+import com.quietbuddy.ui.character.TransitionKind
+import kotlin.math.roundToInt
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.assertIdleRhythmsNeverSkip
 import kotlin.random.Random
@@ -26,22 +28,13 @@ class KittenMotionTest {
         assertEquals(-24f, mid.ear, 1e-4f)
     }
 
-    @Test
-    fun kindFollowsMoodLevel() {
-        assertEquals(KittenTransitionKind.LOUDER, kittenTransitionKind(Mood.HAPPY, Mood.WORRIED))
-        assertEquals(KittenTransitionKind.LOUDER, kittenTransitionKind(Mood.SAD, Mood.EARS_COVERED))
-        assertEquals(KittenTransitionKind.CALMER, kittenTransitionKind(Mood.EARS_COVERED, Mood.SAD))
-        assertEquals(KittenTransitionKind.CALMER, kittenTransitionKind(Mood.FINE, Mood.HAPPY))
-        assertEquals(KittenTransitionKind.SLEEP, kittenTransitionKind(Mood.HAPPY, null))
-        assertEquals(KittenTransitionKind.WAKE, kittenTransitionKind(null, Mood.EARS_COVERED))
-    }
 
     @Test
     fun durationsMatchTheDesign() {
-        assertEquals(180, KittenTransitionKind.LOUDER.durationMs)
-        assertEquals(900, KittenTransitionKind.CALMER.durationMs)
-        assertEquals(1400, KittenTransitionKind.SLEEP.durationMs)
-        assertEquals(1400, KittenTransitionKind.WAKE.durationMs)
+        assertEquals(180, durationMs(TransitionKind.LOUDER))
+        assertEquals(900, durationMs(TransitionKind.CALMER))
+        assertEquals(1400, durationMs(TransitionKind.SLEEP))
+        assertEquals(1400, durationMs(TransitionKind.WAKE))
     }
 
     @Test
@@ -86,7 +79,7 @@ class KittenMotionTest {
     fun tailRoutesThroughDownPoseWhenGoingToSleep() {
         val from = KittenPoses.of(Mood.HAPPY)
         val to = KittenPoses.of(null)
-        val t = KittenTransition(from, to, KittenTransitionKind.SLEEP, 0f)
+        val t = KittenTransition(from, to, TransitionKind.SLEEP)
         // Fur window is 0..0.9 of 1.4 s, so its midpoint is 0.63 s: the tail should be the low side pose.
         val mid = t.poseAt(0.63f)
         assertEquals(KittenShapes.TailDown, mid.tail.map { Math.round(it * 10f) / 10f })
@@ -105,4 +98,8 @@ class KittenMotionTest {
             maxHz = 1.6f,
         )
     }
+
+    private fun durationMs(kind: TransitionKind): Int =
+        (KittenTransition(KittenPoses.of(null), KittenPoses.of(null), kind).durationSec * 1000).roundToInt()
+
 }

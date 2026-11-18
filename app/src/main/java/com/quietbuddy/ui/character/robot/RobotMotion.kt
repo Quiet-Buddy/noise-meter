@@ -2,6 +2,10 @@ package com.quietbuddy.ui.character.robot
 
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.IdlePhase
+import com.quietbuddy.ui.character.MoodAnimator
+import com.quietbuddy.ui.character.PoseTransition
+import com.quietbuddy.ui.character.TransitionKind
+import com.quietbuddy.ui.character.Twitcher
 import com.quietbuddy.ui.character.isCalm
 import kotlin.math.PI
 import kotlin.math.abs
@@ -13,37 +17,15 @@ import kotlin.math.pow
 import kotlin.math.sin
 import kotlin.random.Random
 
-/** How a transition feels: the direction decides its duration, per-part windows and easing. */
-enum class RobotTransitionKind(val durationMs: Int) {
-    /** Towards a louder mood: a quick startle, the hands snapping onto the ear discs. */
-    LOUDER(180),
-
-    /** Towards a calmer mood: a slow relax, the screen face recovering first and the body last. */
-    CALMER(900),
-
-    /** Any mood to asleep (landing): the screen dims last. */
-    SLEEP(1400),
-
-    /** Asleep to any mood (taking off): the screen lights up first. */
-    WAKE(1400),
-}
-
 /** The parts of Astro that move on their own schedule during a transition. */
 private enum class Part { BODY, HEAD, FACE }
 
 /** When each part moves, as a fraction of the whole transition. */
-private fun RobotTransitionKind.window(part: Part): ClosedFloatingPointRange<Float> = when (this) {
-    RobotTransitionKind.LOUDER -> when (part) { Part.BODY -> 0f..1f; Part.HEAD -> 0f..0.7f; Part.FACE -> 0f..0.6f }
-    RobotTransitionKind.CALMER -> when (part) { Part.BODY -> 0.1f..1f; Part.HEAD -> 0.2f..1f; Part.FACE -> 0f..0.55f }
-    RobotTransitionKind.SLEEP -> when (part) { Part.BODY -> 0f..0.9f; Part.HEAD -> 0.1f..0.8f; Part.FACE -> 0.4f..1f }
-    RobotTransitionKind.WAKE -> when (part) { Part.BODY -> 0.25f..1f; Part.HEAD -> 0.15f..0.8f; Part.FACE -> 0f..0.4f }
-}
-
-private fun RobotTransitionKind.ease(t: Float): Float = when (this) {
-    RobotTransitionKind.LOUDER -> 1f - (1f - t).pow(3)
-    RobotTransitionKind.CALMER -> easeInOutCubic(t)
-    RobotTransitionKind.SLEEP -> if (t < 0.5f) 2f * t * t else 1f - (-2f * t + 2f).pow(2) / 2f
-    RobotTransitionKind.WAKE -> 1f - (1f - t).pow(2)
+private fun TransitionKind.window(part: Part): ClosedFloatingPointRange<Float> = when (this) {
+    TransitionKind.LOUDER -> when (part) { Part.BODY -> 0f..1f; Part.HEAD -> 0f..0.7f; Part.FACE -> 0f..0.6f }
+    TransitionKind.CALMER -> when (part) { Part.BODY -> 0.1f..1f; Part.HEAD -> 0.2f..1f; Part.FACE -> 0f..0.55f }
+    TransitionKind.SLEEP -> when (part) { Part.BODY -> 0f..0.9f; Part.HEAD -> 0.1f..0.8f; Part.FACE -> 0.4f..1f }
+    TransitionKind.WAKE -> when (part) { Part.BODY -> 0.25f..1f; Part.HEAD -> 0.15f..0.8f; Part.FACE -> 0f..0.4f }
 }
 
 private fun easeInOutCubic(t: Float) = if (t < 0.5f) 4f * t * t * t else 1f - (-2f * t + 2f).pow(3) / 2f
@@ -53,43 +35,12 @@ private fun smooth(a: Float, b: Float, x: Float): Float {
     return t * t * (3f - 2f * t)
 }
 
-/** Louder = higher level; asleep is handled before levels are compared. */
-private val Mood.level: Int
-    get() = when (this) {
-        Mood.HAPPY -> 0
-        Mood.FINE -> 1
-        Mood.WORRIED -> 2
-        Mood.SAD -> 3
-        Mood.EARS_COVERED -> 4
-    }
+/** A blend from one pose to another. */
+class RobotTransition(from: RobotPose, to: RobotPose, kind: TransitionKind) :
+    PoseTransition<RobotPose>(from, to, kind, kind.defaultDurationMs) {
 
-/** Picks the transition kind between two moods (null = asleep). */
-fun robotTransitionKind(from: Mood?, to: Mood?): RobotTransitionKind = when {
-    to == null -> RobotTransitionKind.SLEEP
-    from == null -> RobotTransitionKind.WAKE
-    to.level > from.level -> RobotTransitionKind.LOUDER
-    else -> RobotTransitionKind.CALMER
-}
-
-/** A blend from one pose to another that started at [startSec]. */
-class RobotTransition(
-    val from: RobotPose,
-    val to: RobotPose,
-    val kind: RobotTransitionKind,
-    val startSec: Float,
-) {
-    private val durationSec = kind.durationMs / 1000f
-
-    fun isFinished(nowSec: Float): Boolean = nowSec - startSec >= durationSec
-
-    /** The blended pose at [nowSec]; exactly [to] once finished. */
-    fun poseAt(nowSec: Float): RobotPose {
-        val e = (nowSec - startSec) / durationSec
-        if (e >= 1f) return to
-        fun progress(part: Part): Float {
-            val w = kind.window(part)
-            return kind.ease(((e - w.start) / (w.endInclusive - w.start)).coerceIn(0f, 1f))
-        }
+    override fun blend(e: Float): RobotPose {
+        fun progress(part: Part) = partProgress(e, kind.window(part), kind::ease)
         return RobotPose.blend(from, to, progress(Part.BODY), progress(Part.HEAD), progress(Part.FACE))
     }
 }
@@ -164,18 +115,13 @@ data class RobotFx(
  * [COMBO_GAP_SEC] apart) add up: 3 make one spin, 6 a hop with a double spin and a sparkle burst, 9 a flying lap,
  * and then the count carries on.
  */
-class RobotAnimator(initial: Mood?, private val random: Random = Random.Default) {
-    private class Spin(val start: Float, val dur: Float, val turns: Float, val hop: Float)
-    private class Lap(val start: Float, val dur: Float)
+class RobotAnimator(initial: Mood?, random: Random = Random.Default) :
+    MoodAnimator<RobotPose>(initial, RobotPoses.of(initial), random) {
+    private class Spin(var start: Float, val dur: Float, val turns: Float, val hop: Float)
+    private class Lap(var start: Float, val dur: Float)
 
-    private var mood: Mood? = initial
-    private var transition: RobotTransition? = null
-    private var clock = 0f
-    private var nextBlink = 1.5f
-    private var blinkStart = -10f
-    private var twitchStart = -10f
-    private var twitchDir = 1f
-    private var nextTwitch = 2f
+    // Small glances or twitches to the side: random, more often in tense poses.
+    private val twitcher = track(Twitcher(random, durationSec = 0.5f))
 
     private var lastPat = -10f
     private var combo = 0
@@ -193,10 +139,6 @@ class RobotAnimator(initial: Mood?, private val random: Random = Random.Default)
     private val nodPhase = IdlePhase()
     private val antennaPhase = IdlePhase()
 
-    /** The pose being shown, before the pat's heart eyes are blended over it (that is [RobotFx.patFace]). */
-    var pose: RobotPose = RobotPoses.of(initial)
-        private set
-
     /** The idle effects as of the last [advance]; still until the first one. */
     var fx: RobotFx = RobotFx.Still
         private set
@@ -207,17 +149,11 @@ class RobotAnimator(initial: Mood?, private val random: Random = Random.Default)
     /** Whether a spin or a lap is under way. */
     val isPerforming: Boolean get() = spin != null || lap != null
 
-    /** Moves towards [newMood]; with [animate] false it jumps there. */
-    fun setMood(newMood: Mood?, animate: Boolean = true) {
-        if (newMood == mood && transition == null) return
-        val target = RobotPoses.of(newMood)
-        if (animate) {
-            transition = RobotTransition(pose, target, robotTransitionKind(mood, newMood), clock)
-        } else {
-            transition = null
-            pose = target
-        }
-        mood = newMood
+    override fun poseOf(mood: Mood?) = RobotPoses.of(mood)
+
+    override fun transition(from: RobotPose, to: RobotPose, kind: TransitionKind) = RobotTransition(from, to, kind)
+
+    override fun onMoodChanged(newMood: Mood?) {
         if (!newMood.isCalm) {
             // Heart eyes make no sense in a loud room: start fading now. The combo is over too.
             faceHoldUntil = min(faceHoldUntil, clock - FACE_HOLD_SEC)
@@ -241,34 +177,22 @@ class RobotAnimator(initial: Mood?, private val random: Random = Random.Default)
         faceHoldUntil = max(clock, max(spin?.let { it.start + it.dur } ?: clock, lap?.let { it.start + it.dur } ?: clock))
     }
 
-    /** Moves time on by [dtSec] and refreshes [pose] and [fx]. */
-    fun advance(dtSec: Float) {
-        clock += dtSec
-        transition?.let {
-            pose = it.poseAt(clock)
-            if (it.isFinished(clock)) transition = null
-        }
+    override fun onClockRebased(sec: Float) {
+        lastPat -= sec
+        spin?.let { it.start -= sec }
+        lap?.let { it.start -= sec }
+        lapEnd -= sec
+        burstAt -= sec
+        faceHoldUntil -= sec
+    }
+
+    override fun update(dtSec: Float, blink: Float) {
         hoverPhase.advance(pose.hoverHz, dtSec)
         swayPhase.advance(pose.swayHz, dtSec)
         handPhase.advance(pose.handHz, dtSec)
         nodPhase.advance(pose.nodHz, dtSec)
         antennaPhase.advance(pose.antennaHz, dtSec)
-        if (clock > nextBlink) {
-            blinkStart = clock
-            nextBlink = clock + 2.2f + random.nextFloat() * 3.2f
-        }
-        val bp = (clock - blinkStart) / 0.16f
-        val blink = if (bp in 0f..1f) sin(PI.toFloat() * bp) else 0f
-        // Quick glances to the side: random, more often when worried.
-        if (clock > nextTwitch) {
-            if (random.nextFloat() < pose.twitch * 2f) {
-                twitchStart = clock
-                twitchDir = if (random.nextFloat() < 0.5f) -1f else 1f
-            }
-            nextTwitch = clock + 0.5f
-        }
-        val tp = (clock - twitchStart) / 0.5f
-        val twitch = if (tp in 0f..1f) twitchDir * 8f * sin(PI.toFloat() * tp) else 0f
+        val twitch = twitcher.direction * 8f * twitcher.at(clock, pose.twitch)
 
         // Pat: heart eyes and an antenna boing (the squash and hearts come from the home screen).
         val ps = clock - lastPat

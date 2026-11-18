@@ -1,5 +1,7 @@
 package com.quietbuddy.ui.character.duck
 
+import com.quietbuddy.ui.character.TransitionKind
+import kotlin.math.roundToInt
 import com.quietbuddy.core.Mood
 import com.quietbuddy.ui.character.assertIdleRhythmsNeverSkip
 import kotlin.random.Random
@@ -62,22 +64,13 @@ class DuckMotionTest {
         assertEquals(fine.tilt, full.tilt, 0f)
     }
 
-    @Test
-    fun kindFollowsMoodLevel() {
-        assertEquals(DuckTransitionKind.LOUDER, duckTransitionKind(Mood.HAPPY, Mood.WORRIED))
-        assertEquals(DuckTransitionKind.LOUDER, duckTransitionKind(Mood.SAD, Mood.EARS_COVERED))
-        assertEquals(DuckTransitionKind.CALMER, duckTransitionKind(Mood.EARS_COVERED, Mood.SAD))
-        assertEquals(DuckTransitionKind.CALMER, duckTransitionKind(Mood.FINE, Mood.HAPPY))
-        assertEquals(DuckTransitionKind.SLEEP, duckTransitionKind(Mood.HAPPY, null))
-        assertEquals(DuckTransitionKind.WAKE, duckTransitionKind(null, Mood.EARS_COVERED))
-    }
 
     @Test
     fun durationsMatchTheDesign() {
-        assertEquals(180, DuckTransitionKind.LOUDER.durationMs)
-        assertEquals(900, DuckTransitionKind.CALMER.durationMs)
-        assertEquals(1400, DuckTransitionKind.SLEEP.durationMs)
-        assertEquals(1400, DuckTransitionKind.WAKE.durationMs)
+        assertEquals(180, durationMs(TransitionKind.LOUDER))
+        assertEquals(900, durationMs(TransitionKind.CALMER))
+        assertEquals(1400, durationMs(TransitionKind.SLEEP))
+        assertEquals(1400, durationMs(TransitionKind.WAKE))
     }
 
     @Test
@@ -93,7 +86,7 @@ class DuckMotionTest {
 
     @Test
     fun headLagsTheFaceWhenCalmingDown() {
-        val t = DuckTransition(DuckPoses.of(Mood.SAD), DuckPoses.of(Mood.FINE), DuckTransitionKind.CALMER, 0f)
+        val t = DuckTransition(DuckPoses.of(Mood.SAD), DuckPoses.of(Mood.FINE), TransitionKind.CALMER)
         // At 10% the face window (0..0.55) has begun but the head window (0.2..1) has not.
         val early = t.poseAt(0.09f)
         assertEquals(DuckPoses.of(Mood.SAD).tilt, early.tilt, 0f)
@@ -138,4 +131,8 @@ class DuckMotionTest {
             maxHz = 3f,
         )
     }
+
+    private fun durationMs(kind: TransitionKind): Int =
+        (DuckTransition(DuckPoses.of(null), DuckPoses.of(null), kind).durationSec * 1000).roundToInt()
+
 }
