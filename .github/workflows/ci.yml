@@ -30,6 +30,10 @@ jobs:
       - name: Lint, unit tests and debug build
         run: ./gradlew --no-daemon lintDebug testDebugUnitTest assembleDebug
 
+      - name: Check the Room schemas are committed
+        # The build regenerates app/schemas; a diff means an entity changed without committing its schema.
+        run: git diff --exit-code app/schemas && test -z "$(git status --porcelain app/schemas)"
+
       - name: Upload unit test report
         if: always()
         uses: actions/upload-artifact@v7

@@ -1,0 +1,97 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "b45fd1fc49cf6a69c9d14cd2c285e14b",
+    "entities": [
+      {
+        "tableName": "level_minute",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`minuteStartMs` INTEGER NOT NULL, `laeqDb` REAL NOT NULL, `minDb` REAL NOT NULL, `maxDb` REAL NOT NULL, `dominantMood` TEXT NOT NULL, `listeningSeconds` INTEGER NOT NULL, PRIMARY KEY(`minuteStartMs`))",
+        "fields": [
+          {
+            "fieldPath": "minuteStartMs",
+            "columnName": "minuteStartMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "laeqDb",
+            "columnName": "laeqDb",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minDb",
+            "columnName": "minDb",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxDb",
+            "columnName": "maxDb",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dominantMood",
+            "columnName": "dominantMood",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "listeningSeconds",
+            "columnName": "listeningSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "minuteStartMs"
+          ]
+        }
+      },
+      {
+        "tableName": "challenge",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `startedAtMs` INTEGER NOT NULL, `won` INTEGER NOT NULL, `peakDb` REAL NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startedAtMs",
+            "columnName": "startedAtMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "won",
+            "columnName": "won",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "peakDb",
+            "columnName": "peakDb",
+            "affinity": "REAL",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b45fd1fc49cf6a69c9d14cd2c285e14b')"
+    ]
+  }
+}

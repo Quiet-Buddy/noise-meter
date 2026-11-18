@@ -1,0 +1,61 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 2,
+    "identityHash": "d67ffe612bd2f0bb11358cb1cd09d1cc",
+    "entities": [
+      {
+        "tableName": "level_minute",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`minuteStartMs` INTEGER NOT NULL, `laeqDb` REAL NOT NULL, `minDb` REAL NOT NULL, `maxDb` REAL NOT NULL, `dominantMood` TEXT NOT NULL, `listeningSeconds` INTEGER NOT NULL, PRIMARY KEY(`minuteStartMs`))",
+        "fields": [
+          {
+            "fieldPath": "minuteStartMs",
+            "columnName": "minuteStartMs",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "laeqDb",
+            "columnName": "laeqDb",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "minDb",
+            "columnName": "minDb",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "maxDb",
+            "columnName": "maxDb",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dominantMood",
+            "columnName": "dominantMood",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "listeningSeconds",
+            "columnName": "listeningSeconds",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": false,
+          "columnNames": [
+            "minuteStartMs"
+          ]
+        }
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd67ffe612bd2f0bb11358cb1cd09d1cc')"
+    ]
+  }
+}
