@@ -202,14 +202,22 @@ class HomeViewModel @Inject constructor(
 
     private fun Mood.isCalm() = this == Mood.HAPPY || this == Mood.FINE
 
-    fun start() = controller.start()
+    // A start or pause by the user uses up the auto-start too: otherwise, when the mic was only granted later (from
+    // the wake button), the first Home visit with the mic granted would undo the user's pause.
+    fun start() {
+        launchAutoStart.consume()
+        controller.start()
+    }
 
     /** Starts listening on the app's first Home only (see [LaunchAutoStart]); later visits leave the state alone. */
     fun autoStart() {
         if (launchAutoStart.consume()) controller.start()
     }
 
-    fun pause() = controller.pause()
+    fun pause() {
+        launchAutoStart.consume()
+        controller.pause()
+    }
 
     private data class Snapshot(
         val roomName: String,
