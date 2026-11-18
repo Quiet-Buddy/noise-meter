@@ -103,6 +103,17 @@ class ListeningSessionTest {
         assertEquals(1, out.ledgers.size)
     }
 
+    @Test fun finishingAgainDoesNotSaveTheMinuteOrLedgerTwice() {
+        val s = session()
+        s.ledgerLoaded(LedgerState())
+        s.feed(quiet, 25)
+        s.finish()
+        s.finish()
+
+        assertEquals(1, out.minutes.size)
+        assertEquals(1, out.ledgers.size)
+    }
+
     @Test fun ledgerIsOnlySavedOnceItHasLoaded() {
         val s = session()
         s.feed(quiet, 61)

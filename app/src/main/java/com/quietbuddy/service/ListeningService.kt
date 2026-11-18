@@ -229,7 +229,12 @@ class ListeningService : LifecycleService() {
         sounder?.release()
         sounder = null
         if (running) {
+            // The system took the service down while listening: keep the partial minute and the calm-minute credit.
+            // The normal pause path has already cleared [running] and [session], so nothing is saved twice.
             running = false
+            session?.finish()
+            session = null
+            bus.clearLatest()
             bus.setState(ListeningState.PAUSED)
         }
         super.onDestroy()
