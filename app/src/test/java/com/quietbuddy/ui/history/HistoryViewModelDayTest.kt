@@ -27,22 +27,26 @@ import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.ZoneOffset
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class HistoryViewModelDayTest {
     private val nov30 = LocalDate.of(2026, 11, 30)
     private var now = nov30.atTime(23, 58).toInstant(ZoneOffset.UTC).toEpochMilli()
-    private val clock = DayClock(nowMs = { now }, zone = { ZoneOffset.UTC })
+    private var zone: ZoneId = ZoneOffset.UTC
+    private val clock = DayClock(nowMs = { now }, zone = { zone })
 
     @Before fun setUp() = Dispatchers.setMain(StandardTestDispatcher())
 
     @After fun tearDown() = Dispatchers.resetMain()
 
+    private val hourlyRequests = mutableListOf<Long>()
+
     private fun TestScope.viewModel() = HistoryViewModel(
         object : HistoryRepository {
             override suspend fun recordMinute(minute: MinuteAggregate, dominantMood: Mood) = Unit
-            override fun hourly(epochDay: Long): Flow<List<HourBar>> = flowOf(emptyList())
+            override fun hourly(epochDay: Long): Flow<List<HourBar>> { hourlyRequests += epochDay; return flowOf(emptyList()) }
             override fun lastDays(days: Int): Flow<List<DaySummary>> = flowOf(emptyList())
             override suspend fun prune(nowMs: Long) = Unit
         },
@@ -51,7 +55,10 @@ class HistoryViewModelDayTest {
             override suspend fun update(transform: (AppSettings) -> AppSettings) = Unit
         },
         clock,
-    ).also { backgroundScope.launch { it.selectedDay.collect {} } }
+    ).also {
+        backgroundScope.launch { it.selectedDay.collect {} }
+        backgroundScope.launch { it.hours.collect {} }
+    }
 
     private fun TestScope.passMidnight() {
         now += 3 * 60_000L
@@ -96,5 +103,16 @@ class HistoryViewModelDayTest {
 
         passMidnight()
         assertEquals(nov30.plusDays(1).toEpochDay(), vm.selectedDay.value)
+    }
+
+    @Test fun hourBarsAreLoadedAgainWhenTheTimeZoneChanges() = runTest {
+        viewModel()
+        runCurrent()
+        assertEquals(listOf(nov30.toEpochDay()), hourlyRequests)
+
+        zone = ZoneOffset.ofHours(-1) // still Nov 30 at 23:58 UTC
+        advanceTimeBy(60_001)
+        runCurrent()
+        assertEquals(listOf(nov30.toEpochDay(), nov30.toEpochDay()), hourlyRequests)
     }
 }

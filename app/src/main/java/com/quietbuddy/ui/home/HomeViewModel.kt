@@ -84,7 +84,11 @@ class HomeViewModel @Inject constructor(
     internal var clockMs: () -> Long = System::currentTimeMillis
 
     /** Time zone and scheduled limited events, replaceable in tests. */
-    internal var zone: ZoneId = ZoneId.systemDefault()
+    private var fixedZone: ZoneId? = null
+    internal var zone: ZoneId
+        // Read each time, so a time zone change on the phone is picked up.
+        get() = fixedZone ?: ZoneId.systemDefault()
+        set(value) { fixedZone = value }
     internal var events = LimitedEvents.scheduled
 
     init {

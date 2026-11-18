@@ -54,10 +54,9 @@ class RoomHistoryRepository @Inject constructor(
         }
     }
 
-    /** The window moves on by itself at midnight, so a screen left open overnight counts the new day. */
+    /** The window moves on by itself at midnight or when the time zone changes, so a screen left open counts the right day. */
     @OptIn(ExperimentalCoroutinesApi::class)
-    override fun lastDays(days: Int): Flow<List<DaySummary>> = dayClock.days.flatMapLatest { today ->
-        val zone = ZoneId.systemDefault()
+    override fun lastDays(days: Int): Flow<List<DaySummary>> = dayClock.stamps.flatMapLatest { (today, zone) ->
         val firstDay = today.minusDays((days - 1).toLong())
         val from = startOfDayMs(firstDay, zone)
         val to = startOfDayMs(today.plusDays(1), zone)

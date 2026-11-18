@@ -24,7 +24,7 @@ import kotlinx.coroutines.flow.stateIn
 class HistoryViewModel @Inject constructor(
     historyRepository: HistoryRepository,
     settingsRepository: SettingsRepository,
-    dayClock: DayClock,
+    private val dayClock: DayClock,
 ) : ViewModel() {
 
     private val today: StateFlow<Long> = dayClock.days.map { it.toEpochDay() }
@@ -42,6 +42,8 @@ class HistoryViewModel @Inject constructor(
 
     /** Hourly bars for the selected day. */
     val hours: StateFlow<List<HourBar>> = selectedDay
+        // A new time zone moves the hour bars, so load them again.
+        .combine(dayClock.zones) { day, _ -> day }
         .flatMapLatest { historyRepository.hourly(it) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
