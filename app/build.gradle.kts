@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp)
     alias(libs.plugins.hilt)
+    alias(libs.plugins.room)
 }
 
 android {
@@ -45,13 +46,24 @@ android {
         compose = true
         buildConfig = true
     }
-    testOptions { unitTests.isReturnDefaultValues = true }
+    testOptions {
+        unitTests.isReturnDefaultValues = true
+        // Robolectric tests (the Room migration test) need the merged resources and assets.
+        unitTests.isIncludeAndroidResources = true
+    }
+    // MigrationTestHelper reads the exported schemas from the test assets.
+    sourceSets["test"].assets.srcDir("$projectDir/schemas")
     bundle {
         // Ship every language in the base APK. The in-app language picker exists so Basque works on phones
         // whose system languages don't include it, but Play only installs the language splits for the
         // system's languages, so picking Euskara there (on Android 12 and older) fell back to English.
         language { enableSplit = false }
     }
+}
+
+room {
+    // One JSON file per database version, checked in, so migrations can be tested against the real old schemas.
+    schemaDirectory("$projectDir/schemas")
 }
 
 kotlin {
@@ -84,4 +96,7 @@ dependencies {
     testImplementation(libs.junit)
     testImplementation(libs.coroutines.test)
     testImplementation(libs.turbine)
+    testImplementation(libs.room.testing)
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
 }

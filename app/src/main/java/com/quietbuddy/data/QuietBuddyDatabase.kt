@@ -8,7 +8,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase
 @Database(
     entities = [LevelMinuteEntity::class],
     version = 2,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class QuietBuddyDatabase : RoomDatabase() {
     abstract fun historyDao(): HistoryDao
