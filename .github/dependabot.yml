@@ -9,6 +9,14 @@ updates:
       all-updates:
         patterns: ["*"]
     open-pull-requests-limit: 5
+    ignore:
+      # Major build-tool jumps are deliberate work (migration steps), not part of the weekly group.
+      - dependency-name: "com.android.application"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "com.android.tools.build:gradle"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "gradle"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: "/"
