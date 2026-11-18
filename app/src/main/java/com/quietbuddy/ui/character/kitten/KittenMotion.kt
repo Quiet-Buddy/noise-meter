@@ -8,6 +8,7 @@ import com.quietbuddy.ui.character.PoseTransition
 import com.quietbuddy.ui.character.TransitionKind
 import com.quietbuddy.ui.character.Twitcher
 import com.quietbuddy.ui.character.isCalm
+import com.quietbuddy.ui.character.waveSin
 import kotlin.math.PI
 import kotlin.math.sin
 import kotlin.random.Random
@@ -47,7 +48,7 @@ class KittenTransition(from: KittenPose, to: KittenPose, kind: TransitionKind) :
 
 /** Per-frame effects drawn on top of a pose. */
 data class KittenFx(
-    val time: Float = 0f,
+    val time: Double = 0.0,
     /** False draws the still pose: no sway, tremble, breathing or twinkle. */
     val idle: Boolean = false,
     val blink: Float = 0f,
@@ -115,9 +116,9 @@ class KittenAnimator(initial: Mood?, random: Random = Random.Default) :
         swishEnv.advance(dtSec)
         swayPhase.advance(pose.swayHz, dtSec)
         // The swish phase runs on the clock; its amplitude eases in and out, so re-pokes never jump.
-        val swish = 14f * swishEnv.value * sin(clock * PI.toFloat() * 2f * 2.6f)
+        val swish = 14f * swishEnv.value * waveSin(waveTime, 2.0 * PI * 2.6)
         fx = KittenFx(
-            time = clock,
+            time = waveTime,
             idle = true,
             blink = blink,
             twitchL = if (left) tw else 0f,

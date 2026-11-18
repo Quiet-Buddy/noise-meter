@@ -62,7 +62,7 @@ enum class MariTrick(val durationSec: Float) {
 
 /** Per-frame effects drawn on top of a pose. Hand and leg values are in the prototype's coordinates. */
 data class MariFx(
-    val time: Float = 0f,
+    val time: Double = 0.0,
     /** False draws the still pose: no bobbing, swaying, wobbling, trembling, breathing, flicker or twinkle. */
     val idle: Boolean = false,
     val blink: Float = 0f,
@@ -295,7 +295,7 @@ class MariAnimator(initial: Mood?, random: Random = Random.Default) :
 
         val bk = (clock - burstAt) / BURST_SEC
         fx = MariFx(
-            time = clock,
+            time = waveTime,
             idle = true,
             blink = blink,
             twitch = twitch,

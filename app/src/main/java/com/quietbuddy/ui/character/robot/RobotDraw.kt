@@ -19,6 +19,9 @@ import com.quietbuddy.ui.character.drawBowTie
 import com.quietbuddy.ui.character.drawPlanetRing
 import com.quietbuddy.ui.character.drawPropellerCap
 import com.quietbuddy.ui.character.drawStarGlasses
+import com.quietbuddy.ui.character.waveCos
+import com.quietbuddy.ui.character.waveSin
+import com.quietbuddy.ui.character.waveCycle
 import com.quietbuddy.ui.theme.Palette
 import com.quietbuddy.ui.theme.QB
 import kotlin.math.PI
@@ -222,13 +225,12 @@ fun DrawScope.drawRobot(pose: RobotPose, fx: RobotFx, pal: Palette, accessories:
 private fun DrawScope.drawAstro(p: RobotPose, fx: RobotFx, pal: Palette, accessories: Set<Accessory>) {
     val t = fx.time
     val idle = fx.idle
-    val tau = PI.toFloat() * 2f
     val hoverY = if (idle) p.hover * sin(fx.hoverPhase) else 0f
     val rock = if (idle) p.sway * sin(fx.swayPhase) else 0f
-    val tremble = if (idle) p.shake * 2.5f * sin(t * tau / 0.12f) else 0f
+    val tremble = if (idle) p.shake * 2.5f * waveSin(t, 2.0 * PI / 0.12) else 0f
     val th = p.thrust + fx.boost
     // Breathing is weighted by the pose, so it eases in and out with it.
-    val breath = if (idle) 1f + 0.02f * p.breathe * (0.5f - 0.5f * cos(t * PI.toFloat())) else 1f
+    val breath = if (idle) 1f + 0.02f * p.breathe * (0.5f - 0.5f * waveCos(t, PI)) else 1f
 
     // Floor: a shadow that grows as Astro sinks, and the thruster's glow on the floor.
     val near = clamp01((p.lift + hoverY + 6f) / 40f)
@@ -256,7 +258,7 @@ private fun DrawScope.drawBody(p: RobotPose, fx: RobotFx, pal: Palette, accessor
 
     // Thruster flame under the nozzle; it flickers.
     if (th > 0.02f) {
-        val fl = if (idle) 0.85f + 0.15f * sin(t * 31f) else 1f
+        val fl = if (idle) 0.85f + 0.15f * waveSin(t, 31.0) else 1f
         val len = 26f * th * fl
         val flame = Path().apply {
             moveTo(90f, 149f); quadraticTo(100f, 149f + len * 1.25f, 110f, 149f); close()
@@ -308,7 +310,7 @@ private fun DrawScope.drawBody(p: RobotPose, fx: RobotFx, pal: Palette, accessor
     // Extras.
     if (p.sweat > 0.02f) drop(pal, 52f, 34f, 13f - 2f * p.shake, p.sweat)
     if (p.sparkle > 0.02f) {
-        fun tw(k: Float) = if (idle) 0.75f + 0.25f * sin(t * 5f + k) else 1f
+        fun tw(k: Float) = if (idle) 0.75f + 0.25f * waveSin(t, 5.0, k) else 1f
         sparkle(pal, 20f, 50f, 8f * tw(0f), p.sparkle)
         sparkle(pal, 178f, 30f, 6f * tw(2f), p.sparkle)
         sparkle(pal, 186f, 96f, 4f * tw(4f), p.sparkle)
@@ -316,7 +318,7 @@ private fun DrawScope.drawBody(p: RobotPose, fx: RobotFx, pal: Palette, accessor
     // Sound waves spreading out on both sides while the hands are over the ears.
     if (p.waves > 0.02f) {
         for (ph0 in listOf(0f, 0.5f)) {
-            val ph = if (idle) (t * 1.6f + ph0) % 1f else 0.25f + ph0
+            val ph = if (idle) (waveCycle(t, 1.6) + ph0) % 1f else 0.25f + ph0
             val a = p.waves * (1f - smooth(0.6f, 1f, ph))
             val dx = 22f + 14f * ph
             val hh = 14f + 12f * ph
@@ -331,7 +333,7 @@ private fun DrawScope.drawBody(p: RobotPose, fx: RobotFx, pal: Palette, accessor
         }
     }
     if (p.shock > 0.02f) {
-        val fl = if (idle) 0.7f + 0.3f * sin(t * 22f) else 1f
+        val fl = if (idle) 0.7f + 0.3f * waveSin(t, 22.0) else 1f
         ink(Shock, QB.TooLoud, 4f, p.shock * fl)
     }
 }
@@ -365,7 +367,7 @@ private fun DrawScope.drawOrb(
         },
         pal.outline, 4f,
     )
-    val flick = if (idle && p.flicker > 0.02f) 1f - p.flicker * 0.6f * (if (sin(t * 17f) > 0.3f) 1f else 0f) else 1f
+    val flick = if (idle && p.flicker > 0.02f) 1f - p.flicker * 0.6f * (if (waveSin(t, 17.0) > 0.3f) 1f else 0f) else 1f
     val bulb = bulbColor(p.bulb)
     if (p.bulbGlow > 0.02f) oval(tipX, tipY, 12f, 12f, bulb, 0.35f * p.bulbGlow * flick)
     oval(tipX, tipY, 6.5f, 6.5f, mix(bulb, BulbHousing, 1f - flick), 1f, pal.outline, 3.5f)
@@ -382,7 +384,7 @@ private fun DrawScope.drawOrb(
     var capX = 0f
     var capFront = true
     val cap = Accessory.PROPELLER_CAP in accessories
-    val capSpin = if (idle) t * (4f + 14f * th) else 0.6f
+    val capSpin = if (idle) ((t * (4.0 + 14.0 * th)) % (2.0 * PI)).toFloat() else 0.6f
     if (cap) {
         val cx = if (spinning) turn.x(CAP_DX, CAP_DZ) else G.ORB_CX + CAP_DX
         val cz = if (spinning) turn.z(CAP_DX, CAP_DZ) else CAP_DZ
@@ -439,7 +441,7 @@ private fun DrawScope.drawOrb(
     // The battery charges while asleep, in place of Z's.
     if (p.battery > 0.02f) {
         val a = p.battery
-        val charge = if (idle) floor((t * 1.2f) % 4f) / 3f else 1f
+        val charge = if (idle) floor((t * 1.2) % 4.0).toFloat() / 3f else 1f
         outlined(pal, BatteryBody, Color.White, 2.8f, a)
         fill(BatteryNub, pal.outline, a)
         if (charge > 0f) fill(rrect(143f, 27f, 18f * charge, 7f, 1.5f), Charge, a)
@@ -501,7 +503,7 @@ private fun DrawScope.drawScreen(p: RobotPose, fx: RobotFx, pal: Palette, access
         }
         // Tears run down the screen from under the left eye.
         if (p.tear > 0.02f) {
-            val ph = if (idle) (t * 0.55f) % 1f else 0.3f
+            val ph = if (idle) waveCycle(t, 0.55) else 0.3f
             drop(pal, 75f, 92f + ph * 16f, 9f, p.tear * (1f - smooth(0.75f, 1f, ph)), 0f)
         }
         drawMouth(p, fx, c.glow, faceA)
@@ -520,7 +522,7 @@ private fun DrawScope.drawMouth(p: RobotPose, fx: RobotFx, glow: Color, faceA: F
         val u = i / (n - 1f) * 2f - 1f
         val x = G.MOUTH_CX + u * G.MOUTH_HALF * (1f - 0.2f * max(0f, -p.smile))
         val bend = 6f * p.smile * (1f - u * u)
-        val z = p.zig * (if (i % 2 == 1) -3f else 3f) * (if (fx.idle) (if (sin(fx.time * 40f + i) > 0f) 1f else 0.6f) else 1f)
+        val z = p.zig * (if (i % 2 == 1) -3f else 3f) * (if (fx.idle) (if (waveSin(fx.time, 40.0, i.toFloat()) > 0f) 1f else 0.6f) else 1f)
         val y = G.MOUTH_CY + bend - 2f * p.smile + z
         top.add(Offset(x, y))
         bot.add(Offset(x, y + p.mouthOpen * 9f * (1f - u * u)))
