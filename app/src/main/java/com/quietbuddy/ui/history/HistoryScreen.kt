@@ -66,7 +66,7 @@ import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle as JTextStyle
-import java.util.Locale
+import androidx.compose.ui.platform.LocalLocale
 
 @Composable
 fun HistoryScreen() {
@@ -78,7 +78,8 @@ fun HistoryScreen() {
     val settings by viewModel.settings.collectAsStateWithLifecycle()
 
     val selectedSummary = days.firstOrNull { it.dateEpochDay == selected }
-    val selectedName = LocalDate.ofEpochDay(selected).dayOfWeek.getDisplayName(JTextStyle.FULL, Locale.getDefault())
+    val locale = LocalLocale.current.platformLocale
+    val selectedName = LocalDate.ofEpochDay(selected).dayOfWeek.getDisplayName(JTextStyle.FULL, locale)
 
     val chartHeight = if (isLargeScreen()) 240.dp else 150.dp
 
@@ -96,7 +97,7 @@ fun HistoryScreen() {
                 val isSelected = day.dateEpochDay == selected
                 val isToday = index == days.lastIndex
                 val weekday = LocalDate.ofEpochDay(day.dateEpochDay)
-                    .dayOfWeek.getDisplayName(JTextStyle.SHORT, Locale.getDefault())
+                    .dayOfWeek.getDisplayName(JTextStyle.SHORT, locale)
                 val shape = RoundedCornerShape(16.dp)
                 val moodText = day.dominantMood?.let { stringResource(moodLabelRes(it)) }
                     ?: stringResource(R.string.history_no_data)
