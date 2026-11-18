@@ -66,6 +66,9 @@ class ListeningSession(
         // with ~0 dB calm minutes and Buddy drifted to happy.
         if (silenced) {
             ledger?.skip(ts)
+            // A rise or fall that was waiting before the gap would otherwise see the gap as dwell time and change
+            // the mood on the first frame after it.
+            engine.reset(engine.current)
             return
         }
         val s = settings

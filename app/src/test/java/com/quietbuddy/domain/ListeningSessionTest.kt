@@ -79,6 +79,20 @@ class ListeningSessionTest {
         assertEquals(listOf(20), out.minutes.map { it.first.listeningSeconds })
     }
 
+    @Test fun moodNeedsItsFullDwellAfterAGapInTheMicrophone() {
+        val s = session()
+        s.feed(quiet, 5)
+        repeat(5) { s.onFrame(loud, loud.size, ts); ts += 100 } // 0.5 s: short of the rise dwell, so a rise is pending
+        assertEquals(Mood.HAPPY, out.moods.last())
+        s.silenced = true
+        s.feed(quiet, 30)
+        s.silenced = false
+        s.onFrame(loud, loud.size, ts)
+
+        // The gap is not time spent loud: the first loud frame after it starts the wait again.
+        assertEquals(Mood.HAPPY, out.moods.last())
+    }
+
     @Test fun finishRecordsThePartialMinuteAndSavesTheLedgerOnce() {
         val s = session()
         s.ledgerLoaded(LedgerState())
