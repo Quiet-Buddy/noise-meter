@@ -2,14 +2,11 @@ package com.quietbuddy.ui.settings
 
 import androidx.compose.ui.res.stringResource
 import com.quietbuddy.R
+import com.quietbuddy.ui.cannotAskAgain
+import com.quietbuddy.ui.notificationsEnabled
+import com.quietbuddy.ui.openNotificationSettings
 import android.Manifest
-import android.content.Context
-import android.content.ContextWrapper
-import android.content.Intent
 import android.os.Build
-import android.provider.Settings
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -71,19 +68,7 @@ import com.quietbuddy.ui.theme.QB
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
-}
 
-private fun openNotificationSettings(context: Context) {
-    context.startActivity(
-        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
-            .putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
-            .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
-    )
-}
 
 private val CardShape = RoundedCornerShape(20.dp)
 
@@ -100,19 +85,19 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
     var dragRange by remember { mutableStateOf<ClosedFloatingPointRange<Float>?>(null) }
 
     // Both the runtime permission and the user blocking our notifications count. Re-read when coming back from settings.
-    var notificationsOn by remember { mutableStateOf(NotificationManagerCompat.from(context).areNotificationsEnabled()) }
+    var notificationsOn by remember { mutableStateOf(context.notificationsEnabled()) }
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
-        notificationsOn = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        notificationsOn = context.notificationsEnabled()
     }
 
     // "Keep listening" runs the mic with the screen off, so it needs the notification that shows it and offers Pause.
     val notificationLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) {
-        notificationsOn = NotificationManagerCompat.from(context).areNotificationsEnabled()
+        notificationsOn = context.notificationsEnabled()
         if (notificationsOn) {
             viewModel.setKeepListening(true)
-        } else if (context.findActivity()?.let { !ActivityCompat.shouldShowRequestPermissionRationale(it, Manifest.permission.POST_NOTIFICATIONS) } == true) {
+        } else if (context.cannotAskAgain(Manifest.permission.POST_NOTIFICATIONS)) {
             // Permanently denied: the system will no longer show the dialog, so send the user to settings.
-            openNotificationSettings(context)
+            context.openNotificationSettings()
         }
     }
 
@@ -203,7 +188,7 @@ fun SettingsScreen(onOpenCalibration: () -> Unit) {
                         !on -> viewModel.setKeepListening(false)
                         notificationsOn -> viewModel.setKeepListening(true)
                         Build.VERSION.SDK_INT >= 33 -> notificationLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                        else -> openNotificationSettings(context)
+                        else -> context.openNotificationSettings()
                     }
                 },
             )

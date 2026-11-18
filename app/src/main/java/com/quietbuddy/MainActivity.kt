@@ -1,12 +1,11 @@
 package com.quietbuddy
 
-import android.app.Activity
 import android.content.Context
-import android.content.ContextWrapper
 import android.os.Bundle
+import com.quietbuddy.ui.findActivity
+import com.quietbuddy.ui.notificationsEnabled
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
-import androidx.core.app.NotificationManagerCompat
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -171,7 +170,7 @@ private fun AppContent(loaded: AppSettings, vm: MainViewModel) {
                 // pausing would reset Buddy's mood and cut the minute short.
                 Lifecycle.Event.ON_STOP -> if (context.findActivity()?.isChangingConfigurations != true) {
                     // Without notifications the listening notice and its Pause button are hidden, so don't listen on in secret.
-                    vm.onUiStopped(keep && NotificationManagerCompat.from(context).areNotificationsEnabled())
+                    vm.onUiStopped(keep && context.notificationsEnabled())
                 }
                 Lifecycle.Event.ON_START -> vm.onUiStarted()
                 else -> Unit
@@ -299,8 +298,3 @@ private fun AppNavHost(
     }
 }
 
-private tailrec fun Context.findActivity(): Activity? = when (this) {
-    is Activity -> this
-    is ContextWrapper -> baseContext.findActivity()
-    else -> null
-}
